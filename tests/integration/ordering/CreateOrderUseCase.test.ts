@@ -34,7 +34,7 @@ describe('CreateOrderUseCase', () => {
     if (result.successful) return;
 
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0]?.ruleName).toBe('OrderHasAtLeastOneLine');
+    expect(result.errors[0]?.code).toBe('OrderHasAtLeastOneLine');
     expect(orderRepo.findAll()).toHaveLength(0);
   });
 
@@ -48,6 +48,6 @@ describe('CreateOrderUseCase', () => {
     expect(result.successful).toBe(false);
     if (result.successful) return;
 
-    expect(result.errors[0]?.ruleName).toBe('OrderLineQuantitiesPositive');
+    expect(result.errors[0]?.code).toBe('OrderLineQuantitiesPositive');
   });
 });

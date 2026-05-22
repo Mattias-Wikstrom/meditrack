@@ -24,15 +24,12 @@ export class AdvanceOrderStatusUseCase {
   execute(input: AdvanceOrderStatusInput): UseCaseResult<Order> {
     const order = this.orderRepository.findById(input.orderId);
     if (order === undefined) {
-      return failure('OrderNotFound', `Order '${input.orderId}' not found.`);
+      return failure('OrderNotFound');
     }
 
     const nextStatus = TRANSITIONS[order.status];
     if (nextStatus === undefined) {
-      return failure(
-        'InvalidStatusTransition',
-        `Order in status '${order.status}' cannot be advanced. Use DeliverOrderUseCase for confirmed orders.`,
-      );
+      return failure('InvalidStatusTransition');
     }
 
     const previousStatus = order.status;

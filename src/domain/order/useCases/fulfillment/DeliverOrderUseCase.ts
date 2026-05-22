@@ -22,20 +22,17 @@ export class DeliverOrderUseCase {
   execute(input: DeliverOrderInput): UseCaseResult<Order> {
     const order = this.orderRepository.findById(input.orderId);
     if (order === undefined) {
-      return failure('OrderNotFound', `Order '${input.orderId}' not found.`);
+      return failure('OrderNotFound');
     }
 
     if (order.status !== OrderStatus.Confirmed) {
-      return failure(
-        'InvalidStatusTransition',
-        `Order must be in '${OrderStatus.Confirmed}' status to be delivered, but is '${order.status}'.`,
-      );
+      return failure('InvalidStatusTransition');
     }
 
     for (const line of order.lines) {
       const medication = this.medicationRepository.findById(line.medicationId);
       if (medication === undefined) {
-        return failure('MedicationNotFound', `Medication '${line.medicationId}' not found.`);
+        return failure('MedicationNotFound');
       }
       medication.stockLevel += line.quantity;
       this.medicationRepository.save(medication);

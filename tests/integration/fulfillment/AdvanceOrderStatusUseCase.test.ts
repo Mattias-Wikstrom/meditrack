@@ -46,7 +46,7 @@ describe('AdvanceOrderStatusUseCase', () => {
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
-    expect(result.errors[0]?.ruleName).toBe('OrderNotFound');
+    expect(result.errors[0]?.code).toBe('OrderNotFound');
   });
 
   it('fails when the order is already confirmed (delivery is a separate step)', () => {
@@ -59,6 +59,6 @@ describe('AdvanceOrderStatusUseCase', () => {
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
-    expect(result.errors[0]?.ruleName).toBe('InvalidStatusTransition');
+    expect(result.errors[0]?.code).toBe('InvalidStatusTransition');
   });
 });

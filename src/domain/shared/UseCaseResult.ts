@@ -1,4 +1,5 @@
 import { ErrorInfo } from './ErrorInfo';
+import { ErrorCode } from './ErrorCode';
 
 export type UseCaseResult<T> =
   | { successful: true; value: T }
@@ -8,8 +9,8 @@ export function success<T>(value: T): UseCaseResult<T> {
   return { successful: true, value };
 }
 
-export function failure<T>(ruleName: string, message: string): UseCaseResult<T> {
-  return { successful: false, errors: [new ErrorInfo(ruleName, message)] };
+export function failure<T>(code: ErrorCode): UseCaseResult<T> {
+  return { successful: false, errors: [new ErrorInfo(code)] };
 }
 
 export function failures<T>(errors: ErrorInfo[]): UseCaseResult<T> {

@@ -1,6 +1,5 @@
+import { ErrorCode } from './ErrorCode';
+
 export class ErrorInfo {
-  constructor(
-    public readonly ruleName: string,
-    public readonly message: string,
-  ) {}
+  constructor(public readonly code: ErrorCode) {}
 }

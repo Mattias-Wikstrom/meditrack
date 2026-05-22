@@ -6,10 +6,7 @@ export class OrderLineQuantitiesPositive implements OrderRule {
   check(order: Order): ErrorInfo | null {
     for (const line of order.lines) {
       if (line.quantity <= 0) {
-        return new ErrorInfo(
-          'OrderLineQuantitiesPositive',
-          `Quantity for medication '${line.medicationId}' must be a positive number.`,
-        );
+        return new ErrorInfo('OrderLineQuantitiesPositive');
       }
     }
     return null;

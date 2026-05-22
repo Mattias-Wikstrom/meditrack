@@ -63,7 +63,7 @@ describe('DeliverOrderUseCase', () => {
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
-    expect(result.errors[0]?.ruleName).toBe('InvalidStatusTransition');
+    expect(result.errors[0]?.code).toBe('InvalidStatusTransition');
   });
 
   it('fails when a medication in the order does not exist', () => {
@@ -73,7 +73,7 @@ describe('DeliverOrderUseCase', () => {
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
-    expect(result.errors[0]?.ruleName).toBe('MedicationNotFound');
+    expect(result.errors[0]?.code).toBe('MedicationNotFound');
   });
 
   it('does not update stock if delivery fails', () => {
