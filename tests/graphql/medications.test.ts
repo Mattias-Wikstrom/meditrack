@@ -5,6 +5,7 @@ import { createTestContext } from '../helpers/createTestContext';
 import Decimal from 'decimal.js';
 import { Medication } from '../../src/domain/medication/Medication';
 import { MedicationForm } from '../../src/domain/medication/MedicationForm';
+import { MedicationId } from '../../src/domain/shared/Id';
 
 describe('Query.medications', () => {
   it('returns an empty list when there are no medications', async () => {
@@ -16,8 +17,8 @@ describe('Query.medications', () => {
 
   it('returns all medications when no search query is given', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)));
-    ctx.medicationRepo.save(new Medication('med-2', 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg', new Decimal(50), new Decimal(10)));
+    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)));
+    ctx.medicationRepo.save(new Medication('med-2' as MedicationId, 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg', new Decimal(50), new Decimal(10)));
 
     const result = await graphql({ schema, source: '{ medications { id name } }', contextValue: ctx });
 
@@ -27,8 +28,8 @@ describe('Query.medications', () => {
 
   it('filters medications by name when a search query is given', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)));
-    ctx.medicationRepo.save(new Medication('med-2', 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg', new Decimal(50), new Decimal(10)));
+    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)));
+    ctx.medicationRepo.save(new Medication('med-2' as MedicationId, 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg', new Decimal(50), new Decimal(10)));
 
     const result = await graphql({
       schema,
@@ -42,7 +43,7 @@ describe('Query.medications', () => {
 
   it('returns isBelowThreshold correctly', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(5), new Decimal(20)));
+    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(5), new Decimal(20)));
 
     const result = await graphql({
       schema,
@@ -69,7 +70,7 @@ describe('Query.medication', () => {
 
   it('returns the medication for a known id', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)));
+    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)));
 
     const result = await graphql({
       schema,

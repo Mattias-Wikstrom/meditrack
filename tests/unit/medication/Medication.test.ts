@@ -2,9 +2,10 @@ import { describe, it, expect } from 'vitest';
 import Decimal from 'decimal.js';
 import { Medication } from '../../../src/domain/medication/Medication';
 import { MedicationForm } from '../../../src/domain/medication/MedicationForm';
+import { MedicationId } from '../../../src/domain/shared/Id';
 
 const paracetamol = (stockLevel: Decimal, stockThreshold: Decimal) =>
-  new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', stockLevel, stockThreshold);
+  new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', stockLevel, stockThreshold);
 
 describe('Medication.isBelowThreshold', () => {
   it('is true when stock is below threshold', () => {

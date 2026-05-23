@@ -1,6 +1,8 @@
+import { WardUnitId } from '../shared/Id';
+
 export class WardUnit {
   constructor(
-    public readonly id: string,
+    public readonly id: WardUnitId,
     public readonly name: string,
   ) {}
 }

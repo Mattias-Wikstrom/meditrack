@@ -1,12 +1,13 @@
 import { GraphQLContext } from '../context';
+import { MedicationId, WardUnitId } from '../../domain/shared/Id';
 
 export const Query = {
   wardUnit: (_: unknown, { id }: { id: string }, ctx: GraphQLContext) =>
-    ctx.wardUnitRepo.findById(id) ?? null,
+    ctx.wardUnitRepo.findById(id as WardUnitId) ?? null,
 
   medications: (_: unknown, { query }: { query?: string }, ctx: GraphQLContext) =>
     query ? ctx.medicationRepo.search(query) : ctx.medicationRepo.findAll(),
 
   medication: (_: unknown, { id }: { id: string }, ctx: GraphQLContext) =>
-    ctx.medicationRepo.findById(id) ?? null,
+    ctx.medicationRepo.findById(id as MedicationId) ?? null,
 };

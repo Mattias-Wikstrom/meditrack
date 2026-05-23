@@ -10,11 +10,12 @@ import { EventBus } from '../../../shared/EventBus';
 import { UseCaseResult, success, failures } from '../../../shared/UseCaseResult';
 import { ErrorInfo } from '../../../shared/ErrorInfo';
 import { OrderPlaced } from '../../events/OrderPlaced';
+import { MedicationId, OrderId, WardUnitId } from '../../../shared/Id';
 
 export interface CreateOrderInput {
   actorId: string;
-  wardUnitId: string;
-  lines: { medicationId: string; quantity: number }[];
+  wardUnitId: WardUnitId;
+  lines: { medicationId: MedicationId; quantity: number }[];
 }
 
 export class CreateOrderUseCase {
@@ -30,7 +31,7 @@ export class CreateOrderUseCase {
 
   execute(input: CreateOrderInput): UseCaseResult<Order> {
     const order = new Order(
-      randomUUID(),
+      randomUUID() as OrderId,
       input.wardUnitId,
       input.lines.map((l) => new OrderLine(l.medicationId, l.quantity)),
       OrderStatus.Draft,

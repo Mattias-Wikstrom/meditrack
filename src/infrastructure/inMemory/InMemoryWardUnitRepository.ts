@@ -1,10 +1,11 @@
 import { WardUnit } from '../../domain/wardUnit/WardUnit';
 import { WardUnitRepository } from '../../domain/wardUnit/WardUnitRepository';
+import { WardUnitId } from '../../domain/shared/Id';
 
 export class InMemoryWardUnitRepository implements WardUnitRepository {
-  private readonly store = new Map<string, WardUnit>();
+  private readonly store = new Map<WardUnitId, WardUnit>();
 
-  findById(id: string): WardUnit | undefined {
+  findById(id: WardUnitId): WardUnit | undefined {
     return this.store.get(id);
   }
 

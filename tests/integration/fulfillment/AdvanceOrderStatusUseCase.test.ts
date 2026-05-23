@@ -4,6 +4,7 @@ import { AdvanceOrderStatusUseCase } from '../../../src/domain/order/useCases/fu
 import { InMemoryOrderRepository } from '../../../src/infrastructure/inMemory/InMemoryOrderRepository';
 import { SimpleEventBus } from '../../../src/infrastructure/events/SimpleEventBus';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
+import { MedicationId, OrderId, WardUnitId } from '../../../src/domain/shared/Id';
 
 describe('AdvanceOrderStatusUseCase', () => {
   let orderRepo: InMemoryOrderRepository;
@@ -19,7 +20,7 @@ describe('AdvanceOrderStatusUseCase', () => {
   });
 
   it('advances a draft order to sent', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] });
+    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
     const result = advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
@@ -30,7 +31,7 @@ describe('AdvanceOrderStatusUseCase', () => {
   });
 
   it('advances a sent order to confirmed', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] });
+    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
     advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
@@ -42,7 +43,7 @@ describe('AdvanceOrderStatusUseCase', () => {
   });
 
   it('fails when the order does not exist', () => {
-    const result = advanceStatus.execute({ actorId: 'pharmacist-1', orderId: 'nonexistent-id' });
+    const result = advanceStatus.execute({ actorId: 'pharmacist-1', orderId: 'nonexistent-id' as OrderId });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
@@ -50,7 +51,7 @@ describe('AdvanceOrderStatusUseCase', () => {
   });
 
   it('fails when the order is already confirmed (delivery is a separate step)', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] });
+    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
     advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id }); // Draft → Sent

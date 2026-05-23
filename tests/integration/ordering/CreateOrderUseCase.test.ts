@@ -3,6 +3,7 @@ import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/
 import { InMemoryOrderRepository } from '../../../src/infrastructure/inMemory/InMemoryOrderRepository';
 import { SimpleEventBus } from '../../../src/infrastructure/events/SimpleEventBus';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
+import { MedicationId, WardUnitId } from '../../../src/domain/shared/Id';
 
 describe('CreateOrderUseCase', () => {
   let orderRepo: InMemoryOrderRepository;
@@ -16,8 +17,8 @@ describe('CreateOrderUseCase', () => {
   it('creates a draft order and persists it', () => {
     const result = useCase.execute({
       actorId: 'nurse-1',
-      wardUnitId: 'ward-1',
-      lines: [{ medicationId: 'med-1', quantity: 5 }],
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
     });
 
     expect(result.successful).toBe(true);
@@ -28,7 +29,7 @@ describe('CreateOrderUseCase', () => {
   });
 
   it('fails and does not persist when there are no lines', () => {
-    const result = useCase.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1', lines: [] });
+    const result = useCase.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [] });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
@@ -41,8 +42,8 @@ describe('CreateOrderUseCase', () => {
   it('fails when a line has a non-positive quantity', () => {
     const result = useCase.execute({
       actorId: 'nurse-1',
-      wardUnitId: 'ward-1',
-      lines: [{ medicationId: 'med-1', quantity: 0 }],
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 0 }],
     });
 
     expect(result.successful).toBe(false);

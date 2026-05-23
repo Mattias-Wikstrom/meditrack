@@ -4,10 +4,11 @@ import { OrderRepository } from '../../OrderRepository';
 import { EventBus } from '../../../shared/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/UseCaseResult';
 import { OrderStatusAdvanced } from '../../events/OrderStatusAdvanced';
+import { OrderId } from '../../../shared/Id';
 
 export interface AdvanceOrderStatusInput {
   actorId: string;
-  orderId: string;
+  orderId: OrderId;
 }
 
 const TRANSITIONS: Partial<Record<OrderStatus, OrderStatus>> = {

@@ -9,6 +9,7 @@ import Decimal from 'decimal.js';
 import { Medication } from '../../../src/domain/medication/Medication';
 import { MedicationForm } from '../../../src/domain/medication/MedicationForm';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
+import { MedicationId, WardUnitId } from '../../../src/domain/shared/Id';
 
 describe('DeliverOrderUseCase', () => {
   let orderRepo: InMemoryOrderRepository;
@@ -27,12 +28,12 @@ describe('DeliverOrderUseCase', () => {
     deliverOrder = new DeliverOrderUseCase(orderRepo, medicationRepo, eventBus);
 
     medicationRepo.save(
-      new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)),
+      new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)),
     );
   });
 
-  const createConfirmedOrder = (medicationId: string, quantity: number): string => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1', lines: [{ medicationId, quantity }] });
+  const createConfirmedOrder = (medicationId: MedicationId, quantity: number) => {
+    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId, quantity }] });
     if (!created.successful) throw new Error('Setup failed: could not create order');
     advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
     advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
@@ -40,7 +41,7 @@ describe('DeliverOrderUseCase', () => {
   };
 
   it('sets the order status to delivered', () => {
-    const orderId = createConfirmedOrder('med-1', 5);
+    const orderId = createConfirmedOrder('med-1' as MedicationId, 5);
 
     const result = deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
 
@@ -49,15 +50,15 @@ describe('DeliverOrderUseCase', () => {
   });
 
   it('increases medication stock level by the ordered quantity', () => {
-    const orderId = createConfirmedOrder('med-1', 5);
+    const orderId = createConfirmedOrder('med-1' as MedicationId, 5);
 
     deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
 
-    expect(medicationRepo.findById('med-1')?.stockLevel.toNumber()).toBe(15);
+    expect(medicationRepo.findById('med-1' as MedicationId)?.stockLevel.toNumber()).toBe(15);
   });
 
   it('fails when order is not in confirmed status', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] });
+    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
     const result = deliverOrder.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
@@ -68,7 +69,7 @@ describe('DeliverOrderUseCase', () => {
   });
 
   it('fails when a medication in the order does not exist', () => {
-    const orderId = createConfirmedOrder('med-unknown', 5);
+    const orderId = createConfirmedOrder('med-unknown' as MedicationId, 5);
 
     const result = deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
 
@@ -78,11 +79,11 @@ describe('DeliverOrderUseCase', () => {
   });
 
   it('does not update stock if delivery fails', () => {
-    const orderId = createConfirmedOrder('med-unknown', 5);
-    const stockBefore = medicationRepo.findById('med-1')?.stockLevel.toNumber();
+    const orderId = createConfirmedOrder('med-unknown' as MedicationId, 5);
+    const stockBefore = medicationRepo.findById('med-1' as MedicationId)?.stockLevel.toNumber();
 
     deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
 
-    expect(medicationRepo.findById('med-1')?.stockLevel.toNumber()).toBe(stockBefore);
+    expect(medicationRepo.findById('med-1' as MedicationId)?.stockLevel.toNumber()).toBe(stockBefore);
   });
 });

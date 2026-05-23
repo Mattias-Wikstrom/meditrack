@@ -9,6 +9,7 @@ import { AuditListener } from '../../../src/infrastructure/audit/AuditListener';
 import Decimal from 'decimal.js';
 import { Medication } from '../../../src/domain/medication/Medication';
 import { MedicationForm } from '../../../src/domain/medication/MedicationForm';
+import { MedicationId, WardUnitId } from '../../../src/domain/shared/Id';
 
 describe('AuditListener', () => {
   let eventBus: SimpleEventBus;
@@ -34,12 +35,12 @@ describe('AuditListener', () => {
     eventBus.subscribe('StockBelowThreshold', auditListener);
 
     medicationRepo.save(
-      new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)),
+      new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)),
     );
   });
 
   it('records an entry when an order is placed', () => {
-    createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] });
+    createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
 
     const entries = auditListener.getEntries();
     expect(entries).toHaveLength(1);
@@ -48,7 +49,7 @@ describe('AuditListener', () => {
   });
 
   it('distinguishes the actor for each action', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] });
+    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
     advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
@@ -60,13 +61,13 @@ describe('AuditListener', () => {
   });
 
   it('does not record failed operations', () => {
-    createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1', lines: [] });
+    createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [] });
 
     expect(auditListener.getEntries()).toHaveLength(0);
   });
 
   it('records a StockBelowThreshold event when stock drops below threshold after delivery', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] });
+    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
     advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });

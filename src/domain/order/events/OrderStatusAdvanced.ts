@@ -1,7 +1,8 @@
 import { DomainEvent } from '../../shared/DomainEvent';
 import { OrderStatus } from '../OrderStatus';
+import { OrderId } from '../../shared/Id';
 
-// The order is progressing through a workflow — "advanced" captures 
+// The order is progressing through a workflow — "advanced" captures
 // that directionality and intent better than the generic "changed."
 export class OrderStatusAdvanced implements DomainEvent {
   readonly eventType = 'OrderStatusAdvanced';
@@ -9,7 +10,7 @@ export class OrderStatusAdvanced implements DomainEvent {
 
   constructor(
     public readonly actorId: string,
-    public readonly orderId: string,
+    public readonly orderId: OrderId,
     public readonly from: OrderStatus,
     public readonly to: OrderStatus,
   ) {}

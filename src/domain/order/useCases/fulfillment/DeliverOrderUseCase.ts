@@ -6,10 +6,11 @@ import { EventBus } from '../../../shared/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/UseCaseResult';
 import { OrderDelivered } from '../../events/OrderDelivered';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';
+import { OrderId } from '../../../shared/Id';
 
 export interface DeliverOrderInput {
   actorId: string;
-  orderId: string;
+  orderId: OrderId;
 }
 
 export class DeliverOrderUseCase {

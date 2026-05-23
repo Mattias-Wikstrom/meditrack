@@ -1,10 +1,11 @@
 import { Medication } from '../../domain/medication/Medication';
 import { MedicationRepository } from '../../domain/medication/MedicationRepository';
+import { MedicationId } from '../../domain/shared/Id';
 
 export class InMemoryMedicationRepository implements MedicationRepository {
-  private readonly store = new Map<string, Medication>();
+  private readonly store = new Map<MedicationId, Medication>();
 
-  findById(id: string): Medication | undefined {
+  findById(id: MedicationId): Medication | undefined {
     return this.store.get(id);
   }
 
@@ -26,7 +27,7 @@ export class InMemoryMedicationRepository implements MedicationRepository {
     this.store.set(medication.id, medication);
   }
 
-  delete(id: string): void {
+  delete(id: MedicationId): void {
     this.store.delete(id);
   }
 }

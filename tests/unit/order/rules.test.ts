@@ -4,9 +4,10 @@ import { OrderLine } from '../../../src/domain/order/OrderLine';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
 import { OrderHasAtLeastOneLine } from '../../../src/domain/order/rules/OrderHasAtLeastOneLine';
 import { OrderLineQuantitiesPositive } from '../../../src/domain/order/rules/OrderLineQuantitiesPositive';
+import { MedicationId, OrderId, WardUnitId } from '../../../src/domain/shared/Id';
 
 const makeOrder = (lines: OrderLine[]) =>
-  new Order('order-1', 'ward-1', lines, OrderStatus.Draft, new Date());
+  new Order('order-1' as OrderId, 'ward-1' as WardUnitId, lines, OrderStatus.Draft, new Date());
 
 describe('OrderHasAtLeastOneLine', () => {
   const rule = new OrderHasAtLeastOneLine();
@@ -16,7 +17,7 @@ describe('OrderHasAtLeastOneLine', () => {
   });
 
   it('returns null when there is at least one line', () => {
-    expect(rule.check(makeOrder([new OrderLine('med-1', 5)]))).toBeNull();
+    expect(rule.check(makeOrder([new OrderLine('med-1' as MedicationId,5)]))).toBeNull();
   });
 });
 
@@ -24,15 +25,15 @@ describe('OrderLineQuantitiesPositive', () => {
   const rule = new OrderLineQuantitiesPositive();
 
   it('returns an error when a quantity is zero', () => {
-    expect(rule.check(makeOrder([new OrderLine('med-1', 0)]))).not.toBeNull();
+    expect(rule.check(makeOrder([new OrderLine('med-1' as MedicationId,0)]))).not.toBeNull();
   });
 
   it('returns an error when a quantity is negative', () => {
-    expect(rule.check(makeOrder([new OrderLine('med-1', -3)]))).not.toBeNull();
+    expect(rule.check(makeOrder([new OrderLine('med-1' as MedicationId,-3)]))).not.toBeNull();
   });
 
   it('returns null when all quantities are positive', () => {
-    const lines = [new OrderLine('med-1', 5), new OrderLine('med-2', 10)];
+    const lines = [new OrderLine('med-1' as MedicationId,5), new OrderLine('med-2' as MedicationId,10)];
     expect(rule.check(makeOrder(lines))).toBeNull();
   });
 });

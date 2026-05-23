@@ -1,12 +1,13 @@
 import Decimal from 'decimal.js';
 import { MedicationForm } from './MedicationForm';
+import { MedicationId } from '../shared/Id';
 
 export class Medication {
   public stockLevel: Decimal;
   public readonly stockThreshold: Decimal;
 
   constructor(
-    public readonly id: string,
+    public readonly id: MedicationId,
     public readonly name: string, // What medication is this?
     public readonly atcCode: string, // What is its ATC code?
     public readonly form: MedicationForm, // Tablet, Capsule, etc.

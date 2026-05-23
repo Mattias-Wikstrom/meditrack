@@ -1,10 +1,11 @@
 import { Order } from '../../domain/order/Order';
 import { OrderRepository } from '../../domain/order/OrderRepository';
+import { OrderId, WardUnitId } from '../../domain/shared/Id';
 
 export class InMemoryOrderRepository implements OrderRepository {
-  private readonly store = new Map<string, Order>();
+  private readonly store = new Map<OrderId, Order>();
 
-  findById(id: string): Order | undefined {
+  findById(id: OrderId): Order | undefined {
     return this.store.get(id);
   }
 
@@ -12,7 +13,7 @@ export class InMemoryOrderRepository implements OrderRepository {
     return Array.from(this.store.values());
   }
 
-  findByWardUnit(wardUnitId: string): Order[] {
+  findByWardUnit(wardUnitId: WardUnitId): Order[] {
     return Array.from(this.store.values()).filter((o) => o.wardUnitId === wardUnitId);
   }
 
