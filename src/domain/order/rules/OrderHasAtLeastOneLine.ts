@@ -2,6 +2,7 @@ import { Order } from '../Order';
 import { ErrorInfo } from '../../shared/ErrorInfo';
 import { OrderRule } from './OrderRule';
 
+// Empty orders are not allowed
 export class OrderHasAtLeastOneLine implements OrderRule {
   check(order: Order): ErrorInfo | null {
     if (order.lines.length === 0) {

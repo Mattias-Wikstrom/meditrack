@@ -1,4 +1,5 @@
 import { DomainEvent } from '../../shared/DomainEvent';
+import { Order } from '../Order';
 
 export class OrderDelivered implements DomainEvent {
   readonly eventType = 'OrderDelivered';
@@ -6,6 +7,6 @@ export class OrderDelivered implements DomainEvent {
 
   constructor(
     public readonly actorId: string,
-    public readonly orderId: string,
+    public readonly order: Order,
   ) {}
 }

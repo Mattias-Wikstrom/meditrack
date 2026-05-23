@@ -7,7 +7,8 @@ export class StockBelowThreshold implements DomainEvent {
   constructor(
     public readonly actorId: string,
     public readonly medicationId: string,
-    public readonly medicationName: string,
+    public readonly medicationName: string, // TODO: Why this and not just medicationId?
+    // TODO: What rule ensures medicationId and medicationName match?
     public readonly stockLevel: number,
     public readonly stockThreshold: number,
   ) {}

@@ -52,7 +52,7 @@ export class DeliverOrderUseCase {
 
     order.status = OrderStatus.Delivered;
     this.orderRepository.save(order);
-    this.eventBus.publish(new OrderDelivered(input.actorId, order.id));
+    this.eventBus.publish(new OrderDelivered(input.actorId, order));
     return success(order);
   }
 }
