@@ -38,15 +38,7 @@ export class DeliverOrderUseCase {
       this.medicationRepository.save(medication);
 
       if (medication.isBelowThreshold) {
-        this.eventBus.publish(
-          new StockBelowThreshold(
-            input.actorId,
-            medication.id,
-            medication.name,
-            medication.stockLevel,
-            medication.stockThreshold,
-          ),
-        );
+        this.eventBus.publish(new StockBelowThreshold(input.actorId, medication));
       }
     }
 
