@@ -11,11 +11,11 @@ export class Medication {
     public readonly atcCode: string, // What is its ATC code?
     public readonly form: MedicationForm, // Tablet, Capsule, etc.
     public readonly strength: string, // Examples? Why not a number?
-    stockLevel: number,
-    stockThreshold: number,
+    stockLevel: Decimal,
+    stockThreshold: Decimal,
   ) {
-    this.stockLevel = new Decimal(stockLevel);
-    this.stockThreshold = new Decimal(stockThreshold);
+    this.stockLevel = stockLevel;
+    this.stockThreshold = stockThreshold;
   }
 
   get isBelowThreshold(): boolean {

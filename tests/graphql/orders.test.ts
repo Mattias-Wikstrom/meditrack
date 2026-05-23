@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { graphql } from 'graphql';
 import { schema } from '../../src/graphql/schema';
 import { createTestContext } from '../helpers/createTestContext';
+import Decimal from 'decimal.js';
 import { Medication } from '../../src/domain/medication/Medication';
 import { MedicationForm } from '../../src/domain/medication/MedicationForm';
 import { WardUnit } from '../../src/domain/wardUnit/WardUnit';
@@ -101,7 +102,7 @@ describe('Mutation.deliverOrder', () => {
   it('updates stock and marks order as delivered', async () => {
     const ctx = createTestContext();
     ctx.medicationRepo.save(
-      new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', 10, 5),
+      new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(5)),
     );
 
     const created = await graphql({
@@ -127,7 +128,7 @@ describe('Query.wardUnit with nested orders', () => {
     const ctx = createTestContext();
     ctx.wardUnitRepo.save(new WardUnit('ward-1', 'Akuten'));
     ctx.medicationRepo.save(
-      new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', 10, 20),
+      new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)),
     );
     await graphql({
       schema, source: CREATE_ORDER, contextValue: ctx,

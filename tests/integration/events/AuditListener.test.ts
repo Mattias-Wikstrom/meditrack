@@ -6,6 +6,7 @@ import { InMemoryOrderRepository } from '../../../src/infrastructure/inMemory/In
 import { InMemoryMedicationRepository } from '../../../src/infrastructure/inMemory/InMemoryMedicationRepository';
 import { SimpleEventBus } from '../../../src/infrastructure/events/SimpleEventBus';
 import { AuditListener } from '../../../src/infrastructure/audit/AuditListener';
+import Decimal from 'decimal.js';
 import { Medication } from '../../../src/domain/medication/Medication';
 import { MedicationForm } from '../../../src/domain/medication/MedicationForm';
 
@@ -33,7 +34,7 @@ describe('AuditListener', () => {
     eventBus.subscribe('StockBelowThreshold', auditListener);
 
     medicationRepo.save(
-      new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', 10, 20),
+      new Medication('med-1', 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)),
     );
   });
 
