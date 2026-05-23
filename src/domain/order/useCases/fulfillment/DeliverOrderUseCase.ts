@@ -34,7 +34,7 @@ export class DeliverOrderUseCase {
       if (medication === undefined) {
         return failure('MedicationNotFound');
       }
-      medication.stockLevel += line.quantity;
+      medication.stockLevel = medication.stockLevel.add(line.quantity);
       this.medicationRepository.save(medication);
 
       if (medication.isBelowThreshold) {

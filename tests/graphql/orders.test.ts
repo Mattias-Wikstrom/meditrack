@@ -118,7 +118,7 @@ describe('Mutation.deliverOrder', () => {
     expect(result.errors).toBeUndefined();
     expect(result.data?.deliverOrder.successful).toBe(true);
     expect(result.data?.deliverOrder.order.status).toBe('Delivered');
-    expect(ctx.medicationRepo.findById('med-1')?.stockLevel).toBe(30);
+    expect(ctx.medicationRepo.findById('med-1')?.stockLevel.toNumber()).toBe(30);
   });
 });
 

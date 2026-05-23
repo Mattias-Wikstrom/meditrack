@@ -1,6 +1,12 @@
+import Decimal from 'decimal.js';
+
 export class OrderLine {
+  public readonly quantity: Decimal;
+
   constructor(
     public readonly medicationId: string,
-    public readonly quantity: number,
-  ) {}
+    quantity: number,
+  ) {
+    this.quantity = new Decimal(quantity);
+  }
 }

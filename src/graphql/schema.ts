@@ -5,8 +5,9 @@ import { Mutation } from './resolvers/Mutation';
 import { WardUnit } from './resolvers/WardUnit';
 import { Order } from './resolvers/Order';
 import { OrderLine } from './resolvers/OrderLine';
+import { Medication } from './resolvers/Medication';
 
 export const schema = makeExecutableSchema({
   typeDefs,
-  resolvers: { Query, Mutation, WardUnit, Order, OrderLine },
+  resolvers: { Query, Mutation, WardUnit, Order, OrderLine, Medication },
 });

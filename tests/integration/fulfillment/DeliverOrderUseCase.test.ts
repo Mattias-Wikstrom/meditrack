@@ -52,7 +52,7 @@ describe('DeliverOrderUseCase', () => {
 
     deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
 
-    expect(medicationRepo.findById('med-1')?.stockLevel).toBe(15);
+    expect(medicationRepo.findById('med-1')?.stockLevel.toNumber()).toBe(15);
   });
 
   it('fails when order is not in confirmed status', () => {
@@ -78,10 +78,10 @@ describe('DeliverOrderUseCase', () => {
 
   it('does not update stock if delivery fails', () => {
     const orderId = createConfirmedOrder('med-unknown', 5);
-    const stockBefore = medicationRepo.findById('med-1')?.stockLevel;
+    const stockBefore = medicationRepo.findById('med-1')?.stockLevel.toNumber();
 
     deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
 
-    expect(medicationRepo.findById('med-1')?.stockLevel).toBe(stockBefore);
+    expect(medicationRepo.findById('med-1')?.stockLevel.toNumber()).toBe(stockBefore);
   });
 });

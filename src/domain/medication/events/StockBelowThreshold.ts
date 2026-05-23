@@ -1,3 +1,4 @@
+import Decimal from 'decimal.js';
 import { DomainEvent } from '../../shared/DomainEvent';
 
 export class StockBelowThreshold implements DomainEvent {
@@ -9,7 +10,7 @@ export class StockBelowThreshold implements DomainEvent {
     public readonly medicationId: string,
     public readonly medicationName: string, // TODO: Why this and not just medicationId?
     // TODO: What rule ensures medicationId and medicationName match?
-    public readonly stockLevel: number,
-    public readonly stockThreshold: number,
+    public readonly stockLevel: Decimal,
+    public readonly stockThreshold: Decimal,
   ) {}
 }
