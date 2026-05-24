@@ -45,8 +45,10 @@ useServer(
   wsServer,
 );
 
-httpServer.listen(PORT, () => {
-  console.log(`GraphQL  http://localhost:${PORT}/graphql`);
-  console.log(`REST     http://localhost:${PORT}/api/orders`);
-  console.log(`WS       ws://localhost:${PORT}/graphql`);
+prisma.$connect().then(() => {
+  httpServer.listen(PORT, () => {
+    console.log(`GraphQL  http://localhost:${PORT}/graphql`);
+    console.log(`REST     http://localhost:${PORT}/api/orders`);
+    console.log(`WS       ws://localhost:${PORT}/graphql`);
+  });
 });
