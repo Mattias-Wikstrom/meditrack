@@ -1,7 +1,7 @@
 import { Order } from '../../Order';
 import { OrderStatus } from '../../OrderStatus';
 import { OrderRepository } from '../../OrderRepository';
-import { EventBus } from '../../../shared/events/EventBus';
+import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/results/UseCaseResult';
 import { OrderStatusAdvanced } from '../../events/OrderStatusAdvanced';
 import { OrderId } from '../../../shared/IdTypes';

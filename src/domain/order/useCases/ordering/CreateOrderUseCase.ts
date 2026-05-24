@@ -6,7 +6,7 @@ import { OrderRepository } from '../../OrderRepository';
 import { OrderRule } from '../../rules/OrderRule';
 import { OrderHasAtLeastOneLine } from '../../rules/OrderHasAtLeastOneLine';
 import { OrderLineQuantitiesPositive } from '../../rules/OrderLineQuantitiesPositive';
-import { EventBus } from '../../../shared/events/EventBus';
+import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failures } from '../../../shared/results/UseCaseResult';
 import { ErrorInfo } from '../../../shared/results/ErrorInfo';
 import { OrderPlaced } from '../../events/OrderPlaced';

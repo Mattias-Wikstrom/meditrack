@@ -2,7 +2,7 @@ import { Order } from '../../Order';
 import { OrderStatus } from '../../OrderStatus';
 import { OrderRepository } from '../../OrderRepository';
 import { MedicinalProductRepository } from '../../../medication/MedicinalProductRepository';
-import { EventBus } from '../../../shared/events/EventBus';
+import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/results/UseCaseResult';
 import { OrderDelivered } from '../../events/OrderDelivered';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';

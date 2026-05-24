@@ -1,4 +1,4 @@
-import { DomainEvent } from '../../shared/events/DomainEvent';
+import { DomainEvent } from '../../shared/eventContracts/DomainEvent';
 import { OrderStatus } from '../OrderStatus';
 import { OrderId } from '../../shared/IdTypes';
 

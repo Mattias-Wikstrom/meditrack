@@ -3,7 +3,7 @@ import { InMemoryMedicationRepository } from '../../src/storage/inMemory/InMemor
 import { InMemoryMedicinalProductRepository } from '../../src/storage/inMemory/InMemoryMedicinalProductRepository';
 import { InMemoryOrderRepository } from '../../src/storage/inMemory/InMemoryOrderRepository';
 import { InMemoryWardUnitRepository } from '../../src/storage/inMemory/InMemoryWardUnitRepository';
-import { SimpleEventBus } from '../../src/events/SimpleEventBus';
+import { SimpleEventBus } from '../../src/eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../src/domain/order/useCases/ordering/CreateOrderUseCase';
 import { AdvanceOrderStatusUseCase } from '../../src/domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
 import { DeliverOrderUseCase } from '../../src/domain/order/useCases/fulfillment/DeliverOrderUseCase';

@@ -1,4 +1,4 @@
-import { DomainEvent } from '../../shared/events/DomainEvent';
+import { DomainEvent } from '../../shared/eventContracts/DomainEvent';
 import { Order } from '../Order';
 
 export class OrderPlaced implements DomainEvent {

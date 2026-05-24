@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js';
-import { DomainEvent } from '../../shared/events/DomainEvent';
+import { DomainEvent } from '../../shared/eventContracts/DomainEvent';
 import { MedicinalProduct } from '../MedicinalProduct';
 import { MedicationId, MedicinalProductId } from '../../shared/IdTypes';
 
