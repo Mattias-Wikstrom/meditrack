@@ -9,7 +9,8 @@ export const typeDefs = /* GraphQL */ `
 
   type Mutation {
     createOrder(wardUnitId: ID!, lines: [OrderLineInput!]!): OrderPayload!
-    advanceOrderStatus(orderId: ID!): OrderPayload!
+    sendOrder(orderId: ID!): OrderPayload!
+    confirmOrder(orderId: ID!): OrderPayload!
     deliverOrder(orderId: ID!, productSelections: [ProductSelectionInput!]!): OrderPayload!
   }
 
@@ -75,6 +76,7 @@ export const typeDefs = /* GraphQL */ `
   }
 
   enum ErrorCode {
+    UnauthorizedRole
     OrderHasAtLeastOneLine
     OrderLineQuantitiesPositive
     OrderNotFound

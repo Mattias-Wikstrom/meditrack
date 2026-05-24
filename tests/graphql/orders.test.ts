@@ -19,9 +19,19 @@ const CREATE_ORDER = /* GraphQL */ `
   }
 `;
 
-const ADVANCE_STATUS = /* GraphQL */ `
-  mutation AdvanceOrderStatus($orderId: ID!) {
-    advanceOrderStatus(orderId: $orderId) {
+const SEND_ORDER = /* GraphQL */ `
+  mutation SendOrder($orderId: ID!) {
+    sendOrder(orderId: $orderId) {
+      successful
+      errors
+      order { status }
+    }
+  }
+`;
+
+const CONFIRM_ORDER = /* GraphQL */ `
+  mutation ConfirmOrder($orderId: ID!) {
+    confirmOrder(orderId: $orderId) {
       successful
       errors
       order { status }
@@ -73,7 +83,7 @@ describe('Mutation.createOrder', () => {
   });
 });
 
-describe('Mutation.advanceOrderStatus', () => {
+describe('Mutation.sendOrder', () => {
   it('advances a draft order to sent', async () => {
     const ctx = createTestContext();
     const created = await graphql({
@@ -82,21 +92,49 @@ describe('Mutation.advanceOrderStatus', () => {
     });
     const orderId = (created.data as any)?.createOrder.order.id;
 
-    const result = await graphql({ schema, source: ADVANCE_STATUS, contextValue: ctx, variableValues: { orderId } });
+    const result = await graphql({ schema, source: SEND_ORDER, contextValue: ctx, variableValues: { orderId } });
 
     expect(result.errors).toBeUndefined();
-    expect((result.data as any)?.advanceOrderStatus.successful).toBe(true);
-    expect((result.data as any)?.advanceOrderStatus.order.status).toBe('Sent');
+    expect((result.data as any)?.sendOrder.successful).toBe(true);
+    expect((result.data as any)?.sendOrder.order.status).toBe('Sent');
   });
 
   it('returns an error for an unknown order', async () => {
     const result = await graphql({
-      schema, source: ADVANCE_STATUS, contextValue: createTestContext(),
+      schema, source: SEND_ORDER, contextValue: createTestContext(),
       variableValues: { orderId: 'no-such-order' },
     });
 
-    expect((result.data as any)?.advanceOrderStatus.successful).toBe(false);
-    expect((result.data as any)?.advanceOrderStatus.errors).toContain('OrderNotFound');
+    expect((result.data as any)?.sendOrder.successful).toBe(false);
+    expect((result.data as any)?.sendOrder.errors).toContain('OrderNotFound');
+  });
+});
+
+describe('Mutation.confirmOrder', () => {
+  it('advances a sent order to confirmed', async () => {
+    const ctx = createTestContext();
+    const created = await graphql({
+      schema, source: CREATE_ORDER, contextValue: ctx,
+      variableValues: { wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] },
+    });
+    const orderId = (created.data as any)?.createOrder.order.id;
+    await graphql({ schema, source: SEND_ORDER, contextValue: ctx, variableValues: { orderId } });
+
+    const result = await graphql({ schema, source: CONFIRM_ORDER, contextValue: ctx, variableValues: { orderId } });
+
+    expect(result.errors).toBeUndefined();
+    expect((result.data as any)?.confirmOrder.successful).toBe(true);
+    expect((result.data as any)?.confirmOrder.order.status).toBe('Confirmed');
+  });
+
+  it('returns an error for an unknown order', async () => {
+    const result = await graphql({
+      schema, source: CONFIRM_ORDER, contextValue: createTestContext(),
+      variableValues: { orderId: 'no-such-order' },
+    });
+
+    expect((result.data as any)?.confirmOrder.successful).toBe(false);
+    expect((result.data as any)?.confirmOrder.errors).toContain('OrderNotFound');
   });
 });
 
@@ -116,8 +154,8 @@ describe('Mutation.deliverOrder', () => {
     });
     const orderId = (created.data as any)?.createOrder.order.id;
 
-    await graphql({ schema, source: ADVANCE_STATUS, contextValue: ctx, variableValues: { orderId } });
-    await graphql({ schema, source: ADVANCE_STATUS, contextValue: ctx, variableValues: { orderId } });
+    await graphql({ schema, source: SEND_ORDER, contextValue: ctx, variableValues: { orderId } });
+    await graphql({ schema, source: CONFIRM_ORDER, contextValue: ctx, variableValues: { orderId } });
 
     const result = await graphql({ schema, source: DELIVER_ORDER, contextValue: ctx, variableValues: { orderId, productSelections: [{ medicationId: 'med-1', medicinalProductId: 'prod-1', quantity: 20 }] } });
 

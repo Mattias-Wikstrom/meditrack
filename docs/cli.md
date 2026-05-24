@@ -115,25 +115,35 @@ Order created: ord-abc123  status: Draft
 
 ---
 
-### advance
+### send
 
-Advance an order to the next status. Each call moves the order one step forward:
-
-```
-Draft → Sent → Confirmed
-```
+Performed by a nurse. Submits a draft order to the pharmacy.
 
 ```
-npm run cli -- orders advance <orderId>
+npm run cli -- orders send <orderId>
 ```
 
 **Example**
 
 ```
-$ npm run cli -- orders advance ord-abc123
+$ npm run cli -- orders send ord-abc123
 Order ord-abc123 is now: Sent
+```
 
-$ npm run cli -- orders advance ord-abc123
+---
+
+### confirm
+
+Performed by a pharmacist. Confirms receipt of a sent order, making it ready for delivery.
+
+```
+npm run cli -- orders confirm <orderId>
+```
+
+**Example**
+
+```
+$ npm run cli -- orders confirm ord-abc123
 Order ord-abc123 is now: Confirmed
 ```
 
@@ -176,10 +186,10 @@ Order ord-abc123 delivered.
 
 ```
 create ──► Draft ──► Sent ──► Confirmed ──► Delivered
-              advance   advance          deliver
+               send      confirm          deliver
 ```
 
-Calling `advance` on a `Confirmed` order, or `deliver` on anything other than a `Confirmed` order, returns an error and exits with code 1.
+`send` is performed by a nurse; `confirm` and `deliver` are performed by a pharmacist. Calling a command on an order in the wrong status returns an error and exits with code 1.
 
 ---
 

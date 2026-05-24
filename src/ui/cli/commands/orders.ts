@@ -1,8 +1,10 @@
 import { OrderRepository } from '../../../domain/order/OrderRepository';
 import { CreateOrderUseCase } from '../../../domain/order/useCases/ordering/CreateOrderUseCase';
-import { AdvanceOrderStatusUseCase } from '../../../domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
+import { SendOrderUseCase } from '../../../domain/order/useCases/fulfillment/SendOrderUseCase';
+import { ConfirmOrderUseCase } from '../../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { MedicationId, MedicinalProductId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
+import { ActorRole } from '../../../domain/shared/ActorRole';
 import { CliOutput } from '../CliOutput';
 
 export async function listOrders(repo: OrderRepository, output: CliOutput): Promise<void> {
@@ -27,6 +29,7 @@ export async function createOrder(
 ): Promise<void> {
   const result = await useCase.execute({
     actorId: 'cli',
+    actorRole: ActorRole.Nurse,
     wardUnitId: wardUnitId as WardUnitId,
     lines: [{ medicationId: medicationId as MedicationId, quantity }],
   });
@@ -39,12 +42,35 @@ export async function createOrder(
   }
 }
 
-export async function advanceOrder(
-  useCase: AdvanceOrderStatusUseCase,
+export async function sendOrder(
+  useCase: SendOrderUseCase,
   output: CliOutput,
   orderId: string,
 ): Promise<void> {
-  const result = await useCase.execute({ actorId: 'cli', orderId: orderId as OrderId });
+  const result = await useCase.execute({
+    actorId: 'cli',
+    actorRole: ActorRole.Nurse,
+    orderId: orderId as OrderId,
+  });
+
+  if (result.successful) {
+    output.print(`Order ${orderId} is now: ${result.value.status}`);
+  } else {
+    output.error(`Failed: ${result.errors.map((e) => e.code).join(', ')}`);
+    output.exit(1);
+  }
+}
+
+export async function confirmOrder(
+  useCase: ConfirmOrderUseCase,
+  output: CliOutput,
+  orderId: string,
+): Promise<void> {
+  const result = await useCase.execute({
+    actorId: 'cli',
+    actorRole: ActorRole.Pharmacist,
+    orderId: orderId as OrderId,
+  });
 
   if (result.successful) {
     output.print(`Order ${orderId} is now: ${result.value.status}`);
@@ -62,6 +88,7 @@ export async function deliverOrder(
 ): Promise<void> {
   const result = await useCase.execute({
     actorId: 'cli',
+    actorRole: ActorRole.Pharmacist,
     orderId: orderId as OrderId,
     productSelections: productSelections.map((s) => ({
       medicationId: s.medicationId as MedicationId,

@@ -8,6 +8,7 @@ import { UseCaseResult, success, failure, failures } from '../../../shared/resul
 import { OrderDelivered } from '../../events/OrderDelivered';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';
 import { MedicationId, MedicinalProductId, OrderId } from '../../../shared/IdTypes';
+import { ActorRole } from '../../../shared/ActorRole';
 import { DeliveryRule } from '../../rules/DeliveryRule';
 import { DeliveryPlan, ResolvedLine } from '../../rules/DeliveryPlan';
 import { OrderMustBeConfirmed } from '../../rules/OrderMustBeConfirmed';
@@ -28,6 +29,7 @@ export interface ProductSelection {
 // The input to the use case
 export interface DeliverOrderInput {
   actorId: string; // The person who is interacting with the system
+  actorRole: ActorRole;
   orderId: OrderId; // The order
   productSelections: ReadonlyArray<ProductSelection>; // How the order is to be handled
 }
@@ -47,6 +49,10 @@ export class DeliverOrderUseCase {
   ) {}
 
   async execute(input: DeliverOrderInput): Promise<UseCaseResult<Order>> {
+    if (input.actorRole !== ActorRole.Pharmacist) {
+      return failure('UnauthorizedRole');
+    }
+
     // Find the order in the database from the orderId that was specified
     const order = await this.orderRepository.findById(input.orderId);
 

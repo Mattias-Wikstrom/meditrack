@@ -1,4 +1,5 @@
 export type ErrorCode =
+  | 'UnauthorizedRole'
   | 'OrderHasAtLeastOneLine'
   | 'OrderLineQuantitiesPositive'
   | 'OrderNotFound'

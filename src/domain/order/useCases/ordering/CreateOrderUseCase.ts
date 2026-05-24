@@ -1,3 +1,5 @@
+// Performed by a nurse. Creates a new medication order for a ward unit.
+
 import { randomUUID } from 'crypto';
 import { Order } from '../../Order';
 import { OrderLine } from '../../OrderLine';
@@ -7,13 +9,15 @@ import { OrderRule } from '../../rules/OrderRule';
 import { OrderHasAtLeastOneLine } from '../../rules/OrderHasAtLeastOneLine';
 import { OrderLineQuantitiesPositive } from '../../rules/OrderLineQuantitiesPositive';
 import { EventBus } from '../../../shared/eventContracts/EventBus';
-import { UseCaseResult, success, failures } from '../../../shared/results/UseCaseResult';
+import { UseCaseResult, success, failure, failures } from '../../../shared/results/UseCaseResult';
 import { ErrorInfo } from '../../../shared/results/ErrorInfo';
 import { OrderPlaced } from '../../events/OrderPlaced';
 import { MedicationId, OrderId, WardUnitId } from '../../../shared/IdTypes';
+import { ActorRole } from '../../../shared/ActorRole';
 
 export interface CreateOrderInput {
   actorId: string;
+  actorRole: ActorRole;
   wardUnitId: WardUnitId;
   lines: { medicationId: MedicationId; quantity: number }[];
 }
@@ -30,6 +34,10 @@ export class CreateOrderUseCase {
   ) {}
 
   async execute(input: CreateOrderInput): Promise<UseCaseResult<Order>> {
+    if (input.actorRole !== ActorRole.Nurse) {
+      return failure('UnauthorizedRole');
+    }
+
     const order = new Order(
       randomUUID() as OrderId,
       input.wardUnitId,

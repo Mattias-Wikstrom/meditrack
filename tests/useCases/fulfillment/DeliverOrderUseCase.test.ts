@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/CreateOrderUseCase';
-import { AdvanceOrderStatusUseCase } from '../../../src/domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
+import { SendOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/SendOrderUseCase';
+import { ConfirmOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
 import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';
@@ -8,6 +9,7 @@ import { SimpleEventBus } from '../../../src/eventBus/SimpleEventBus';
 import Decimal from 'decimal.js';
 import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
+import { ActorRole } from '../../../src/domain/shared/ActorRole';
 import { MedicationId, MedicinalProductId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 
 describe('DeliverOrderUseCase', () => {
@@ -15,7 +17,8 @@ describe('DeliverOrderUseCase', () => {
   let medicinalProductRepo: InMemoryMedicinalProductRepository;
   let eventBus: SimpleEventBus;
   let createOrder: CreateOrderUseCase;
-  let advanceStatus: AdvanceOrderStatusUseCase;
+  let sendOrder: SendOrderUseCase;
+  let confirmOrder: ConfirmOrderUseCase;
   let deliverOrder: DeliverOrderUseCase;
 
   beforeEach(async () => {
@@ -23,7 +26,8 @@ describe('DeliverOrderUseCase', () => {
     medicinalProductRepo = new InMemoryMedicinalProductRepository();
     eventBus = new SimpleEventBus();
     createOrder = new CreateOrderUseCase(orderRepo, eventBus);
-    advanceStatus = new AdvanceOrderStatusUseCase(orderRepo, eventBus);
+    sendOrder = new SendOrderUseCase(orderRepo, eventBus);
+    confirmOrder = new ConfirmOrderUseCase(orderRepo, eventBus);
     deliverOrder = new DeliverOrderUseCase(orderRepo, medicinalProductRepo, eventBus);
 
     await medicinalProductRepo.save(
@@ -32,10 +36,15 @@ describe('DeliverOrderUseCase', () => {
   });
 
   const createConfirmedOrder = async (medicationId: MedicationId, quantity: number) => {
-    const created = await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId, quantity }] });
+    const created = await createOrder.execute({
+      actorId: 'nurse-1',
+      actorRole: ActorRole.Nurse,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId, quantity }],
+    });
     if (!created.successful) throw new Error('Setup failed: could not create order');
-    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
-    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    await sendOrder.execute({ actorId: 'nurse-1', actorRole: ActorRole.Nurse, orderId: created.value.id });
+    await confirmOrder.execute({ actorId: 'pharmacist-1', actorRole: ActorRole.Pharmacist, orderId: created.value.id });
     return created.value.id;
   };
 
@@ -44,7 +53,7 @@ describe('DeliverOrderUseCase', () => {
   it('sets the order status to delivered', async () => {
     const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
 
-    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: selectProd1 });
+    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', actorRole: ActorRole.Pharmacist, orderId, productSelections: selectProd1 });
 
     expect(result.successful).toBe(true);
     expect((await orderRepo.findById(orderId))?.status).toBe(OrderStatus.Delivered);
@@ -53,16 +62,31 @@ describe('DeliverOrderUseCase', () => {
   it('decreases stock level by the ordered quantity', async () => {
     const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
 
-    await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: selectProd1 });
+    await deliverOrder.execute({ actorId: 'pharmacist-1', actorRole: ActorRole.Pharmacist, orderId, productSelections: selectProd1 });
 
     expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(5);
   });
 
+  it('fails when the actor is not a pharmacist', async () => {
+    const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
+
+    const result = await deliverOrder.execute({ actorId: 'nurse-1', actorRole: ActorRole.Nurse, orderId, productSelections: selectProd1 });
+
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('UnauthorizedRole');
+  });
+
   it('fails when order is not in confirmed status', async () => {
-    const created = await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+    const created = await createOrder.execute({
+      actorId: 'nurse-1',
+      actorRole: ActorRole.Nurse,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
+    });
     if (!created.successful) return;
 
-    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', orderId: created.value.id, productSelections: selectProd1 });
+    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', actorRole: ActorRole.Pharmacist, orderId: created.value.id, productSelections: selectProd1 });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
@@ -72,7 +96,7 @@ describe('DeliverOrderUseCase', () => {
   it('fails when no product selection is provided for a line', async () => {
     const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
 
-    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: [] });
+    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', actorRole: ActorRole.Pharmacist, orderId, productSelections: [] });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
@@ -84,6 +108,7 @@ describe('DeliverOrderUseCase', () => {
 
     const result = await deliverOrder.execute({
       actorId: 'pharmacist-1',
+      actorRole: ActorRole.Pharmacist,
       orderId,
       productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-nonexistent' as MedicinalProductId, quantity: 5 }],
     });
@@ -99,6 +124,7 @@ describe('DeliverOrderUseCase', () => {
 
     await deliverOrder.execute({
       actorId: 'pharmacist-1',
+      actorRole: ActorRole.Pharmacist,
       orderId,
       productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-nonexistent' as MedicinalProductId, quantity: 5 }],
     });
