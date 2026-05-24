@@ -7,6 +7,9 @@ export interface AuditLogEntry {
   readonly occurredAt: Date;
 }
 
+/**
+ * Implements (in-memory) logging of domain events.
+ */
 export class AuditListener implements EventListener {
   private readonly entries: AuditLogEntry[] = [];
 

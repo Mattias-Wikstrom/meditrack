@@ -1,6 +1,6 @@
 import { MedicinalProduct } from '../../domain/medication/MedicinalProduct';
 import { MedicinalProductRepository } from '../../domain/medication/MedicinalProductRepository';
-import { MedicationId, MedicinalProductId } from '../../domain/shared/Id';
+import { MedicationId, MedicinalProductId } from '../../domain/shared/IdTypes';
 
 export class InMemoryMedicinalProductRepository implements MedicinalProductRepository {
   private readonly store = new Map<MedicinalProductId, MedicinalProduct>();

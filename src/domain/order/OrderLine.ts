@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js';
-import { MedicationId } from '../shared/Id';
+import { MedicationId } from '../shared/IdTypes';
 
 export class OrderLine {
   public readonly quantity: Decimal;

@@ -6,7 +6,7 @@ import { EventBus } from '../../../shared/events/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/results/UseCaseResult';
 import { OrderDelivered } from '../../events/OrderDelivered';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';
-import { OrderId } from '../../../shared/Id';
+import { OrderId } from '../../../shared/IdTypes';
 
 export interface DeliverOrderInput {
   actorId: string;

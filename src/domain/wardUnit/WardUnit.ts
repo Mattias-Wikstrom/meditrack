@@ -1,4 +1,4 @@
-import { WardUnitId } from '../shared/Id';
+import { WardUnitId } from '../shared/IdTypes';
 
 export class WardUnit {
   constructor(

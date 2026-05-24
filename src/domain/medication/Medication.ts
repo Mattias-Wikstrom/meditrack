@@ -1,5 +1,5 @@
 import { MedicationForm } from './MedicationForm';
-import { MedicationId } from '../shared/Id';
+import { MedicationId } from '../shared/IdTypes';
 
 export class Medication {
   public readonly id: MedicationId;

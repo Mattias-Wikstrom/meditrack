@@ -1,7 +1,7 @@
 import Decimal from 'decimal.js';
 import { DomainEvent } from '../../shared/events/DomainEvent';
 import { MedicinalProduct } from '../MedicinalProduct';
-import { MedicationId, MedicinalProductId } from '../../shared/Id';
+import { MedicationId, MedicinalProductId } from '../../shared/IdTypes';
 
 export class StockBelowThreshold implements DomainEvent {
   readonly eventType = 'StockBelowThreshold';

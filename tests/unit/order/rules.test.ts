@@ -4,7 +4,7 @@ import { OrderLine } from '../../../src/domain/order/OrderLine';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
 import { OrderHasAtLeastOneLine } from '../../../src/domain/order/rules/OrderHasAtLeastOneLine';
 import { OrderLineQuantitiesPositive } from '../../../src/domain/order/rules/OrderLineQuantitiesPositive';
-import { MedicationId, OrderId, WardUnitId } from '../../../src/domain/shared/Id';
+import { MedicationId, OrderId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 
 const makeOrder = (lines: OrderLine[]) =>
   new Order('order-1' as OrderId, 'ward-1' as WardUnitId, lines, OrderStatus.Draft, new Date());

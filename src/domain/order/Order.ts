@@ -1,6 +1,6 @@
 import { OrderLine } from './OrderLine';
 import { OrderStatus } from './OrderStatus';
-import { OrderId, WardUnitId } from '../shared/Id';
+import { OrderId, WardUnitId } from '../shared/IdTypes';
 
 export class Order {
   constructor(

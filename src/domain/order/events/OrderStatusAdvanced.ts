@@ -1,6 +1,6 @@
 import { DomainEvent } from '../../shared/events/DomainEvent';
 import { OrderStatus } from '../OrderStatus';
-import { OrderId } from '../../shared/Id';
+import { OrderId } from '../../shared/IdTypes';
 
 // The order is progressing through a workflow — "advanced" captures
 // that directionality and intent better than the generic "changed."

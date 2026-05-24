@@ -8,7 +8,7 @@ import { SimpleEventBus } from '../../../src/infrastructure/events/SimpleEventBu
 import { AuditListener } from '../../../src/infrastructure/audit/AuditListener';
 import Decimal from 'decimal.js';
 import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
-import { MedicationId, MedicinalProductId, WardUnitId } from '../../../src/domain/shared/Id';
+import { MedicationId, MedicinalProductId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 
 describe('AuditListener', () => {
   let eventBus: SimpleEventBus;

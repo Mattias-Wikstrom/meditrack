@@ -6,7 +6,7 @@ import Decimal from 'decimal.js';
 import { Medication } from '../../src/domain/medication/Medication';
 import { MedicinalProduct } from '../../src/domain/medication/MedicinalProduct';
 import { MedicationForm } from '../../src/domain/medication/MedicationForm';
-import { MedicationId, MedicinalProductId } from '../../src/domain/shared/Id';
+import { MedicationId, MedicinalProductId } from '../../src/domain/shared/IdTypes';
 
 describe('Query.medications', () => {
   it('returns an empty list when there are no medications', async () => {

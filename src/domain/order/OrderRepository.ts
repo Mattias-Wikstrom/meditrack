@@ -1,5 +1,5 @@
 import { Order } from './Order';
-import { OrderId, WardUnitId } from '../shared/Id';
+import { OrderId, WardUnitId } from '../shared/IdTypes';
 
 export interface OrderRepository {
   findById(id: OrderId): Order | undefined;

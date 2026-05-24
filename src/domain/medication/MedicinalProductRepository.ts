@@ -1,5 +1,5 @@
 import { MedicinalProduct } from './MedicinalProduct';
-import { MedicationId, MedicinalProductId } from '../shared/Id';
+import { MedicationId, MedicinalProductId } from '../shared/IdTypes';
 
 export interface MedicinalProductRepository {
   findById(id: MedicinalProductId): MedicinalProduct | undefined;

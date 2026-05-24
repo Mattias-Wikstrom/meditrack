@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js';
-import { MedicationId, MedicinalProductId } from '../shared/Id';
+import { MedicationId, MedicinalProductId } from '../shared/IdTypes';
 
 export class MedicinalProduct {
   public readonly id: MedicinalProductId;

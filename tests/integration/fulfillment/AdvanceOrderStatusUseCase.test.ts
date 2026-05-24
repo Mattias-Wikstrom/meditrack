@@ -4,7 +4,7 @@ import { AdvanceOrderStatusUseCase } from '../../../src/domain/order/useCases/fu
 import { InMemoryOrderRepository } from '../../../src/infrastructure/inMemory/InMemoryOrderRepository';
 import { SimpleEventBus } from '../../../src/infrastructure/events/SimpleEventBus';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
-import { MedicationId, OrderId, WardUnitId } from '../../../src/domain/shared/Id';
+import { MedicationId, OrderId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 
 describe('AdvanceOrderStatusUseCase', () => {
   let orderRepo: InMemoryOrderRepository;

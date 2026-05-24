@@ -10,7 +10,7 @@ import { EventBus } from '../../../shared/events/EventBus';
 import { UseCaseResult, success, failures } from '../../../shared/results/UseCaseResult';
 import { ErrorInfo } from '../../../shared/results/ErrorInfo';
 import { OrderPlaced } from '../../events/OrderPlaced';
-import { MedicationId, OrderId, WardUnitId } from '../../../shared/Id';
+import { MedicationId, OrderId, WardUnitId } from '../../../shared/IdTypes';
 
 export interface CreateOrderInput {
   actorId: string;

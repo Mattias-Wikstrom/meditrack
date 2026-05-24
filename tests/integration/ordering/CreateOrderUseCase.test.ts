@@ -3,7 +3,7 @@ import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/
 import { InMemoryOrderRepository } from '../../../src/infrastructure/inMemory/InMemoryOrderRepository';
 import { SimpleEventBus } from '../../../src/infrastructure/events/SimpleEventBus';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
-import { MedicationId, WardUnitId } from '../../../src/domain/shared/Id';
+import { MedicationId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 
 describe('CreateOrderUseCase', () => {
   let orderRepo: InMemoryOrderRepository;

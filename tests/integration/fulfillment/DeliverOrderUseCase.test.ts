@@ -8,7 +8,7 @@ import { SimpleEventBus } from '../../../src/infrastructure/events/SimpleEventBu
 import Decimal from 'decimal.js';
 import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
-import { MedicationId, MedicinalProductId, WardUnitId } from '../../../src/domain/shared/Id';
+import { MedicationId, MedicinalProductId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 
 describe('DeliverOrderUseCase', () => {
   let orderRepo: InMemoryOrderRepository;

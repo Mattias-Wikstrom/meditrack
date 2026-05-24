@@ -4,7 +4,7 @@ import { OrderRepository } from '../../OrderRepository';
 import { EventBus } from '../../../shared/events/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/results/UseCaseResult';
 import { OrderStatusAdvanced } from '../../events/OrderStatusAdvanced';
-import { OrderId } from '../../../shared/Id';
+import { OrderId } from '../../../shared/IdTypes';
 
 export interface AdvanceOrderStatusInput {
   actorId: string;
