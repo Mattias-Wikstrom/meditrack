@@ -4,6 +4,7 @@ import { prisma } from '../../storage/prisma/prismaClient';
 import { PrismaMedicationRepository } from '../../storage/prisma/PrismaMedicationRepository';
 import { PrismaMedicinalProductRepository } from '../../storage/prisma/PrismaMedicinalProductRepository';
 import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepository';
+import { PrismaWardUnitRepository } from '../../storage/prisma/PrismaWardUnitRepository';
 import { PrismaActorRepository } from '../../storage/prisma/PrismaActorRepository';
 import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
@@ -14,11 +15,14 @@ import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/Del
 import { ConsoleOutput } from './ConsoleOutput';
 import { listMedications, showMedication } from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
+import { runGraphQL } from './commands/graphql';
+import { GraphQLContext } from '../../api/graphql/context';
 
 // --- Wiring ---
 const medicationRepo = new PrismaMedicationRepository(prisma);
 const medicinalProductRepo = new PrismaMedicinalProductRepository(prisma);
 const orderRepo = new PrismaOrderRepository(prisma);
+const wardUnitRepo = new PrismaWardUnitRepository(prisma);
 const actorRepo = new PrismaActorRepository(prisma);
 const transactor = new PrismaTransactor(prisma);
 const eventBus = new SimpleEventBus();
@@ -95,6 +99,35 @@ orders
       };
     });
     return deliverOrder(deliverOrderUseCase, output, opts.actorId, orderId, productSelections);
+  });
+
+program
+  .command('graphql <query>')
+  .description('Execute a GraphQL query or mutation in-process')
+  .option('--actor-id <id>', 'actor ID (required for mutations)', '')
+  .option('--variables <json>', 'variables as a JSON object')
+  .action(async (query: string, opts: { actorId: string; variables?: string }) => {
+    let variables: Record<string, unknown> | undefined;
+    if (opts.variables) {
+      try {
+        variables = JSON.parse(opts.variables) as Record<string, unknown>;
+      } catch {
+        output.error('--variables must be valid JSON');
+        output.exit(1);
+      }
+    }
+    const context: GraphQLContext = {
+      medicationRepo,
+      medicinalProductRepo,
+      orderRepo,
+      wardUnitRepo,
+      createOrderUseCase,
+      sendOrderUseCase,
+      confirmOrderUseCase,
+      deliverOrderUseCase,
+      actorId: opts.actorId,
+    };
+    await runGraphQL(context, output, query, variables);
   });
 
 program.parseAsync().catch((err: unknown) => {
