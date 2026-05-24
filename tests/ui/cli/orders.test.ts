@@ -3,6 +3,8 @@ import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from '
 import { InMemoryActorRepository } from '../../../src/storage/inMemory/InMemoryActorRepository';
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
 import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';
+import { InMemoryAuditRepository } from '../../../src/storage/inMemory/InMemoryAuditRepository';
+import { InMemoryTransactor } from '../../../src/storage/inMemory/InMemoryTransactor';
 import { SimpleEventBus } from '../../../src/eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/CreateOrderUseCase';
 import { SendOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/SendOrderUseCase';
@@ -20,6 +22,9 @@ const makeActorRepo = () =>
     { id: 'pharmacist-1', role: ActorRole.Pharmacist },
   ]);
 
+const makeTransactor = (orderRepo: InMemoryOrderRepository, productRepo = new InMemoryMedicinalProductRepository()) =>
+  new InMemoryTransactor(orderRepo, productRepo, new InMemoryAuditRepository());
+
 describe('listOrders', () => {
   it('prints a message when there are no orders', async () => {
     const output = new RecordingOutput();
@@ -32,7 +37,8 @@ describe('listOrders', () => {
   it('prints one line per order', async () => {
     const repo = new InMemoryOrderRepository();
     const actorRepo = makeActorRepo();
-    const useCase = new CreateOrderUseCase(actorRepo, repo, new SimpleEventBus());
+    const transactor = makeTransactor(repo);
+    const useCase = new CreateOrderUseCase(actorRepo, transactor, new SimpleEventBus());
     await useCase.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     await useCase.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-2' as MedicationId, quantity: 3 }] });
     const output = new RecordingOutput();
@@ -45,7 +51,8 @@ describe('listOrders', () => {
 
 describe('createOrder', () => {
   it('prints the created order ID on success', async () => {
-    const useCase = new CreateOrderUseCase(makeActorRepo(), new InMemoryOrderRepository(), new SimpleEventBus());
+    const orderRepo = new InMemoryOrderRepository();
+    const useCase = new CreateOrderUseCase(makeActorRepo(), makeTransactor(orderRepo), new SimpleEventBus());
     const output = new RecordingOutput();
 
     await createOrder(useCase, output, 'nurse-1', 'ward-1', 'med-1', 5);
@@ -55,7 +62,8 @@ describe('createOrder', () => {
   });
 
   it('exits with code 1 and prints an error on validation failure', async () => {
-    const useCase = new CreateOrderUseCase(makeActorRepo(), new InMemoryOrderRepository(), new SimpleEventBus());
+    const orderRepo = new InMemoryOrderRepository();
+    const useCase = new CreateOrderUseCase(makeActorRepo(), makeTransactor(orderRepo), new SimpleEventBus());
     const output = new RecordingOutput();
 
     await expect(createOrder(useCase, output, 'nurse-1', 'ward-1', 'med-1', 0)).rejects.toThrow(ExitError);
@@ -68,13 +76,14 @@ describe('sendOrder', () => {
     const repo = new InMemoryOrderRepository();
     const eventBus = new SimpleEventBus();
     const actorRepo = makeActorRepo();
-    const created = await new CreateOrderUseCase(actorRepo, repo, eventBus).execute({
+    const transactor = makeTransactor(repo);
+    const created = await new CreateOrderUseCase(actorRepo, transactor, eventBus).execute({
       actorId: 'nurse-1',
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
     });
     if (!created.successful) throw new Error('setup failed');
-    const useCase = new SendOrderUseCase(actorRepo, repo, eventBus);
+    const useCase = new SendOrderUseCase(actorRepo, repo, transactor, eventBus);
     const output = new RecordingOutput();
 
     await sendOrder(useCase, output, 'nurse-1', created.value.id);
@@ -83,7 +92,8 @@ describe('sendOrder', () => {
   });
 
   it('exits with code 1 for an unknown order', async () => {
-    const useCase = new SendOrderUseCase(makeActorRepo(), new InMemoryOrderRepository(), new SimpleEventBus());
+    const orderRepo = new InMemoryOrderRepository();
+    const useCase = new SendOrderUseCase(makeActorRepo(), orderRepo, makeTransactor(orderRepo), new SimpleEventBus());
     const output = new RecordingOutput();
 
     await expect(sendOrder(useCase, output, 'nurse-1', 'no-such-order')).rejects.toThrow(ExitError);
@@ -96,14 +106,15 @@ describe('confirmOrder', () => {
     const repo = new InMemoryOrderRepository();
     const eventBus = new SimpleEventBus();
     const actorRepo = makeActorRepo();
-    const created = await new CreateOrderUseCase(actorRepo, repo, eventBus).execute({
+    const transactor = makeTransactor(repo);
+    const created = await new CreateOrderUseCase(actorRepo, transactor, eventBus).execute({
       actorId: 'nurse-1',
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
     });
     if (!created.successful) throw new Error('setup failed');
-    await new SendOrderUseCase(actorRepo, repo, eventBus).execute({ actorId: 'nurse-1', orderId: created.value.id });
-    const useCase = new ConfirmOrderUseCase(actorRepo, repo, eventBus);
+    await new SendOrderUseCase(actorRepo, repo, transactor, eventBus).execute({ actorId: 'nurse-1', orderId: created.value.id });
+    const useCase = new ConfirmOrderUseCase(actorRepo, repo, transactor, eventBus);
     const output = new RecordingOutput();
 
     await confirmOrder(useCase, output, 'pharmacist-1', created.value.id);
@@ -112,7 +123,8 @@ describe('confirmOrder', () => {
   });
 
   it('exits with code 1 for an unknown order', async () => {
-    const useCase = new ConfirmOrderUseCase(makeActorRepo(), new InMemoryOrderRepository(), new SimpleEventBus());
+    const orderRepo = new InMemoryOrderRepository();
+    const useCase = new ConfirmOrderUseCase(makeActorRepo(), orderRepo, makeTransactor(orderRepo), new SimpleEventBus());
     const output = new RecordingOutput();
 
     await expect(confirmOrder(useCase, output, 'pharmacist-1', 'no-such-order')).rejects.toThrow(ExitError);
@@ -126,16 +138,17 @@ describe('deliverOrder', () => {
     const medicinalProductRepo = new InMemoryMedicinalProductRepository();
     const eventBus = new SimpleEventBus();
     const actorRepo = makeActorRepo();
+    const transactor = makeTransactor(orderRepo, medicinalProductRepo);
     await medicinalProductRepo.save(new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(5)));
-    const created = await new CreateOrderUseCase(actorRepo, orderRepo, eventBus).execute({
+    const created = await new CreateOrderUseCase(actorRepo, transactor, eventBus).execute({
       actorId: 'nurse-1',
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
     });
     if (!created.successful) throw new Error('setup failed');
-    await new SendOrderUseCase(actorRepo, orderRepo, eventBus).execute({ actorId: 'nurse-1', orderId: created.value.id });
-    await new ConfirmOrderUseCase(actorRepo, orderRepo, eventBus).execute({ actorId: 'pharmacist-1', orderId: created.value.id });
-    const useCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, eventBus);
+    await new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus).execute({ actorId: 'nurse-1', orderId: created.value.id });
+    await new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus).execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    const useCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus);
     const output = new RecordingOutput();
 
     await deliverOrder(useCase, output, 'pharmacist-1', created.value.id, [{ medicationId: 'med-1', medicinalProductId: 'prod-1', quantity: 5 }]);

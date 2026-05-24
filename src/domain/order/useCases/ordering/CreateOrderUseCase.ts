@@ -4,12 +4,12 @@ import { randomUUID } from 'crypto';
 import { Order } from '../../Order';
 import { OrderLine } from '../../OrderLine';
 import { OrderStatus } from '../../OrderStatus';
-import { OrderRepository } from '../../OrderRepository';
 import { OrderRule } from '../../rules/OrderRule';
 import { OrderHasAtLeastOneLine } from '../../rules/OrderHasAtLeastOneLine';
 import { OrderLineQuantitiesPositive } from '../../rules/OrderLineQuantitiesPositive';
 import { ActorRepository } from '../../../actor/ActorRepository';
 import { ActorRole } from '../../../shared/ActorRole';
+import { Transactor } from '../../../shared/Transactor';
 import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure, failures } from '../../../shared/results/UseCaseResult';
 import { ErrorInfo } from '../../../shared/results/ErrorInfo';
@@ -30,7 +30,7 @@ export class CreateOrderUseCase {
 
   constructor(
     private readonly actorRepository: ActorRepository,
-    private readonly orderRepository: OrderRepository,
+    private readonly transactor: Transactor,
     private readonly eventBus: EventBus,
   ) {}
 
@@ -63,7 +63,11 @@ export class CreateOrderUseCase {
       return failures(errors);
     }
 
-    await this.orderRepository.save(order);
+    await this.transactor.run(async (tx) => {
+      await tx.orderRepository.save(order);
+      await tx.auditRepository.record({ actorId: input.actorId, action: 'OrderPlaced', entityId: order.id, occurredAt: new Date() });
+    });
+
     await this.eventBus.publish(new OrderPlaced(input.actorId, order));
     return success(order);
   }

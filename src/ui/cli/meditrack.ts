@@ -5,6 +5,7 @@ import { PrismaMedicationRepository } from '../../storage/prisma/PrismaMedicatio
 import { PrismaMedicinalProductRepository } from '../../storage/prisma/PrismaMedicinalProductRepository';
 import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepository';
 import { PrismaActorRepository } from '../../storage/prisma/PrismaActorRepository';
+import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
@@ -19,12 +20,13 @@ const medicationRepo = new PrismaMedicationRepository(prisma);
 const medicinalProductRepo = new PrismaMedicinalProductRepository(prisma);
 const orderRepo = new PrismaOrderRepository(prisma);
 const actorRepo = new PrismaActorRepository(prisma);
+const transactor = new PrismaTransactor(prisma);
 const eventBus = new SimpleEventBus();
 
-const createOrderUseCase = new CreateOrderUseCase(actorRepo, orderRepo, eventBus);
-const sendOrderUseCase = new SendOrderUseCase(actorRepo, orderRepo, eventBus);
-const confirmOrderUseCase = new ConfirmOrderUseCase(actorRepo, orderRepo, eventBus);
-const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, eventBus);
+const createOrderUseCase = new CreateOrderUseCase(actorRepo, transactor, eventBus);
+const sendOrderUseCase = new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
+const confirmOrderUseCase = new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
+const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus);
 
 const output = new ConsoleOutput();
 

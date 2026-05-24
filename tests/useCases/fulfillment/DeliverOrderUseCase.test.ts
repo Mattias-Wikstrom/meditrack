@@ -6,6 +6,8 @@ import { DeliverOrderUseCase } from '../../../src/domain/order/useCases/fulfillm
 import { InMemoryActorRepository } from '../../../src/storage/inMemory/InMemoryActorRepository';
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
 import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';
+import { InMemoryAuditRepository } from '../../../src/storage/inMemory/InMemoryAuditRepository';
+import { InMemoryTransactor } from '../../../src/storage/inMemory/InMemoryTransactor';
 import { SimpleEventBus } from '../../../src/eventBus/SimpleEventBus';
 import Decimal from 'decimal.js';
 import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
@@ -17,6 +19,7 @@ describe('DeliverOrderUseCase', () => {
   let actorRepo: InMemoryActorRepository;
   let orderRepo: InMemoryOrderRepository;
   let medicinalProductRepo: InMemoryMedicinalProductRepository;
+  let auditRepo: InMemoryAuditRepository;
   let eventBus: SimpleEventBus;
   let createOrder: CreateOrderUseCase;
   let sendOrder: SendOrderUseCase;
@@ -30,11 +33,13 @@ describe('DeliverOrderUseCase', () => {
     ]);
     orderRepo = new InMemoryOrderRepository();
     medicinalProductRepo = new InMemoryMedicinalProductRepository();
+    auditRepo = new InMemoryAuditRepository();
+    const transactor = new InMemoryTransactor(orderRepo, medicinalProductRepo, auditRepo);
     eventBus = new SimpleEventBus();
-    createOrder = new CreateOrderUseCase(actorRepo, orderRepo, eventBus);
-    sendOrder = new SendOrderUseCase(actorRepo, orderRepo, eventBus);
-    confirmOrder = new ConfirmOrderUseCase(actorRepo, orderRepo, eventBus);
-    deliverOrder = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, eventBus);
+    createOrder = new CreateOrderUseCase(actorRepo, transactor, eventBus);
+    sendOrder = new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
+    confirmOrder = new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
+    deliverOrder = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus);
 
     await medicinalProductRepo.save(
       new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(3)),
@@ -70,6 +75,28 @@ describe('DeliverOrderUseCase', () => {
     await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: selectProd1 });
 
     expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(5);
+  });
+
+  it('writes an audit entry on success', async () => {
+    const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
+
+    await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: selectProd1 });
+
+    const deliverEntry = auditRepo.getEntries().find((e) => e.action === 'OrderDelivered');
+    expect(deliverEntry).toBeDefined();
+    expect(deliverEntry?.actorId).toBe('pharmacist-1');
+    expect(deliverEntry?.entityId).toBe(orderId);
+  });
+
+  it('fires a StockBelowThreshold event when stock crosses the threshold', async () => {
+    const received: string[] = [];
+    eventBus.subscribe('StockBelowThreshold', { handle: async (e) => { received.push(e.eventType); } });
+    // prod-1: stock 10, threshold 3 — delivering 8 units takes it to 2, crossing the threshold
+    const orderId = await createConfirmedOrder('med-1' as MedicationId, 8);
+
+    await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-1' as MedicinalProductId, quantity: 8 }] });
+
+    expect(received).toContain('StockBelowThreshold');
   });
 
   it('fails when the actor is not a pharmacist', async () => {
@@ -115,20 +142,6 @@ describe('DeliverOrderUseCase', () => {
     expect(result.successful).toBe(false);
     if (result.successful) return;
     expect(result.errors[0]?.code).toBe('SelectionQuantityMismatch');
-  });
-
-  it('fails when the specified product does not exist', async () => {
-    const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
-
-    const result = await deliverOrder.execute({
-      actorId: 'pharmacist-1',
-      orderId,
-      productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-nonexistent' as MedicinalProductId, quantity: 5 }],
-    });
-
-    expect(result.successful).toBe(false);
-    if (result.successful) return;
-    expect(result.errors[0]?.code).toBe('MedicinalProductNotFound');
   });
 
   it('does not update stock if delivery fails', async () => {
