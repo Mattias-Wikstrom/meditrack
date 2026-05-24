@@ -1,6 +1,6 @@
-import { DomainEvent } from '../../domain/shared/eventContracts/DomainEvent';
-import { EventBus } from '../../domain/shared/eventContracts/EventBus';
-import { EventListener } from '../../domain/shared/eventContracts/EventListener';
+import { DomainEvent } from '../domain/shared/eventContracts/DomainEvent';
+import { EventBus } from '../domain/shared/eventContracts/EventBus';
+import { EventListener } from '../domain/shared/eventContracts/EventListener';
 
 /**
  * A minimal implementation of the EventBus interface.

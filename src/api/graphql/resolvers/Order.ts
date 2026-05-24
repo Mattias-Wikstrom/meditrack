@@ -1,5 +1,5 @@
-import { Order } from '../../../domain/order/Order';
+import { Order as OrderEntity } from '../../../domain/order/Order';
 
 export const Order = {
-  createdAt: (order: Order) => order.createdAt.toISOString(),
+  createdAt: (order: OrderEntity) => order.createdAt.toISOString(),
 };

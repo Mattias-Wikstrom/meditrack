@@ -51,9 +51,9 @@ describe('Mutation.createOrder', () => {
     });
 
     expect(result.errors).toBeUndefined();
-    expect(result.data?.createOrder.successful).toBe(true);
-    expect(result.data?.createOrder.order.status).toBe('Draft');
-    expect(result.data?.createOrder.errors).toEqual([]);
+    expect((result.data as any)?.createOrder.successful).toBe(true);
+    expect((result.data as any)?.createOrder.order.status).toBe('Draft');
+    expect((result.data as any)?.createOrder.errors).toEqual([]);
   });
 
   it('returns errors and no order when validation fails', async () => {
@@ -67,9 +67,9 @@ describe('Mutation.createOrder', () => {
     });
 
     expect(result.errors).toBeUndefined();
-    expect(result.data?.createOrder.successful).toBe(false);
-    expect(result.data?.createOrder.errors).toContain('OrderHasAtLeastOneLine');
-    expect(result.data?.createOrder.order).toBeNull();
+    expect((result.data as any)?.createOrder.successful).toBe(false);
+    expect((result.data as any)?.createOrder.errors).toContain('OrderHasAtLeastOneLine');
+    expect((result.data as any)?.createOrder.order).toBeNull();
   });
 });
 
@@ -80,13 +80,13 @@ describe('Mutation.advanceOrderStatus', () => {
       schema, source: CREATE_ORDER, contextValue: ctx,
       variableValues: { wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] },
     });
-    const orderId = created.data?.createOrder.order.id;
+    const orderId = (created.data as any)?.createOrder.order.id;
 
     const result = await graphql({ schema, source: ADVANCE_STATUS, contextValue: ctx, variableValues: { orderId } });
 
     expect(result.errors).toBeUndefined();
-    expect(result.data?.advanceOrderStatus.successful).toBe(true);
-    expect(result.data?.advanceOrderStatus.order.status).toBe('Sent');
+    expect((result.data as any)?.advanceOrderStatus.successful).toBe(true);
+    expect((result.data as any)?.advanceOrderStatus.order.status).toBe('Sent');
   });
 
   it('returns an error for an unknown order', async () => {
@@ -95,8 +95,8 @@ describe('Mutation.advanceOrderStatus', () => {
       variableValues: { orderId: 'no-such-order' },
     });
 
-    expect(result.data?.advanceOrderStatus.successful).toBe(false);
-    expect(result.data?.advanceOrderStatus.errors).toContain('OrderNotFound');
+    expect((result.data as any)?.advanceOrderStatus.successful).toBe(false);
+    expect((result.data as any)?.advanceOrderStatus.errors).toContain('OrderNotFound');
   });
 });
 
@@ -114,7 +114,7 @@ describe('Mutation.deliverOrder', () => {
       schema, source: CREATE_ORDER, contextValue: ctx,
       variableValues: { wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 20 }] },
     });
-    const orderId = created.data?.createOrder.order.id;
+    const orderId = (created.data as any)?.createOrder.order.id;
 
     await graphql({ schema, source: ADVANCE_STATUS, contextValue: ctx, variableValues: { orderId } });
     await graphql({ schema, source: ADVANCE_STATUS, contextValue: ctx, variableValues: { orderId } });
@@ -122,8 +122,8 @@ describe('Mutation.deliverOrder', () => {
     const result = await graphql({ schema, source: DELIVER_ORDER, contextValue: ctx, variableValues: { orderId } });
 
     expect(result.errors).toBeUndefined();
-    expect(result.data?.deliverOrder.successful).toBe(true);
-    expect(result.data?.deliverOrder.order.status).toBe('Delivered');
+    expect((result.data as any)?.deliverOrder.successful).toBe(true);
+    expect((result.data as any)?.deliverOrder.order.status).toBe('Delivered');
     expect((await ctx.medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(30);
   });
 });
@@ -158,7 +158,7 @@ describe('Query.wardUnit with nested orders', () => {
     });
 
     expect(result.errors).toBeUndefined();
-    const ward = result.data?.wardUnit;
+    const ward = (result.data as any)?.wardUnit;
     expect(ward.name).toBe('Akuten');
     expect(ward.orders).toHaveLength(1);
     expect(ward.orders[0].lines[0].medication.innName).toBe('Paracetamol');

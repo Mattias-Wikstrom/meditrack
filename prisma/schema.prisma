@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────────
+// Enums (must match the TypeScript domain enums)
+// ──────────────────────────────────────────────
+
+enum MedicationForm {
+  Tablet
+  Capsule
+  Injection
+  Solution
+  Cream
+  Drops
+  Inhaler
+}
+
+enum OrderStatus {
+  Draft
+  Sent
+  Confirmed
+  Delivered
+}
+
+// ──────────────────────────────────────────────
+// Models
+// ──────────────────────────────────────────────
+
+model Medication {
+  id                String             @id
+  innName           String
+  atcCode           String
+  form              MedicationForm
+  strength          String
+  medicinalProducts MedicinalProduct[]
+}
+
+model MedicinalProduct {
+  id             String     @id
+  productName    String
+  medicationId   String
+  stockLevel     Decimal    @db.Decimal(18, 4)
+  stockThreshold Decimal    @db.Decimal(18, 4)
+  medication     Medication @relation(fields: [medicationId], references: [id])
+}
+
+model Order {
+  id         String      @id
+  wardUnitId String
+  status     OrderStatus
+  createdAt  DateTime
+  lines      OrderLine[]
+}
+
+/// OrderLine has no identity in the domain — the auto-increment id is
+/// an internal surrogate key used only by Prisma.
+model OrderLine {
+  id           Int     @id @default(autoincrement())
+  orderId      String
+  medicationId String
+  quantity     Decimal @db.Decimal(18, 4)
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model WardUnit {
+  id   String @id
+  name String
+}

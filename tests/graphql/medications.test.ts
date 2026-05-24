@@ -97,7 +97,7 @@ describe('Query.medicinalProducts', () => {
     });
 
     expect(result.errors).toBeUndefined();
-    expect(result.data?.medicinalProducts[0].isBelowThreshold).toBe(true);
+    expect((result.data as any)?.medicinalProducts[0].isBelowThreshold).toBe(true);
   });
 
   it('resolves the nested medication', async () => {
@@ -114,7 +114,7 @@ describe('Query.medicinalProducts', () => {
     });
 
     expect(result.errors).toBeUndefined();
-    expect(result.data?.medicinalProducts[0].productName).toBe('Alvedon 500mg');
-    expect(result.data?.medicinalProducts[0].medication.innName).toBe('Paracetamol');
+    expect((result.data as any)?.medicinalProducts[0].productName).toBe('Alvedon 500mg');
+    expect((result.data as any)?.medicinalProducts[0].medication.innName).toBe('Paracetamol');
   });
 });
