@@ -97,4 +97,7 @@ orders
     return deliverOrder(deliverOrderUseCase, output, opts.actorId, orderId, productSelections);
   });
 
-program.parse();
+program.parseAsync().catch((err: unknown) => {
+  output.error(`Unexpected error: ${err instanceof Error ? err.message : String(err)}`);
+  output.exit(1);
+});
