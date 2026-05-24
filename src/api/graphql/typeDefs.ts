@@ -1,4 +1,24 @@
 export const typeDefs = /* GraphQL */ `
+  type Subscription {
+    orderStatusChanged: OrderStatusChangedEvent!
+    stockBelowThreshold: StockAlertEvent!
+  }
+
+  type OrderStatusChangedEvent {
+    orderId: ID!
+    from: OrderStatus!
+    to: OrderStatus!
+    actorId: String!
+  }
+
+  type StockAlertEvent {
+    medicinalProductId: ID!
+    productName: String!
+    medicationId: ID!
+    stockLevel: Int!
+    stockThreshold: Int!
+  }
+
   type Query {
     wardUnit(id: ID!): WardUnit
     medications(query: String): [Medication!]!
