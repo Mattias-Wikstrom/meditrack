@@ -1,6 +1,6 @@
-import { DomainEvent } from '../../domain/shared/DomainEvent';
-import { EventBus } from '../../domain/shared/EventBus';
-import { EventListener } from '../../domain/shared/EventListener';
+import { DomainEvent } from '../../domain/shared/events/DomainEvent';
+import { EventBus } from '../../domain/shared/events/EventBus';
+import { EventListener } from '../../domain/shared/events/EventListener';
 
 export class SimpleEventBus implements EventBus {
   private readonly listeners = new Map<string, EventListener[]>();

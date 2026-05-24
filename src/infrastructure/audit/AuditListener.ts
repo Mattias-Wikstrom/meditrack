@@ -1,5 +1,5 @@
-import { DomainEvent } from '../../domain/shared/DomainEvent';
-import { EventListener } from '../../domain/shared/EventListener';
+import { DomainEvent } from '../../domain/shared/events/DomainEvent';
+import { EventListener } from '../../domain/shared/events/EventListener';
 
 export interface AuditLogEntry {
   readonly eventType: string;

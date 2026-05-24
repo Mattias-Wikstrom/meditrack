@@ -1,5 +1,5 @@
 import { Order } from '../Order';
-import { ErrorInfo } from '../../shared/ErrorInfo';
+import { ErrorInfo } from '../../shared/results/ErrorInfo';
 import { OrderRule } from './OrderRule';
 
 // Empty orders are not allowed

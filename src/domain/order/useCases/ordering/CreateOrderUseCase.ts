@@ -6,9 +6,9 @@ import { OrderRepository } from '../../OrderRepository';
 import { OrderRule } from '../../rules/OrderRule';
 import { OrderHasAtLeastOneLine } from '../../rules/OrderHasAtLeastOneLine';
 import { OrderLineQuantitiesPositive } from '../../rules/OrderLineQuantitiesPositive';
-import { EventBus } from '../../../shared/EventBus';
-import { UseCaseResult, success, failures } from '../../../shared/UseCaseResult';
-import { ErrorInfo } from '../../../shared/ErrorInfo';
+import { EventBus } from '../../../shared/events/EventBus';
+import { UseCaseResult, success, failures } from '../../../shared/results/UseCaseResult';
+import { ErrorInfo } from '../../../shared/results/ErrorInfo';
 import { OrderPlaced } from '../../events/OrderPlaced';
 import { MedicationId, OrderId, WardUnitId } from '../../../shared/Id';
 
