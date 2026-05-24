@@ -5,6 +5,7 @@ import { ConfirmOrderUseCase } from '../../../domain/order/useCases/fulfillment/
 import { DeliverOrderUseCase } from '../../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { MedicationId, MedicinalProductId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
 import { CliOutput } from '../CliOutput';
+import { errorMessages } from '../errorMessages';
 
 export async function listOrders(repo: OrderRepository, output: CliOutput): Promise<void> {
   const orders = await repo.findAll();
@@ -36,7 +37,7 @@ export async function createOrder(
   if (result.successful) {
     output.print(`Order created: ${result.value.id}  status: ${result.value.status}`);
   } else {
-    output.error(`Failed: ${result.errors.map((e) => e.code).join(', ')}`);
+    output.error(`Failed: ${result.errors.map((e) => errorMessages[e.code]).join(' ')}`);
     output.exit(1);
   }
 }
@@ -55,7 +56,7 @@ export async function sendOrder(
   if (result.successful) {
     output.print(`Order ${orderId} is now: ${result.value.status}`);
   } else {
-    output.error(`Failed: ${result.errors.map((e) => e.code).join(', ')}`);
+    output.error(`Failed: ${result.errors.map((e) => errorMessages[e.code]).join(' ')}`);
     output.exit(1);
   }
 }
@@ -74,7 +75,7 @@ export async function confirmOrder(
   if (result.successful) {
     output.print(`Order ${orderId} is now: ${result.value.status}`);
   } else {
-    output.error(`Failed: ${result.errors.map((e) => e.code).join(', ')}`);
+    output.error(`Failed: ${result.errors.map((e) => errorMessages[e.code]).join(' ')}`);
     output.exit(1);
   }
 }
@@ -99,7 +100,7 @@ export async function deliverOrder(
   if (result.successful) {
     output.print(`Order ${orderId} delivered.`);
   } else {
-    output.error(`Failed: ${result.errors.map((e) => e.code).join(', ')}`);
+    output.error(`Failed: ${result.errors.map((e) => errorMessages[e.code]).join(' ')}`);
     output.exit(1);
   }
 }

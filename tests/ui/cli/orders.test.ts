@@ -67,7 +67,7 @@ describe('createOrder', () => {
     const output = new RecordingOutput();
 
     await expect(createOrder(useCase, output, 'nurse-1', 'ward-1', 'med-1', 0)).rejects.toThrow(ExitError);
-    expect(output.errors[0]).toContain('OrderLineQuantitiesPositive');
+    expect(output.errors[0]).toContain('greater than zero');
   });
 });
 
@@ -97,7 +97,7 @@ describe('sendOrder', () => {
     const output = new RecordingOutput();
 
     await expect(sendOrder(useCase, output, 'nurse-1', 'no-such-order')).rejects.toThrow(ExitError);
-    expect(output.errors[0]).toContain('OrderNotFound');
+    expect(output.errors[0]).toContain('Order not found');
   });
 });
 
@@ -128,7 +128,7 @@ describe('confirmOrder', () => {
     const output = new RecordingOutput();
 
     await expect(confirmOrder(useCase, output, 'pharmacist-1', 'no-such-order')).rejects.toThrow(ExitError);
-    expect(output.errors[0]).toContain('OrderNotFound');
+    expect(output.errors[0]).toContain('Order not found');
   });
 });
 
