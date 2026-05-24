@@ -4,8 +4,8 @@ import { prisma } from '../../storage/prisma/prismaClient';
 import { PrismaMedicationRepository } from '../../storage/prisma/PrismaMedicationRepository';
 import { PrismaMedicinalProductRepository } from '../../storage/prisma/PrismaMedicinalProductRepository';
 import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepository';
-import { InMemoryActorRepository } from '../../storage/inMemory/InMemoryActorRepository';
-import { ActorRole } from '../../domain/shared/ActorRole';
+import { PrismaActorRepository } from '../../storage/prisma/PrismaActorRepository';
+import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
@@ -19,17 +19,14 @@ import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from '
 const medicationRepo = new PrismaMedicationRepository(prisma);
 const medicinalProductRepo = new PrismaMedicinalProductRepository(prisma);
 const orderRepo = new PrismaOrderRepository(prisma);
+const actorRepo = new PrismaActorRepository(prisma);
+const transactor = new PrismaTransactor(prisma);
 const eventBus = new SimpleEventBus();
 
-const actorRepo = new InMemoryActorRepository([
-  { id: 'cli-nurse', role: ActorRole.Nurse },
-  { id: 'cli-pharmacist', role: ActorRole.Pharmacist },
-]);
-
-const createOrderUseCase = new CreateOrderUseCase(actorRepo, orderRepo, eventBus);
-const sendOrderUseCase = new SendOrderUseCase(actorRepo, orderRepo, eventBus);
-const confirmOrderUseCase = new ConfirmOrderUseCase(actorRepo, orderRepo, eventBus);
-const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, eventBus);
+const createOrderUseCase = new CreateOrderUseCase(actorRepo, transactor, eventBus);
+const sendOrderUseCase = new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
+const confirmOrderUseCase = new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
+const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus);
 
 const output = new ConsoleOutput();
 
@@ -60,24 +57,28 @@ orders
 orders
   .command('create')
   .description('Create a new order')
+  .requiredOption('--actor-id <id>', 'actor ID')
   .requiredOption('--ward-unit-id <id>', 'ward unit ID')
   .requiredOption('--medication-id <id>', 'medication ID')
   .requiredOption('--quantity <n>', 'quantity', parseInt)
-  .action(async (opts) => createOrder(createOrderUseCase, output, opts.wardUnitId, opts.medicationId, opts.quantity));
+  .action(async (opts) => createOrder(createOrderUseCase, output, opts.actorId, opts.wardUnitId, opts.medicationId, opts.quantity));
 
 orders
   .command('send <orderId>')
   .description('Send a draft order to the pharmacy')
-  .action(async (orderId) => sendOrder(sendOrderUseCase, output, orderId));
+  .requiredOption('--actor-id <id>', 'actor ID')
+  .action(async (orderId, opts) => sendOrder(sendOrderUseCase, output, opts.actorId, orderId));
 
 orders
   .command('confirm <orderId>')
   .description('Confirm receipt of a sent order')
-  .action(async (orderId) => confirmOrder(confirmOrderUseCase, output, orderId));
+  .requiredOption('--actor-id <id>', 'actor ID')
+  .action(async (orderId, opts) => confirmOrder(confirmOrderUseCase, output, opts.actorId, orderId));
 
 orders
   .command('deliver <orderId>')
   .description('Mark an order as delivered and update stock')
+  .requiredOption('--actor-id <id>', 'actor ID')
   .option(
     '--product <spec>',
     'medicationId:medicinalProductId:quantity — repeat once per product used',
@@ -93,7 +94,7 @@ orders
         quantity: parseInt(quantityStr ?? '0', 10),
       };
     });
-    return deliverOrder(deliverOrderUseCase, output, orderId, productSelections);
+    return deliverOrder(deliverOrderUseCase, output, opts.actorId, orderId, productSelections);
   });
 
 program.parse();

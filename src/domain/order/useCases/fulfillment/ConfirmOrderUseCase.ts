@@ -5,6 +5,7 @@ import { OrderStatus } from '../../OrderStatus';
 import { OrderRepository } from '../../OrderRepository';
 import { ActorRepository } from '../../../actor/ActorRepository';
 import { ActorRole } from '../../../shared/ActorRole';
+import { Transactor } from '../../../shared/Transactor';
 import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/results/UseCaseResult';
 import { OrderStatusAdvanced } from '../../events/OrderStatusAdvanced';
@@ -19,6 +20,7 @@ export class ConfirmOrderUseCase {
   constructor(
     private readonly actorRepository: ActorRepository,
     private readonly orderRepository: OrderRepository,
+    private readonly transactor: Transactor,
     private readonly eventBus: EventBus,
   ) {}
 
@@ -42,9 +44,13 @@ export class ConfirmOrderUseCase {
 
     const previousStatus = order.status;
     order.status = OrderStatus.Confirmed;
-    await this.orderRepository.save(order);
-    await this.eventBus.publish(new OrderStatusAdvanced(input.actorId, order.id, previousStatus, OrderStatus.Confirmed));
 
+    await this.transactor.run(async (tx) => {
+      await tx.orderRepository.save(order);
+      await tx.auditRepository.record({ actorId: input.actorId, action: 'OrderConfirmed', entityId: order.id, occurredAt: new Date() });
+    });
+
+    await this.eventBus.publish(new OrderStatusAdvanced(input.actorId, order.id, previousStatus, OrderStatus.Confirmed));
     return success(order);
   }
 }

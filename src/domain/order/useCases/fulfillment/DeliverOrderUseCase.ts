@@ -1,15 +1,16 @@
 import Decimal from 'decimal.js';
 import { Order } from '../../Order';
+import { OrderStatus } from '../../OrderStatus';
 import { OrderRepository } from '../../OrderRepository';
 import { MedicinalProductRepository } from '../../../medication/MedicinalProductRepository';
 import { ActorRepository } from '../../../actor/ActorRepository';
 import { ActorRole } from '../../../shared/ActorRole';
+import { Transactor } from '../../../shared/Transactor';
 import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure, failures } from '../../../shared/results/UseCaseResult';
 import { OrderDelivered } from '../../events/OrderDelivered';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';
 import { MedicationId, MedicinalProductId, OrderId } from '../../../shared/IdTypes';
-import { OrderStatus } from '../../OrderStatus';
 import { DeliveryRule } from '../../rules/DeliveryRule';
 import { DeliveryPlan, ResolvedLine } from '../../rules/DeliveryPlan';
 import { OrderMustBeConfirmed } from '../../rules/OrderMustBeConfirmed';
@@ -46,6 +47,7 @@ export class DeliverOrderUseCase {
     private readonly actorRepository: ActorRepository,
     private readonly orderRepository: OrderRepository,
     private readonly medicinalProductRepository: MedicinalProductRepository,
+    private readonly transactor: Transactor,
     private readonly eventBus: EventBus,
   ) {}
 
@@ -88,6 +90,7 @@ export class DeliverOrderUseCase {
 
     // Verify that no business rule has been violated
     const errors: ErrorInfo[] = [];
+
     for (const rule of this.rules) {
       const error = rule.check(plan);
       if (error !== null) {
@@ -99,32 +102,32 @@ export class DeliverOrderUseCase {
       return failures(errors);
     }
 
-    // No rule has been violated. We can now go ahead and make the updates in the database.
+    // All reads and validation passed. Run writes + audit atomically.
+    const thresholdEvents: StockBelowThreshold[] = [];
 
-    // TODO: Use a database transaction here
+    await this.transactor.run(async (tx) => {
+      for (const line of plan.resolvedLines) {
+        const wasBelowThreshold = line.product.isBelowThreshold;
 
-    const stockBelowThresholdEventsToTrigger: StockBelowThreshold[] = [];
+        line.product.stockLevel = line.product.stockLevel.sub(line.quantity);
+        await tx.medicinalProductRepository.save(line.product);
 
-    for (const line of plan.resolvedLines) {
-      const wasBelowThreshold = line.product.isBelowThreshold;
-
-      line.product.stockLevel = line.product.stockLevel.sub(line.quantity);
-      await this.medicinalProductRepository.save(line.product);
-      if (line.product.isBelowThreshold && !wasBelowThreshold) {
-        stockBelowThresholdEventsToTrigger.push(new StockBelowThreshold(input.actorId, line.product));
+        if (line.product.isBelowThreshold && !wasBelowThreshold) {
+          thresholdEvents.push(new StockBelowThreshold(input.actorId, line.product));
+        }
       }
+
+      order.status = OrderStatus.Delivered;
+      await tx.orderRepository.save(order);
+      await tx.auditRepository.record({ actorId: input.actorId, action: 'OrderDelivered', entityId: order.id, occurredAt: new Date() });
+    });
+
+    // Publish real-time notification events after the transaction commits.
+    for (const ev of thresholdEvents) {
+      await this.eventBus.publish(ev);
     }
-
-    order.status = OrderStatus.Delivered;
-    await this.orderRepository.save(order);
-
-    // The database update was successful. Now we will trigger events.
-    for (const ev of stockBelowThresholdEventsToTrigger) {
-      await this.eventBus.publish(ev); // A product has gone below the stock threshold
-    }
-
-    // The order is now being delivered
     await this.eventBus.publish(new OrderDelivered(input.actorId, order));
+
     return success(order);
   }
 }

@@ -3,6 +3,9 @@ import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/
 import { SendOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/SendOrderUseCase';
 import { InMemoryActorRepository } from '../../../src/storage/inMemory/InMemoryActorRepository';
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
+import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';
+import { InMemoryAuditRepository } from '../../../src/storage/inMemory/InMemoryAuditRepository';
+import { InMemoryTransactor } from '../../../src/storage/inMemory/InMemoryTransactor';
 import { SimpleEventBus } from '../../../src/eventBus/SimpleEventBus';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
 import { ActorRole } from '../../../src/domain/shared/ActorRole';
@@ -11,6 +14,7 @@ import { MedicationId, OrderId, WardUnitId } from '../../../src/domain/shared/Id
 describe('SendOrderUseCase', () => {
   let actorRepo: InMemoryActorRepository;
   let orderRepo: InMemoryOrderRepository;
+  let auditRepo: InMemoryAuditRepository;
   let eventBus: SimpleEventBus;
   let createOrder: CreateOrderUseCase;
   let sendOrder: SendOrderUseCase;
@@ -21,9 +25,11 @@ describe('SendOrderUseCase', () => {
       { id: 'pharmacist-1', role: ActorRole.Pharmacist },
     ]);
     orderRepo = new InMemoryOrderRepository();
+    auditRepo = new InMemoryAuditRepository();
+    const transactor = new InMemoryTransactor(orderRepo, new InMemoryMedicinalProductRepository(), auditRepo);
     eventBus = new SimpleEventBus();
-    createOrder = new CreateOrderUseCase(actorRepo, orderRepo, eventBus);
-    sendOrder = new SendOrderUseCase(actorRepo, orderRepo, eventBus);
+    createOrder = new CreateOrderUseCase(actorRepo, transactor, eventBus);
+    sendOrder = new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
   });
 
   const createDraftOrder = async () => {
@@ -44,6 +50,18 @@ describe('SendOrderUseCase', () => {
     expect(result.successful).toBe(true);
     if (!result.successful) return;
     expect(result.value.status).toBe(OrderStatus.Sent);
+  });
+
+  it('writes an audit entry on success', async () => {
+    const orderId = await createDraftOrder();
+    auditRepo.getEntries(); // clear mental state — one entry already from createOrder
+
+    await sendOrder.execute({ actorId: 'nurse-1', orderId });
+
+    const entries = auditRepo.getEntries();
+    const sendEntry = entries.find((e) => e.action === 'OrderSent');
+    expect(sendEntry).toBeDefined();
+    expect(sendEntry?.actorId).toBe('nurse-1');
   });
 
   it('fails when the actor is not a nurse', async () => {

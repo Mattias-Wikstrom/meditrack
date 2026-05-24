@@ -4,6 +4,9 @@ import { SendOrderUseCase } from '../../../src/domain/order/useCases/fulfillment
 import { ConfirmOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { InMemoryActorRepository } from '../../../src/storage/inMemory/InMemoryActorRepository';
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
+import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';
+import { InMemoryAuditRepository } from '../../../src/storage/inMemory/InMemoryAuditRepository';
+import { InMemoryTransactor } from '../../../src/storage/inMemory/InMemoryTransactor';
 import { SimpleEventBus } from '../../../src/eventBus/SimpleEventBus';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
 import { ActorRole } from '../../../src/domain/shared/ActorRole';
@@ -12,6 +15,7 @@ import { MedicationId, OrderId, WardUnitId } from '../../../src/domain/shared/Id
 describe('ConfirmOrderUseCase', () => {
   let actorRepo: InMemoryActorRepository;
   let orderRepo: InMemoryOrderRepository;
+  let auditRepo: InMemoryAuditRepository;
   let eventBus: SimpleEventBus;
   let createOrder: CreateOrderUseCase;
   let sendOrder: SendOrderUseCase;
@@ -23,10 +27,12 @@ describe('ConfirmOrderUseCase', () => {
       { id: 'pharmacist-1', role: ActorRole.Pharmacist },
     ]);
     orderRepo = new InMemoryOrderRepository();
+    auditRepo = new InMemoryAuditRepository();
+    const transactor = new InMemoryTransactor(orderRepo, new InMemoryMedicinalProductRepository(), auditRepo);
     eventBus = new SimpleEventBus();
-    createOrder = new CreateOrderUseCase(actorRepo, orderRepo, eventBus);
-    sendOrder = new SendOrderUseCase(actorRepo, orderRepo, eventBus);
-    confirmOrder = new ConfirmOrderUseCase(actorRepo, orderRepo, eventBus);
+    createOrder = new CreateOrderUseCase(actorRepo, transactor, eventBus);
+    sendOrder = new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
+    confirmOrder = new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
   });
 
   const createSentOrder = async () => {
@@ -48,6 +54,17 @@ describe('ConfirmOrderUseCase', () => {
     expect(result.successful).toBe(true);
     if (!result.successful) return;
     expect(result.value.status).toBe(OrderStatus.Confirmed);
+  });
+
+  it('writes an audit entry on success', async () => {
+    const orderId = await createSentOrder();
+
+    await confirmOrder.execute({ actorId: 'pharmacist-1', orderId });
+
+    const entries = auditRepo.getEntries();
+    const confirmEntry = entries.find((e) => e.action === 'OrderConfirmed');
+    expect(confirmEntry).toBeDefined();
+    expect(confirmEntry?.actorId).toBe('pharmacist-1');
   });
 
   it('fails when the actor is not a pharmacist', async () => {
