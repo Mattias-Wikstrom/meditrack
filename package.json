@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Medication management for modern healthcare workflows",
   "type": "module",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
