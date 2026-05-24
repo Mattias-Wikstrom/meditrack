@@ -3,6 +3,7 @@ import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
 import { SimpleEventBus } from '../../../src/eventBus/SimpleEventBus';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
+import { ActorRole } from '../../../src/domain/shared/ActorRole';
 import { MedicationId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 
 describe('CreateOrderUseCase', () => {
@@ -17,6 +18,7 @@ describe('CreateOrderUseCase', () => {
   it('creates a draft order and persists it', async () => {
     const result = await useCase.execute({
       actorId: 'nurse-1',
+      actorRole: ActorRole.Nurse,
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
     });
@@ -28,8 +30,26 @@ describe('CreateOrderUseCase', () => {
     expect(await orderRepo.findById(result.value.id)).toBeDefined();
   });
 
+  it('fails when the actor is not a nurse', async () => {
+    const result = await useCase.execute({
+      actorId: 'pharmacist-1',
+      actorRole: ActorRole.Pharmacist,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
+    });
+
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('UnauthorizedRole');
+  });
+
   it('fails and does not persist when there are no lines', async () => {
-    const result = await useCase.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [] });
+    const result = await useCase.execute({
+      actorId: 'nurse-1',
+      actorRole: ActorRole.Nurse,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [],
+    });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
@@ -42,6 +62,7 @@ describe('CreateOrderUseCase', () => {
   it('fails when a line has a non-positive quantity', async () => {
     const result = await useCase.execute({
       actorId: 'nurse-1',
+      actorRole: ActorRole.Nurse,
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [{ medicationId: 'med-1' as MedicationId, quantity: 0 }],
     });

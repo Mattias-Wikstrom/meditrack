@@ -8,6 +8,7 @@ import { UseCaseResult, success, failure, failures } from '../../../shared/resul
 import { OrderDelivered } from '../../events/OrderDelivered';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';
 import { MedicationId, MedicinalProductId, OrderId } from '../../../shared/IdTypes';
+import { ActorRole } from '../../../shared/ActorRole';
 import { DeliveryRule } from '../../rules/DeliveryRule';
 import { DeliveryPlan, ResolvedLine } from '../../rules/DeliveryPlan';
 import { OrderMustBeConfirmed } from '../../rules/OrderMustBeConfirmed';
@@ -28,6 +29,7 @@ export interface ProductSelection {
 // The input to the use case
 export interface DeliverOrderInput {
   actorId: string; // The person who is interacting with the system
+  actorRole: ActorRole;
   orderId: OrderId; // The order
   productSelections: ReadonlyArray<ProductSelection>; // How the order is to be handled
 }
@@ -47,9 +49,13 @@ export class DeliverOrderUseCase {
   ) {}
 
   async execute(input: DeliverOrderInput): Promise<UseCaseResult<Order>> {
+    if (input.actorRole !== ActorRole.Pharmacist) {
+      return failure('UnauthorizedRole');
+    }
+
     // Find the order in the database from the orderId that was specified
     const order = await this.orderRepository.findById(input.orderId);
-    
+
     if (order === undefined) {
       return failure('OrderNotFound');
     }
@@ -60,14 +66,14 @@ export class DeliverOrderUseCase {
     for (const selection of input.productSelections) {
       // Look up the selected product in the database
       const product = await this.medicinalProductRepository.findById(selection.medicinalProductId);
-      
+
       if (product === undefined) {
         return failure('MedicinalProductNotFound');
       }
-      
+
       resolvedLines.push({
         medicationId: selection.medicationId, // What was requested?
-        product, // The product that has been fetched from the database
+        product, // The product that has been picked from the shelf
         quantity: new Decimal(selection.quantity), // How much was requested?
       });
     }
@@ -77,7 +83,6 @@ export class DeliverOrderUseCase {
 
     // Verify that no business rule has been violated
     const errors: ErrorInfo[] = [];
-    
     for (const rule of this.rules) {
       const error = rule.check(plan);
       if (error !== null) {
@@ -93,14 +98,13 @@ export class DeliverOrderUseCase {
 
     // TODO: Use a database transaction here
 
-    const stockBelowThresholdEventsToTrigger : StockBelowThreshold[] = [];
+    const stockBelowThresholdEventsToTrigger: StockBelowThreshold[] = [];
 
     for (const line of plan.resolvedLines) {
       const wasBelowThreshold = line.product.isBelowThreshold;
 
       line.product.stockLevel = line.product.stockLevel.sub(line.quantity);
       await this.medicinalProductRepository.save(line.product);
-      
       if (line.product.isBelowThreshold && !wasBelowThreshold) {
         stockBelowThresholdEventsToTrigger.push(new StockBelowThreshold(input.actorId, line.product));
       }
@@ -116,7 +120,6 @@ export class DeliverOrderUseCase {
 
     // The order is now being delivered
     await this.eventBus.publish(new OrderDelivered(input.actorId, order));
-    
     return success(order);
   }
 }

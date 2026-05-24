@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/CreateOrderUseCase';
-import { AdvanceOrderStatusUseCase } from '../../../src/domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
+import { SendOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/SendOrderUseCase';
+import { ConfirmOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
 import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';
@@ -8,6 +9,7 @@ import { SimpleEventBus } from '../../../src/eventBus/SimpleEventBus';
 import { AuditListener } from '../../../src/audit/AuditListener';
 import Decimal from 'decimal.js';
 import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
+import { ActorRole } from '../../../src/domain/shared/ActorRole';
 import { MedicationId, MedicinalProductId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 
 describe('AuditListener', () => {
@@ -16,7 +18,8 @@ describe('AuditListener', () => {
   let orderRepo: InMemoryOrderRepository;
   let medicinalProductRepo: InMemoryMedicinalProductRepository;
   let createOrder: CreateOrderUseCase;
-  let advanceStatus: AdvanceOrderStatusUseCase;
+  let sendOrder: SendOrderUseCase;
+  let confirmOrder: ConfirmOrderUseCase;
   let deliverOrder: DeliverOrderUseCase;
 
   beforeEach(async () => {
@@ -25,7 +28,8 @@ describe('AuditListener', () => {
     orderRepo = new InMemoryOrderRepository();
     medicinalProductRepo = new InMemoryMedicinalProductRepository();
     createOrder = new CreateOrderUseCase(orderRepo, eventBus);
-    advanceStatus = new AdvanceOrderStatusUseCase(orderRepo, eventBus);
+    sendOrder = new SendOrderUseCase(orderRepo, eventBus);
+    confirmOrder = new ConfirmOrderUseCase(orderRepo, eventBus);
     deliverOrder = new DeliverOrderUseCase(orderRepo, medicinalProductRepo, eventBus);
 
     eventBus.subscribe('OrderPlaced', auditListener);
@@ -34,12 +38,17 @@ describe('AuditListener', () => {
     eventBus.subscribe('StockBelowThreshold', auditListener);
 
     await medicinalProductRepo.save(
-      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(20)),
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(6)),
     );
   });
 
   it('records an entry when an order is placed', async () => {
-    await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+    await createOrder.execute({
+      actorId: 'nurse-1',
+      actorRole: ActorRole.Nurse,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
+    });
 
     const entries = auditListener.getEntries();
     expect(entries).toHaveLength(1);
@@ -48,33 +57,49 @@ describe('AuditListener', () => {
   });
 
   it('distinguishes the actor for each action', async () => {
-    const created = await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+    const created = await createOrder.execute({
+      actorId: 'nurse-1',
+      actorRole: ActorRole.Nurse,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
+    });
     if (!created.successful) return;
 
-    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    await sendOrder.execute({ actorId: 'nurse-1', actorRole: ActorRole.Nurse, orderId: created.value.id });
 
     const entries = auditListener.getEntries();
     expect(entries).toHaveLength(2);
     expect(entries[0]?.actorId).toBe('nurse-1');
-    expect(entries[1]?.actorId).toBe('pharmacist-1');
+    expect(entries[1]?.actorId).toBe('nurse-1');
   });
 
   it('does not record failed operations', async () => {
-    await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [] });
+    await createOrder.execute({
+      actorId: 'nurse-1',
+      actorRole: ActorRole.Nurse,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [],
+    });
 
     expect(auditListener.getEntries()).toHaveLength(0);
   });
 
-  it('records a StockBelowThreshold event when stock drops below threshold after delivery', async () => {
-    const created = await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+  it('records a StockBelowThreshold event when stock crosses the threshold after delivery', async () => {
+    const created = await createOrder.execute({
+      actorId: 'nurse-1',
+      actorRole: ActorRole.Nurse,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
+    });
     if (!created.successful) return;
 
-    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
-    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    await sendOrder.execute({ actorId: 'nurse-1', actorRole: ActorRole.Nurse, orderId: created.value.id });
+    await confirmOrder.execute({ actorId: 'pharmacist-1', actorRole: ActorRole.Pharmacist, orderId: created.value.id });
 
-    // stock starts at 10, threshold is 20 — already below threshold before delivery
+    // stock starts at 10, threshold is 6 — delivery of 5 units takes it to 5, crossing the threshold
     await deliverOrder.execute({
       actorId: 'pharmacist-1',
+      actorRole: ActorRole.Pharmacist,
       orderId: created.value.id,
       productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-1' as MedicinalProductId, quantity: 5 }],
     });

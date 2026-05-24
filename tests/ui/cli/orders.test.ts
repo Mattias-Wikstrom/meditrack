@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { listOrders, createOrder, advanceOrder, deliverOrder } from '../../../src/ui/cli/commands/orders';
+import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from '../../../src/ui/cli/commands/orders';
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
 import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';
 import { SimpleEventBus } from '../../../src/eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/CreateOrderUseCase';
-import { AdvanceOrderStatusUseCase } from '../../../src/domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
+import { SendOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/SendOrderUseCase';
+import { ConfirmOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
+import { ActorRole } from '../../../src/domain/shared/ActorRole';
 import { MedicationId, MedicinalProductId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 import Decimal from 'decimal.js';
 import { RecordingOutput, ExitError } from './RecordingOutput';
@@ -23,8 +25,8 @@ describe('listOrders', () => {
   it('prints one line per order', async () => {
     const repo = new InMemoryOrderRepository();
     const useCase = new CreateOrderUseCase(repo, new SimpleEventBus());
-    await useCase.execute({ actorId: 'cli', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
-    await useCase.execute({ actorId: 'cli', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-2' as MedicationId, quantity: 3 }] });
+    await useCase.execute({ actorId: 'cli', actorRole: ActorRole.Nurse, wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+    await useCase.execute({ actorId: 'cli', actorRole: ActorRole.Nurse, wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-2' as MedicationId, quantity: 3 }] });
     const output = new RecordingOutput();
 
     await listOrders(repo, output);
@@ -54,25 +56,59 @@ describe('createOrder', () => {
   });
 });
 
-describe('advanceOrder', () => {
+describe('sendOrder', () => {
   it('prints the new status on success', async () => {
     const repo = new InMemoryOrderRepository();
     const eventBus = new SimpleEventBus();
-    const created = await new CreateOrderUseCase(repo, eventBus).execute({ actorId: 'cli', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+    const created = await new CreateOrderUseCase(repo, eventBus).execute({
+      actorId: 'cli',
+      actorRole: ActorRole.Nurse,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
+    });
     if (!created.successful) throw new Error('setup failed');
-    const useCase = new AdvanceOrderStatusUseCase(repo, eventBus);
+    const useCase = new SendOrderUseCase(repo, eventBus);
     const output = new RecordingOutput();
 
-    await advanceOrder(useCase, output, created.value.id);
+    await sendOrder(useCase, output, created.value.id);
 
     expect(output.messages[0]).toContain('Sent');
   });
 
   it('exits with code 1 for an unknown order', async () => {
-    const useCase = new AdvanceOrderStatusUseCase(new InMemoryOrderRepository(), new SimpleEventBus());
+    const useCase = new SendOrderUseCase(new InMemoryOrderRepository(), new SimpleEventBus());
     const output = new RecordingOutput();
 
-    await expect(advanceOrder(useCase, output, 'no-such-order')).rejects.toThrow(ExitError);
+    await expect(sendOrder(useCase, output, 'no-such-order')).rejects.toThrow(ExitError);
+    expect(output.errors[0]).toContain('OrderNotFound');
+  });
+});
+
+describe('confirmOrder', () => {
+  it('prints the new status on success', async () => {
+    const repo = new InMemoryOrderRepository();
+    const eventBus = new SimpleEventBus();
+    const created = await new CreateOrderUseCase(repo, eventBus).execute({
+      actorId: 'cli',
+      actorRole: ActorRole.Nurse,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
+    });
+    if (!created.successful) throw new Error('setup failed');
+    await new SendOrderUseCase(repo, eventBus).execute({ actorId: 'cli', actorRole: ActorRole.Nurse, orderId: created.value.id });
+    const useCase = new ConfirmOrderUseCase(repo, eventBus);
+    const output = new RecordingOutput();
+
+    await confirmOrder(useCase, output, created.value.id);
+
+    expect(output.messages[0]).toContain('Confirmed');
+  });
+
+  it('exits with code 1 for an unknown order', async () => {
+    const useCase = new ConfirmOrderUseCase(new InMemoryOrderRepository(), new SimpleEventBus());
+    const output = new RecordingOutput();
+
+    await expect(confirmOrder(useCase, output, 'no-such-order')).rejects.toThrow(ExitError);
     expect(output.errors[0]).toContain('OrderNotFound');
   });
 });
@@ -83,10 +119,15 @@ describe('deliverOrder', () => {
     const medicinalProductRepo = new InMemoryMedicinalProductRepository();
     const eventBus = new SimpleEventBus();
     await medicinalProductRepo.save(new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(5)));
-    const created = await new CreateOrderUseCase(orderRepo, eventBus).execute({ actorId: 'cli', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+    const created = await new CreateOrderUseCase(orderRepo, eventBus).execute({
+      actorId: 'cli',
+      actorRole: ActorRole.Nurse,
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
+    });
     if (!created.successful) throw new Error('setup failed');
-    await new AdvanceOrderStatusUseCase(orderRepo, eventBus).execute({ actorId: 'cli', orderId: created.value.id });
-    await new AdvanceOrderStatusUseCase(orderRepo, eventBus).execute({ actorId: 'cli', orderId: created.value.id });
+    await new SendOrderUseCase(orderRepo, eventBus).execute({ actorId: 'cli', actorRole: ActorRole.Nurse, orderId: created.value.id });
+    await new ConfirmOrderUseCase(orderRepo, eventBus).execute({ actorId: 'cli', actorRole: ActorRole.Pharmacist, orderId: created.value.id });
     const useCase = new DeliverOrderUseCase(orderRepo, medicinalProductRepo, eventBus);
     const output = new RecordingOutput();
 

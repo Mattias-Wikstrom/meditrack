@@ -6,11 +6,12 @@ import { PrismaMedicinalProductRepository } from '../../storage/prisma/PrismaMed
 import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepository';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
-import { AdvanceOrderStatusUseCase } from '../../domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
+import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
+import { ConfirmOrderUseCase } from '../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { ConsoleOutput } from './ConsoleOutput';
 import { listMedications, showMedication } from './commands/medications';
-import { listOrders, createOrder, advanceOrder, deliverOrder } from './commands/orders';
+import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
 
 // --- Wiring ---
 const medicationRepo = new PrismaMedicationRepository(prisma);
@@ -19,7 +20,8 @@ const orderRepo = new PrismaOrderRepository(prisma);
 const eventBus = new SimpleEventBus();
 
 const createOrderUseCase = new CreateOrderUseCase(orderRepo, eventBus);
-const advanceOrderStatusUseCase = new AdvanceOrderStatusUseCase(orderRepo, eventBus);
+const sendOrderUseCase = new SendOrderUseCase(orderRepo, eventBus);
+const confirmOrderUseCase = new ConfirmOrderUseCase(orderRepo, eventBus);
 const deliverOrderUseCase = new DeliverOrderUseCase(orderRepo, medicinalProductRepo, eventBus);
 
 const output = new ConsoleOutput();
@@ -57,9 +59,14 @@ orders
   .action(async (opts) => createOrder(createOrderUseCase, output, opts.wardUnitId, opts.medicationId, opts.quantity));
 
 orders
-  .command('advance <orderId>')
-  .description('Advance an order to the next status')
-  .action(async (orderId) => advanceOrder(advanceOrderStatusUseCase, output, orderId));
+  .command('send <orderId>')
+  .description('Send a draft order to the pharmacy')
+  .action(async (orderId) => sendOrder(sendOrderUseCase, output, orderId));
+
+orders
+  .command('confirm <orderId>')
+  .description('Confirm receipt of a sent order')
+  .action(async (orderId) => confirmOrder(confirmOrderUseCase, output, orderId));
 
 orders
   .command('deliver <orderId>')
