@@ -14,8 +14,8 @@ describe('CreateOrderUseCase', () => {
     useCase = new CreateOrderUseCase(orderRepo, new SimpleEventBus());
   });
 
-  it('creates a draft order and persists it', () => {
-    const result = useCase.execute({
+  it('creates a draft order and persists it', async () => {
+    const result = await useCase.execute({
       actorId: 'nurse-1',
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
@@ -25,22 +25,22 @@ describe('CreateOrderUseCase', () => {
     if (!result.successful) return;
 
     expect(result.value.status).toBe(OrderStatus.Draft);
-    expect(orderRepo.findById(result.value.id)).toBeDefined();
+    expect(await orderRepo.findById(result.value.id)).toBeDefined();
   });
 
-  it('fails and does not persist when there are no lines', () => {
-    const result = useCase.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [] });
+  it('fails and does not persist when there are no lines', async () => {
+    const result = await useCase.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [] });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
 
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0]?.code).toBe('OrderHasAtLeastOneLine');
-    expect(orderRepo.findAll()).toHaveLength(0);
+    expect(await orderRepo.findAll()).toHaveLength(0);
   });
 
-  it('fails when a line has a non-positive quantity', () => {
-    const result = useCase.execute({
+  it('fails when a line has a non-positive quantity', async () => {
+    const result = await useCase.execute({
       actorId: 'nurse-1',
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [{ medicationId: 'med-1' as MedicationId, quantity: 0 }],

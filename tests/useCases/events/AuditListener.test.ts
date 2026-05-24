@@ -19,7 +19,7 @@ describe('AuditListener', () => {
   let advanceStatus: AdvanceOrderStatusUseCase;
   let deliverOrder: DeliverOrderUseCase;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     eventBus = new SimpleEventBus();
     auditListener = new AuditListener();
     orderRepo = new InMemoryOrderRepository();
@@ -33,13 +33,13 @@ describe('AuditListener', () => {
     eventBus.subscribe('OrderDelivered', auditListener);
     eventBus.subscribe('StockBelowThreshold', auditListener);
 
-    medicinalProductRepo.save(
+    await medicinalProductRepo.save(
       new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(20)),
     );
   });
 
-  it('records an entry when an order is placed', () => {
-    createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+  it('records an entry when an order is placed', async () => {
+    await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
 
     const entries = auditListener.getEntries();
     expect(entries).toHaveLength(1);
@@ -47,11 +47,11 @@ describe('AuditListener', () => {
     expect(entries[0]?.actorId).toBe('nurse-1');
   });
 
-  it('distinguishes the actor for each action', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+  it('distinguishes the actor for each action', async () => {
+    const created = await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
-    advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
 
     const entries = auditListener.getEntries();
     expect(entries).toHaveLength(2);
@@ -59,21 +59,21 @@ describe('AuditListener', () => {
     expect(entries[1]?.actorId).toBe('pharmacist-1');
   });
 
-  it('does not record failed operations', () => {
-    createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [] });
+  it('does not record failed operations', async () => {
+    await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [] });
 
     expect(auditListener.getEntries()).toHaveLength(0);
   });
 
-  it('records a StockBelowThreshold event when stock drops below threshold after delivery', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+  it('records a StockBelowThreshold event when stock drops below threshold after delivery', async () => {
+    const created = await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
-    advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
-    advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
 
     // stock starts at 10, threshold is 20 — already below threshold before delivery
-    deliverOrder.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    await deliverOrder.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
 
     const eventTypes = auditListener.getEntries().map((e) => e.eventType);
     expect(eventTypes).toContain('StockBelowThreshold');

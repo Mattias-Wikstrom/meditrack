@@ -6,8 +6,6 @@ import { EventListener } from './EventListener';
  * 
  * Known implementation: SimpleEventBus
  *  
- * Possible future modification: Use async methods (requires changes everywhere).
- * 
  * Possible future implementations:
  *  Outbox/transactional — with PostgreSQL, you want the event and the database write to be atomic. The standard pattern is to store the event in an outbox table in the same transaction, then have a background process relay it to listeners. The EventBus implementation would write to the outbox instead of dispatching in-process.
  *
@@ -17,6 +15,6 @@ import { EventListener } from './EventListener';
  * 
  */
 export interface EventBus {
-  publish(event: DomainEvent): void;
+  publish(event: DomainEvent): Promise<void>;
   subscribe(eventType: string, listener: EventListener): void;
 }

@@ -19,44 +19,44 @@ describe('AdvanceOrderStatusUseCase', () => {
     advanceStatus = new AdvanceOrderStatusUseCase(orderRepo, eventBus);
   });
 
-  it('advances a draft order to sent', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+  it('advances a draft order to sent', async () => {
+    const created = await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
-    const result = advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    const result = await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
 
     expect(result.successful).toBe(true);
     if (!result.successful) return;
     expect(result.value.status).toBe(OrderStatus.Sent);
   });
 
-  it('advances a sent order to confirmed', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+  it('advances a sent order to confirmed', async () => {
+    const created = await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
-    advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
-    const result = advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    const result = await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
 
     expect(result.successful).toBe(true);
     if (!result.successful) return;
     expect(result.value.status).toBe(OrderStatus.Confirmed);
   });
 
-  it('fails when the order does not exist', () => {
-    const result = advanceStatus.execute({ actorId: 'pharmacist-1', orderId: 'nonexistent-id' as OrderId });
+  it('fails when the order does not exist', async () => {
+    const result = await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: 'nonexistent-id' as OrderId });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
     expect(result.errors[0]?.code).toBe('OrderNotFound');
   });
 
-  it('fails when the order is already confirmed (delivery is a separate step)', () => {
-    const created = createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
+  it('fails when the order is already confirmed (delivery is a separate step)', async () => {
+    const created = await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
-    advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id }); // Draft → Sent
-    advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id }); // Sent → Confirmed
-    const result = advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id }); // Draft → Sent
+    await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id }); // Sent → Confirmed
+    const result = await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;

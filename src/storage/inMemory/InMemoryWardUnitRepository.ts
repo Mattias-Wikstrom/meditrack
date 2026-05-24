@@ -1,19 +1,19 @@
 import { WardUnit } from '../../domain/wardUnit/WardUnit';
 import { WardUnitRepository } from '../../domain/wardUnit/WardUnitRepository';
-import { WardUnitId } from '../../domain/shared/Id';
+import { WardUnitId } from '../../domain/shared/IdTypes';
 
 export class InMemoryWardUnitRepository implements WardUnitRepository {
   private readonly store = new Map<WardUnitId, WardUnit>();
 
-  findById(id: WardUnitId): WardUnit | undefined {
+  async findById(id: WardUnitId): Promise<WardUnit | undefined> {
     return this.store.get(id);
   }
 
-  findAll(): WardUnit[] {
+  async findAll(): Promise<WardUnit[]> {
     return Array.from(this.store.values());
   }
 
-  save(wardUnit: WardUnit): void {
+  async save(wardUnit: WardUnit): Promise<void> {
     this.store.set(wardUnit.id, wardUnit);
   }
 }

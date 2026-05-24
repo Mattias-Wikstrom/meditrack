@@ -33,19 +33,19 @@ medications
   .command('list')
   .description('List all medications, optionally filtered by a search query')
   .option('-q, --query <query>', 'search by INN name, ATC code, or form')
-  .action((opts) => listMedications(medicationRepo, output, opts.query));
+  .action(async (opts) => listMedications(medicationRepo, output, opts.query));
 
 medications
   .command('show <id>')
   .description('Show a medication and its registered medicinal products')
-  .action((id) => showMedication(medicationRepo, medicinalProductRepo, output, id));
+  .action(async (id) => showMedication(medicationRepo, medicinalProductRepo, output, id));
 
 const orders = program.command('orders');
 
 orders
   .command('list')
   .description('List all orders')
-  .action(() => listOrders(orderRepo, output));
+  .action(async () => listOrders(orderRepo, output));
 
 orders
   .command('create')
@@ -53,16 +53,16 @@ orders
   .requiredOption('--ward-unit-id <id>', 'ward unit ID')
   .requiredOption('--medication-id <id>', 'medication ID')
   .requiredOption('--quantity <n>', 'quantity', parseInt)
-  .action((opts) => createOrder(createOrderUseCase, output, opts.wardUnitId, opts.medicationId, opts.quantity));
+  .action(async (opts) => createOrder(createOrderUseCase, output, opts.wardUnitId, opts.medicationId, opts.quantity));
 
 orders
   .command('advance <orderId>')
   .description('Advance an order to the next status')
-  .action((orderId) => advanceOrder(advanceOrderStatusUseCase, output, orderId));
+  .action(async (orderId) => advanceOrder(advanceOrderStatusUseCase, output, orderId));
 
 orders
   .command('deliver <orderId>')
   .description('Mark an order as delivered and update stock')
-  .action((orderId) => deliverOrder(deliverOrderUseCase, output, orderId));
+  .action(async (orderId) => deliverOrder(deliverOrderUseCase, output, orderId));
 
 program.parse();

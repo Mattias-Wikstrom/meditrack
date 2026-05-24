@@ -22,8 +22,8 @@ export class AdvanceOrderStatusUseCase {
     private readonly eventBus: EventBus,
   ) {}
 
-  execute(input: AdvanceOrderStatusInput): UseCaseResult<Order> {
-    const order = this.orderRepository.findById(input.orderId);
+  async execute(input: AdvanceOrderStatusInput): Promise<UseCaseResult<Order>> {
+    const order = await this.orderRepository.findById(input.orderId);
     if (order === undefined) {
       return failure('OrderNotFound');
     }
@@ -35,8 +35,8 @@ export class AdvanceOrderStatusUseCase {
 
     const previousStatus = order.status;
     order.status = nextStatus;
-    this.orderRepository.save(order);
-    this.eventBus.publish(new OrderStatusAdvanced(input.actorId, order.id, previousStatus, nextStatus));
+    await this.orderRepository.save(order);
+    await this.eventBus.publish(new OrderStatusAdvanced(input.actorId, order.id, previousStatus, nextStatus));
     return success(order);
   }
 }

@@ -13,7 +13,7 @@ export interface AuditLogEntry {
 export class AuditListener implements EventListener {
   private readonly entries: AuditLogEntry[] = [];
 
-  handle(event: DomainEvent): void {
+  async handle(event: DomainEvent): Promise<void> {
     this.entries.push({
       eventType: event.eventType,
       actorId: event.actorId,

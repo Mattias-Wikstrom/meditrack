@@ -20,8 +20,8 @@ export class DeliverOrderUseCase {
     private readonly eventBus: EventBus,
   ) {}
 
-  execute(input: DeliverOrderInput): UseCaseResult<Order> {
-    const order = this.orderRepository.findById(input.orderId);
+  async execute(input: DeliverOrderInput): Promise<UseCaseResult<Order>> {
+    const order = await this.orderRepository.findById(input.orderId);
     if (order === undefined) {
       return failure('OrderNotFound');
     }
@@ -31,21 +31,21 @@ export class DeliverOrderUseCase {
     }
 
     for (const line of order.lines) {
-      const [product] = this.medicinalProductRepository.findByMedicationId(line.medicationId);
+      const [product] = await this.medicinalProductRepository.findByMedicationId(line.medicationId);
       if (product === undefined) {
         return failure('MedicinalProductNotFound');
       }
       product.stockLevel = product.stockLevel.add(line.quantity);
-      this.medicinalProductRepository.save(product);
+      await this.medicinalProductRepository.save(product);
 
       if (product.isBelowThreshold) {
-        this.eventBus.publish(new StockBelowThreshold(input.actorId, product));
+        await this.eventBus.publish(new StockBelowThreshold(input.actorId, product));
       }
     }
 
     order.status = OrderStatus.Delivered;
-    this.orderRepository.save(order);
-    this.eventBus.publish(new OrderDelivered(input.actorId, order));
+    await this.orderRepository.save(order);
+    await this.eventBus.publish(new OrderDelivered(input.actorId, order));
     return success(order);
   }
 }

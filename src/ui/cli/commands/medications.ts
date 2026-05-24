@@ -3,12 +3,12 @@ import { MedicinalProductRepository } from '../../../domain/medication/Medicinal
 import { MedicationId } from '../../../domain/shared/IdTypes';
 import { CliOutput } from '../CliOutput';
 
-export function listMedications(
+export async function listMedications(
   repo: MedicationRepository,
   output: CliOutput,
   query?: string,
-): void {
-  const medications = query ? repo.search(query) : repo.findAll();
+): Promise<void> {
+  const medications = query ? await repo.search(query) : await repo.findAll();
 
   if (medications.length === 0) {
     output.print('No medications found.');
@@ -20,13 +20,13 @@ export function listMedications(
   }
 }
 
-export function showMedication(
+export async function showMedication(
   medicationRepo: MedicationRepository,
   medicinalProductRepo: MedicinalProductRepository,
   output: CliOutput,
   id: string,
-): void {
-  const med = medicationRepo.findById(id as MedicationId);
+): Promise<void> {
+  const med = await medicationRepo.findById(id as MedicationId);
   if (med === undefined) {
     output.error(`Medication not found: ${id}`);
     output.exit(1);
@@ -35,7 +35,7 @@ export function showMedication(
   output.print(`${med.innName} (${med.atcCode})`);
   output.print(`Form: ${med.form}   Strength: ${med.strength}`);
 
-  const products = medicinalProductRepo.findByMedicationId(med.id);
+  const products = await medicinalProductRepo.findByMedicationId(med.id);
   if (products.length === 0) {
     output.print('No medicinal products registered.');
     return;

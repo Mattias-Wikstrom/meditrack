@@ -5,19 +5,19 @@ import { OrderId, WardUnitId } from '../../domain/shared/IdTypes';
 export class InMemoryOrderRepository implements OrderRepository {
   private readonly store = new Map<OrderId, Order>();
 
-  findById(id: OrderId): Order | undefined {
+  async findById(id: OrderId): Promise<Order | undefined> {
     return this.store.get(id);
   }
 
-  findAll(): Order[] {
+  async findAll(): Promise<Order[]> {
     return Array.from(this.store.values());
   }
 
-  findByWardUnit(wardUnitId: WardUnitId): Order[] {
+  async findByWardUnit(wardUnitId: WardUnitId): Promise<Order[]> {
     return Array.from(this.store.values()).filter((o) => o.wardUnitId === wardUnitId);
   }
 
-  save(order: Order): void {
+  async save(order: Order): Promise<void> {
     this.store.set(order.id, order);
   }
 }

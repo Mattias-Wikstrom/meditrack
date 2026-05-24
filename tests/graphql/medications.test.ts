@@ -18,8 +18,8 @@ describe('Query.medications', () => {
 
   it('returns all medications when no search query is given', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
-    ctx.medicationRepo.save(new Medication('med-2' as MedicationId, 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg'));
+    await ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
+    await ctx.medicationRepo.save(new Medication('med-2' as MedicationId, 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg'));
 
     const result = await graphql({ schema, source: '{ medications { id innName } }', contextValue: ctx });
 
@@ -29,8 +29,8 @@ describe('Query.medications', () => {
 
   it('filters medications by INN name when a search query is given', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
-    ctx.medicationRepo.save(new Medication('med-2' as MedicationId, 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg'));
+    await ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
+    await ctx.medicationRepo.save(new Medication('med-2' as MedicationId, 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg'));
 
     const result = await graphql({
       schema,
@@ -57,7 +57,7 @@ describe('Query.medication', () => {
 
   it('returns the medication for a known id', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
+    await ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
 
     const result = await graphql({
       schema,
@@ -85,8 +85,8 @@ describe('Query.medicinalProducts', () => {
 
   it('returns isBelowThreshold correctly', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
-    ctx.medicinalProductRepo.save(
+    await ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
+    await ctx.medicinalProductRepo.save(
       new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, new Decimal(5), new Decimal(20)),
     );
 
@@ -102,8 +102,8 @@ describe('Query.medicinalProducts', () => {
 
   it('resolves the nested medication', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
-    ctx.medicinalProductRepo.save(
+    await ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
+    await ctx.medicinalProductRepo.save(
       new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(5)),
     );
 

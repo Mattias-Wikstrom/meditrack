@@ -1,21 +1,21 @@
 import { Medication } from '../../domain/medication/Medication';
 import { MedicationRepository } from '../../domain/medication/MedicationRepository';
-import { MedicationId } from '../../domain/shared/Id';
+import { MedicationId } from '../../domain/shared/IdTypes';
 
 export class InMemoryMedicationRepository implements MedicationRepository {
   private readonly store = new Map<MedicationId, Medication>();
 
-  findById(id: MedicationId): Medication | undefined {
+  async findById(id: MedicationId): Promise<Medication | undefined> {
     return this.store.get(id);
   }
 
-  findAll(): Medication[] {
+  async findAll(): Promise<Medication[]> {
     return Array.from(this.store.values());
   }
 
-  search(query: string): Medication[] {
+  async search(query: string): Promise<Medication[]> {
     const q = query.toLowerCase();
-    return this.findAll().filter(
+    return (await this.findAll()).filter(
       (m) =>
         m.innName.toLowerCase().includes(q) ||
         m.atcCode.toLowerCase().includes(q) ||
@@ -23,11 +23,11 @@ export class InMemoryMedicationRepository implements MedicationRepository {
     );
   }
 
-  save(medication: Medication): void {
+  async save(medication: Medication): Promise<void> {
     this.store.set(medication.id, medication);
   }
 
-  delete(id: MedicationId): void {
+  async delete(id: MedicationId): Promise<void> {
     this.store.delete(id);
   }
 }

@@ -13,10 +13,10 @@ export class SimpleEventBus implements EventBus {
     this.listeners.set(eventType, [...existing, listener]);
   }
 
-  publish(event: DomainEvent): void {
+  async publish(event: DomainEvent): Promise<void> {
     const listeners = this.listeners.get(event.eventType) ?? [];
     for (const listener of listeners) {
-      listener.handle(event);
+      await listener.handle(event);
     }
   }
 }

@@ -4,6 +4,6 @@ import { GraphQLContext } from '../context';
 export const MedicinalProduct = {
   stockLevel: (p: MedicinalProductEntity) => p.stockLevel.toNumber(),
   stockThreshold: (p: MedicinalProductEntity) => p.stockThreshold.toNumber(),
-  medication: (p: MedicinalProductEntity, _: unknown, ctx: GraphQLContext) =>
-    ctx.medicationRepo.findById(p.medicationId) ?? null,
+  medication: async (p: MedicinalProductEntity, _: unknown, ctx: GraphQLContext) =>
+    (await ctx.medicationRepo.findById(p.medicationId)) ?? null,
 };

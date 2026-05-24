@@ -29,7 +29,7 @@ export class CreateOrderUseCase {
     private readonly eventBus: EventBus,
   ) {}
 
-  execute(input: CreateOrderInput): UseCaseResult<Order> {
+  async execute(input: CreateOrderInput): Promise<UseCaseResult<Order>> {
     const order = new Order(
       randomUUID() as OrderId,
       input.wardUnitId,
@@ -50,8 +50,8 @@ export class CreateOrderUseCase {
       return failures(errors);
     }
 
-    this.orderRepository.save(order);
-    this.eventBus.publish(new OrderPlaced(input.actorId, order));
+    await this.orderRepository.save(order);
+    await this.eventBus.publish(new OrderPlaced(input.actorId, order));
     return success(order);
   }
 }

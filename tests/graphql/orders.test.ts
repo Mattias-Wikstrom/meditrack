@@ -103,10 +103,10 @@ describe('Mutation.advanceOrderStatus', () => {
 describe('Mutation.deliverOrder', () => {
   it('updates stock and marks order as delivered', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(
+    await ctx.medicationRepo.save(
       new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'),
     );
-    ctx.medicinalProductRepo.save(
+    await ctx.medicinalProductRepo.save(
       new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(5)),
     );
 
@@ -124,15 +124,15 @@ describe('Mutation.deliverOrder', () => {
     expect(result.errors).toBeUndefined();
     expect(result.data?.deliverOrder.successful).toBe(true);
     expect(result.data?.deliverOrder.order.status).toBe('Delivered');
-    expect(ctx.medicinalProductRepo.findByMedicationId('med-1' as MedicationId)[0]?.stockLevel.toNumber()).toBe(30);
+    expect((await ctx.medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(30);
   });
 });
 
 describe('Query.wardUnit with nested orders', () => {
   it('returns a ward unit with its orders and medication details', async () => {
     const ctx = createTestContext();
-    ctx.wardUnitRepo.save(new WardUnit('ward-1' as WardUnitId, 'Akuten'));
-    ctx.medicationRepo.save(
+    await ctx.wardUnitRepo.save(new WardUnit('ward-1' as WardUnitId, 'Akuten'));
+    await ctx.medicationRepo.save(
       new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'),
     );
     await graphql({

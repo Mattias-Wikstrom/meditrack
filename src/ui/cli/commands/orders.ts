@@ -5,8 +5,8 @@ import { DeliverOrderUseCase } from '../../../domain/order/useCases/fulfillment/
 import { MedicationId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
 import { CliOutput } from '../CliOutput';
 
-export function listOrders(repo: OrderRepository, output: CliOutput): void {
-  const orders = repo.findAll();
+export async function listOrders(repo: OrderRepository, output: CliOutput): Promise<void> {
+  const orders = await repo.findAll();
 
   if (orders.length === 0) {
     output.print('No orders.');
@@ -18,14 +18,14 @@ export function listOrders(repo: OrderRepository, output: CliOutput): void {
   }
 }
 
-export function createOrder(
+export async function createOrder(
   useCase: CreateOrderUseCase,
   output: CliOutput,
   wardUnitId: string,
   medicationId: string,
   quantity: number,
-): void {
-  const result = useCase.execute({
+): Promise<void> {
+  const result = await useCase.execute({
     actorId: 'cli',
     wardUnitId: wardUnitId as WardUnitId,
     lines: [{ medicationId: medicationId as MedicationId, quantity }],
@@ -39,12 +39,12 @@ export function createOrder(
   }
 }
 
-export function advanceOrder(
+export async function advanceOrder(
   useCase: AdvanceOrderStatusUseCase,
   output: CliOutput,
   orderId: string,
-): void {
-  const result = useCase.execute({ actorId: 'cli', orderId: orderId as OrderId });
+): Promise<void> {
+  const result = await useCase.execute({ actorId: 'cli', orderId: orderId as OrderId });
 
   if (result.successful) {
     output.print(`Order ${orderId} is now: ${result.value.status}`);
@@ -54,12 +54,12 @@ export function advanceOrder(
   }
 }
 
-export function deliverOrder(
+export async function deliverOrder(
   useCase: DeliverOrderUseCase,
   output: CliOutput,
   orderId: string,
-): void {
-  const result = useCase.execute({ actorId: 'cli', orderId: orderId as OrderId });
+): Promise<void> {
+  const result = await useCase.execute({ actorId: 'cli', orderId: orderId as OrderId });
 
   if (result.successful) {
     output.print(`Order ${orderId} delivered.`);
