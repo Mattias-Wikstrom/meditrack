@@ -1,6 +1,6 @@
 import { Order } from '../../domain/order/Order';
 import { OrderRepository } from '../../domain/order/OrderRepository';
-import { OrderId, WardUnitId } from '../../domain/shared/Id';
+import { OrderId, WardUnitId } from '../../domain/shared/IdTypes';
 
 export class InMemoryOrderRepository implements OrderRepository {
   private readonly store = new Map<OrderId, Order>();
