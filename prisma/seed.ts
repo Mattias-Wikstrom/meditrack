@@ -1,8 +1,21 @@
-import { MedicationForm, PrismaClient } from '@prisma/client';
+import { ActorRole, MedicationForm, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
+  // ── Actors ────────────────────────────────────────────────────────────────
+
+  const actors = [
+    { id: 'nurse-anna',       role: ActorRole.Nurse       },
+    { id: 'nurse-erik',       role: ActorRole.Nurse       },
+    { id: 'pharmacist-sofia', role: ActorRole.Pharmacist  },
+    { id: 'pharmacist-lars',  role: ActorRole.Pharmacist  },
+  ];
+
+  for (const a of actors) {
+    await prisma.actor.upsert({ where: { id: a.id }, create: a, update: a });
+  }
+
   // ── Ward units ────────────────────────────────────────────────────────────
 
   const wardUnits = [
@@ -67,7 +80,7 @@ async function main() {
   }
 
   console.log(
-    `Seeded ${wardUnits.length} ward units, ${medications.length} medications, ${products.length} medicinal products.`,
+    `Seeded ${actors.length} actors, ${wardUnits.length} ward units, ${medications.length} medications, ${products.length} medicinal products.`,
   );
 }
 

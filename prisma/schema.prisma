@@ -11,6 +11,11 @@ datasource db {
 // Enums (must match the TypeScript domain enums)
 // ──────────────────────────────────────────────
 
+enum ActorRole {
+  Nurse
+  Pharmacist
+}
+
 enum MedicationForm {
   Tablet
   Capsule
@@ -71,4 +76,9 @@ model OrderLine {
 model WardUnit {
   id   String @id
   name String
+}
+
+model Actor {
+  id   String    @id
+  role ActorRole
 }
