@@ -1,4 +1,4 @@
-import { OrderLine as OrderLineEntity } from '../../domain/order/OrderLine';
+import { OrderLine as OrderLineEntity } from '../../../domain/order/OrderLine';
 import { GraphQLContext } from '../context';
 
 export const OrderLine = {

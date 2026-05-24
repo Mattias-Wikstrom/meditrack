@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { graphql } from 'graphql';
-import { schema } from '../../src/graphql/schema';
+import { schema } from '../../src/api/graphql/schema';
 import { createTestContext } from '../helpers/createTestContext';
 import Decimal from 'decimal.js';
 import { Medication } from '../../src/domain/medication/Medication';

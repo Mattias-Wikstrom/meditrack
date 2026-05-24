@@ -1,4 +1,4 @@
-import { WardUnit } from '../../domain/wardUnit/WardUnit';
+import { WardUnit } from '../../../domain/wardUnit/WardUnit';
 import { GraphQLContext } from '../context';
 
 export const WardUnit = {

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/CreateOrderUseCase';
 import { AdvanceOrderStatusUseCase } from '../../../src/domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
-import { InMemoryOrderRepository } from '../../../src/infrastructure/inMemory/InMemoryOrderRepository';
-import { SimpleEventBus } from '../../../src/infrastructure/events/SimpleEventBus';
+import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
+import { SimpleEventBus } from '../../../src/events/simple/SimpleEventBus';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
 import { MedicationId, OrderId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 

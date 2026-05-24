@@ -1,4 +1,4 @@
-import { MedicinalProduct as MedicinalProductEntity } from '../../domain/medication/MedicinalProduct';
+import { MedicinalProduct as MedicinalProductEntity } from '../../../domain/medication/MedicinalProduct';
 import { GraphQLContext } from '../context';
 
 export const MedicinalProduct = {

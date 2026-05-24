@@ -1,5 +1,5 @@
 import { GraphQLContext } from '../context';
-import { MedicationId, OrderId, WardUnitId } from '../../domain/shared/IdTypes';
+import { MedicationId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
 
 export const Mutation = {
   createOrder: (

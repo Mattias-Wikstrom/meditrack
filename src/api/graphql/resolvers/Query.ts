@@ -1,5 +1,5 @@
 import { GraphQLContext } from '../context';
-import { MedicationId, MedicinalProductId, WardUnitId } from '../../domain/shared/IdTypes';
+import { MedicationId, MedicinalProductId, WardUnitId } from '../../../domain/shared/IdTypes';
 
 export const Query = {
   wardUnit: (_: unknown, { id }: { id: string }, ctx: GraphQLContext) =>

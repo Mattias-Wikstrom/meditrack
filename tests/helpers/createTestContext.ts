@@ -1,9 +1,9 @@
-import { GraphQLContext } from '../../src/graphql/context';
-import { InMemoryMedicationRepository } from '../../src/infrastructure/inMemory/InMemoryMedicationRepository';
-import { InMemoryMedicinalProductRepository } from '../../src/infrastructure/inMemory/InMemoryMedicinalProductRepository';
-import { InMemoryOrderRepository } from '../../src/infrastructure/inMemory/InMemoryOrderRepository';
-import { InMemoryWardUnitRepository } from '../../src/infrastructure/inMemory/InMemoryWardUnitRepository';
-import { SimpleEventBus } from '../../src/infrastructure/events/SimpleEventBus';
+import { GraphQLContext } from '../../src/api/graphql/context';
+import { InMemoryMedicationRepository } from '../../src/storage/inMemory/InMemoryMedicationRepository';
+import { InMemoryMedicinalProductRepository } from '../../src/storage/inMemory/InMemoryMedicinalProductRepository';
+import { InMemoryOrderRepository } from '../../src/storage/inMemory/InMemoryOrderRepository';
+import { InMemoryWardUnitRepository } from '../../src/storage/inMemory/InMemoryWardUnitRepository';
+import { SimpleEventBus } from '../../src/events/simple/SimpleEventBus';
 import { CreateOrderUseCase } from '../../src/domain/order/useCases/ordering/CreateOrderUseCase';
 import { AdvanceOrderStatusUseCase } from '../../src/domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
 import { DeliverOrderUseCase } from '../../src/domain/order/useCases/fulfillment/DeliverOrderUseCase';
