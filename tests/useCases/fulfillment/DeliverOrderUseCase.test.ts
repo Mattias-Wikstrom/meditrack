@@ -4,7 +4,7 @@ import { AdvanceOrderStatusUseCase } from '../../../src/domain/order/useCases/fu
 import { DeliverOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
 import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';
-import { SimpleEventBus } from '../../../src/events/simple/SimpleEventBus';
+import { SimpleEventBus } from '../../../src/events/SimpleEventBus';
 import Decimal from 'decimal.js';
 import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
