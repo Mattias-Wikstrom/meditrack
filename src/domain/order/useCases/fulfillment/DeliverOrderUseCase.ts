@@ -1,14 +1,15 @@
 import Decimal from 'decimal.js';
 import { Order } from '../../Order';
-import { OrderStatus } from '../../OrderStatus';
 import { OrderRepository } from '../../OrderRepository';
 import { MedicinalProductRepository } from '../../../medication/MedicinalProductRepository';
+import { ActorRepository } from '../../../actor/ActorRepository';
+import { ActorRole } from '../../../shared/ActorRole';
 import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure, failures } from '../../../shared/results/UseCaseResult';
 import { OrderDelivered } from '../../events/OrderDelivered';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';
 import { MedicationId, MedicinalProductId, OrderId } from '../../../shared/IdTypes';
-import { ActorRole } from '../../../shared/ActorRole';
+import { OrderStatus } from '../../OrderStatus';
 import { DeliveryRule } from '../../rules/DeliveryRule';
 import { DeliveryPlan, ResolvedLine } from '../../rules/DeliveryPlan';
 import { OrderMustBeConfirmed } from '../../rules/OrderMustBeConfirmed';
@@ -29,7 +30,6 @@ export interface ProductSelection {
 // The input to the use case
 export interface DeliverOrderInput {
   actorId: string; // The person who is interacting with the system
-  actorRole: ActorRole;
   orderId: OrderId; // The order
   productSelections: ReadonlyArray<ProductSelection>; // How the order is to be handled
 }
@@ -43,13 +43,18 @@ export class DeliverOrderUseCase {
   ];
 
   constructor(
+    private readonly actorRepository: ActorRepository,
     private readonly orderRepository: OrderRepository,
     private readonly medicinalProductRepository: MedicinalProductRepository,
     private readonly eventBus: EventBus,
   ) {}
 
   async execute(input: DeliverOrderInput): Promise<UseCaseResult<Order>> {
-    if (input.actorRole !== ActorRole.Pharmacist) {
+    const actor = await this.actorRepository.findById(input.actorId);
+    if (actor === undefined) {
+      return failure('ActorNotFound');
+    }
+    if (actor.role !== ActorRole.Pharmacist) {
       return failure('UnauthorizedRole');
     }
 

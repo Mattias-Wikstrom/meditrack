@@ -4,7 +4,6 @@ import { SendOrderUseCase } from '../../../domain/order/useCases/fulfillment/Sen
 import { ConfirmOrderUseCase } from '../../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { MedicationId, MedicinalProductId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
-import { ActorRole } from '../../../domain/shared/ActorRole';
 import { CliOutput } from '../CliOutput';
 
 export async function listOrders(repo: OrderRepository, output: CliOutput): Promise<void> {
@@ -28,8 +27,7 @@ export async function createOrder(
   quantity: number,
 ): Promise<void> {
   const result = await useCase.execute({
-    actorId: 'cli',
-    actorRole: ActorRole.Nurse,
+    actorId: 'cli-nurse',
     wardUnitId: wardUnitId as WardUnitId,
     lines: [{ medicationId: medicationId as MedicationId, quantity }],
   });
@@ -48,8 +46,7 @@ export async function sendOrder(
   orderId: string,
 ): Promise<void> {
   const result = await useCase.execute({
-    actorId: 'cli',
-    actorRole: ActorRole.Nurse,
+    actorId: 'cli-nurse',
     orderId: orderId as OrderId,
   });
 
@@ -67,8 +64,7 @@ export async function confirmOrder(
   orderId: string,
 ): Promise<void> {
   const result = await useCase.execute({
-    actorId: 'cli',
-    actorRole: ActorRole.Pharmacist,
+    actorId: 'cli-pharmacist',
     orderId: orderId as OrderId,
   });
 
@@ -87,8 +83,7 @@ export async function deliverOrder(
   productSelections: ReadonlyArray<{ medicationId: string; medicinalProductId: string; quantity: number }>,
 ): Promise<void> {
   const result = await useCase.execute({
-    actorId: 'cli',
-    actorRole: ActorRole.Pharmacist,
+    actorId: 'cli-pharmacist',
     orderId: orderId as OrderId,
     productSelections: productSelections.map((s) => ({
       medicationId: s.medicationId as MedicationId,

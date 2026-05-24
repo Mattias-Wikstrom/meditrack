@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/CreateOrderUseCase';
+import { InMemoryActorRepository } from '../../../src/storage/inMemory/InMemoryActorRepository';
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
 import { SimpleEventBus } from '../../../src/eventBus/SimpleEventBus';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
@@ -7,18 +8,22 @@ import { ActorRole } from '../../../src/domain/shared/ActorRole';
 import { MedicationId, WardUnitId } from '../../../src/domain/shared/IdTypes';
 
 describe('CreateOrderUseCase', () => {
+  let actorRepo: InMemoryActorRepository;
   let orderRepo: InMemoryOrderRepository;
   let useCase: CreateOrderUseCase;
 
   beforeEach(() => {
+    actorRepo = new InMemoryActorRepository([
+      { id: 'nurse-1', role: ActorRole.Nurse },
+      { id: 'pharmacist-1', role: ActorRole.Pharmacist },
+    ]);
     orderRepo = new InMemoryOrderRepository();
-    useCase = new CreateOrderUseCase(orderRepo, new SimpleEventBus());
+    useCase = new CreateOrderUseCase(actorRepo, orderRepo, new SimpleEventBus());
   });
 
   it('creates a draft order and persists it', async () => {
     const result = await useCase.execute({
       actorId: 'nurse-1',
-      actorRole: ActorRole.Nurse,
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
     });
@@ -33,7 +38,6 @@ describe('CreateOrderUseCase', () => {
   it('fails when the actor is not a nurse', async () => {
     const result = await useCase.execute({
       actorId: 'pharmacist-1',
-      actorRole: ActorRole.Pharmacist,
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
     });
@@ -43,10 +47,21 @@ describe('CreateOrderUseCase', () => {
     expect(result.errors[0]?.code).toBe('UnauthorizedRole');
   });
 
+  it('fails when the actor is not found', async () => {
+    const result = await useCase.execute({
+      actorId: 'unknown',
+      wardUnitId: 'ward-1' as WardUnitId,
+      lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }],
+    });
+
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('ActorNotFound');
+  });
+
   it('fails and does not persist when there are no lines', async () => {
     const result = await useCase.execute({
       actorId: 'nurse-1',
-      actorRole: ActorRole.Nurse,
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [],
     });
@@ -62,7 +77,6 @@ describe('CreateOrderUseCase', () => {
   it('fails when a line has a non-positive quantity', async () => {
     const result = await useCase.execute({
       actorId: 'nurse-1',
-      actorRole: ActorRole.Nurse,
       wardUnitId: 'ward-1' as WardUnitId,
       lines: [{ medicationId: 'med-1' as MedicationId, quantity: 0 }],
     });

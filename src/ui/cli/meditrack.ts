@@ -4,6 +4,8 @@ import { prisma } from '../../storage/prisma/prismaClient';
 import { PrismaMedicationRepository } from '../../storage/prisma/PrismaMedicationRepository';
 import { PrismaMedicinalProductRepository } from '../../storage/prisma/PrismaMedicinalProductRepository';
 import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepository';
+import { InMemoryActorRepository } from '../../storage/inMemory/InMemoryActorRepository';
+import { ActorRole } from '../../domain/shared/ActorRole';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
@@ -19,10 +21,15 @@ const medicinalProductRepo = new PrismaMedicinalProductRepository(prisma);
 const orderRepo = new PrismaOrderRepository(prisma);
 const eventBus = new SimpleEventBus();
 
-const createOrderUseCase = new CreateOrderUseCase(orderRepo, eventBus);
-const sendOrderUseCase = new SendOrderUseCase(orderRepo, eventBus);
-const confirmOrderUseCase = new ConfirmOrderUseCase(orderRepo, eventBus);
-const deliverOrderUseCase = new DeliverOrderUseCase(orderRepo, medicinalProductRepo, eventBus);
+const actorRepo = new InMemoryActorRepository([
+  { id: 'cli-nurse', role: ActorRole.Nurse },
+  { id: 'cli-pharmacist', role: ActorRole.Pharmacist },
+]);
+
+const createOrderUseCase = new CreateOrderUseCase(actorRepo, orderRepo, eventBus);
+const sendOrderUseCase = new SendOrderUseCase(actorRepo, orderRepo, eventBus);
+const confirmOrderUseCase = new ConfirmOrderUseCase(actorRepo, orderRepo, eventBus);
+const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, eventBus);
 
 const output = new ConsoleOutput();
 

@@ -51,7 +51,7 @@ const DELIVER_ORDER = /* GraphQL */ `
 
 describe('Mutation.createOrder', () => {
   it('returns a draft order on success', async () => {
-    const ctx = createTestContext();
+    const ctx = createTestContext('nurse-1');
 
     const result = await graphql({
       schema,
@@ -67,7 +67,7 @@ describe('Mutation.createOrder', () => {
   });
 
   it('returns errors and no order when validation fails', async () => {
-    const ctx = createTestContext();
+    const ctx = createTestContext('nurse-1');
 
     const result = await graphql({
       schema,
@@ -85,7 +85,7 @@ describe('Mutation.createOrder', () => {
 
 describe('Mutation.sendOrder', () => {
   it('advances a draft order to sent', async () => {
-    const ctx = createTestContext();
+    const ctx = createTestContext('nurse-1');
     const created = await graphql({
       schema, source: CREATE_ORDER, contextValue: ctx,
       variableValues: { wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] },
@@ -101,7 +101,7 @@ describe('Mutation.sendOrder', () => {
 
   it('returns an error for an unknown order', async () => {
     const result = await graphql({
-      schema, source: SEND_ORDER, contextValue: createTestContext(),
+      schema, source: SEND_ORDER, contextValue: createTestContext('nurse-1'),
       variableValues: { orderId: 'no-such-order' },
     });
 
@@ -112,7 +112,8 @@ describe('Mutation.sendOrder', () => {
 
 describe('Mutation.confirmOrder', () => {
   it('advances a sent order to confirmed', async () => {
-    const ctx = createTestContext();
+    const ctx = createTestContext('nurse-1');
+    const pharmacistCtx = { ...ctx, actorId: 'pharmacist-1' };
     const created = await graphql({
       schema, source: CREATE_ORDER, contextValue: ctx,
       variableValues: { wardUnitId: 'ward-1', lines: [{ medicationId: 'med-1', quantity: 5 }] },
@@ -120,7 +121,7 @@ describe('Mutation.confirmOrder', () => {
     const orderId = (created.data as any)?.createOrder.order.id;
     await graphql({ schema, source: SEND_ORDER, contextValue: ctx, variableValues: { orderId } });
 
-    const result = await graphql({ schema, source: CONFIRM_ORDER, contextValue: ctx, variableValues: { orderId } });
+    const result = await graphql({ schema, source: CONFIRM_ORDER, contextValue: pharmacistCtx, variableValues: { orderId } });
 
     expect(result.errors).toBeUndefined();
     expect((result.data as any)?.confirmOrder.successful).toBe(true);
@@ -128,8 +129,11 @@ describe('Mutation.confirmOrder', () => {
   });
 
   it('returns an error for an unknown order', async () => {
+    const ctx = createTestContext('nurse-1');
+    const pharmacistCtx = { ...ctx, actorId: 'pharmacist-1' };
+
     const result = await graphql({
-      schema, source: CONFIRM_ORDER, contextValue: createTestContext(),
+      schema, source: CONFIRM_ORDER, contextValue: pharmacistCtx,
       variableValues: { orderId: 'no-such-order' },
     });
 
@@ -140,7 +144,8 @@ describe('Mutation.confirmOrder', () => {
 
 describe('Mutation.deliverOrder', () => {
   it('updates stock and marks order as delivered', async () => {
-    const ctx = createTestContext();
+    const ctx = createTestContext('nurse-1');
+    const pharmacistCtx = { ...ctx, actorId: 'pharmacist-1' };
     await ctx.medicationRepo.save(
       new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'),
     );
@@ -155,9 +160,9 @@ describe('Mutation.deliverOrder', () => {
     const orderId = (created.data as any)?.createOrder.order.id;
 
     await graphql({ schema, source: SEND_ORDER, contextValue: ctx, variableValues: { orderId } });
-    await graphql({ schema, source: CONFIRM_ORDER, contextValue: ctx, variableValues: { orderId } });
+    await graphql({ schema, source: CONFIRM_ORDER, contextValue: pharmacistCtx, variableValues: { orderId } });
 
-    const result = await graphql({ schema, source: DELIVER_ORDER, contextValue: ctx, variableValues: { orderId, productSelections: [{ medicationId: 'med-1', medicinalProductId: 'prod-1', quantity: 20 }] } });
+    const result = await graphql({ schema, source: DELIVER_ORDER, contextValue: pharmacistCtx, variableValues: { orderId, productSelections: [{ medicationId: 'med-1', medicinalProductId: 'prod-1', quantity: 20 }] } });
 
     expect(result.errors).toBeUndefined();
     expect((result.data as any)?.deliverOrder.successful).toBe(true);
@@ -168,7 +173,7 @@ describe('Mutation.deliverOrder', () => {
 
 describe('Query.wardUnit with nested orders', () => {
   it('returns a ward unit with its orders and medication details', async () => {
-    const ctx = createTestContext();
+    const ctx = createTestContext('nurse-1');
     await ctx.wardUnitRepo.save(new WardUnit('ward-1' as WardUnitId, 'Akuten'));
     await ctx.medicationRepo.save(
       new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'),

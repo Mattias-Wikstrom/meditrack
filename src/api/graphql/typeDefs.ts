@@ -76,6 +76,7 @@ export const typeDefs = /* GraphQL */ `
   }
 
   enum ErrorCode {
+    ActorNotFound
     UnauthorizedRole
     OrderHasAtLeastOneLine
     OrderLineQuantitiesPositive

@@ -8,16 +8,16 @@ import { OrderRepository } from '../../OrderRepository';
 import { OrderRule } from '../../rules/OrderRule';
 import { OrderHasAtLeastOneLine } from '../../rules/OrderHasAtLeastOneLine';
 import { OrderLineQuantitiesPositive } from '../../rules/OrderLineQuantitiesPositive';
+import { ActorRepository } from '../../../actor/ActorRepository';
+import { ActorRole } from '../../../shared/ActorRole';
 import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure, failures } from '../../../shared/results/UseCaseResult';
 import { ErrorInfo } from '../../../shared/results/ErrorInfo';
 import { OrderPlaced } from '../../events/OrderPlaced';
 import { MedicationId, OrderId, WardUnitId } from '../../../shared/IdTypes';
-import { ActorRole } from '../../../shared/ActorRole';
 
 export interface CreateOrderInput {
   actorId: string;
-  actorRole: ActorRole;
   wardUnitId: WardUnitId;
   lines: { medicationId: MedicationId; quantity: number }[];
 }
@@ -29,12 +29,17 @@ export class CreateOrderUseCase {
   ];
 
   constructor(
+    private readonly actorRepository: ActorRepository,
     private readonly orderRepository: OrderRepository,
     private readonly eventBus: EventBus,
   ) {}
 
   async execute(input: CreateOrderInput): Promise<UseCaseResult<Order>> {
-    if (input.actorRole !== ActorRole.Nurse) {
+    const actor = await this.actorRepository.findById(input.actorId);
+    if (actor === undefined) {
+      return failure('ActorNotFound');
+    }
+    if (actor.role !== ActorRole.Nurse) {
       return failure('UnauthorizedRole');
     }
 
