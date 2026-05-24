@@ -1,7 +1,7 @@
 import { Order } from '../../Order';
 import { OrderStatus } from '../../OrderStatus';
 import { OrderRepository } from '../../OrderRepository';
-import { MedicationRepository } from '../../../medication/MedicationRepository';
+import { MedicinalProductRepository } from '../../../medication/MedicinalProductRepository';
 import { EventBus } from '../../../shared/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/UseCaseResult';
 import { OrderDelivered } from '../../events/OrderDelivered';
@@ -16,7 +16,7 @@ export interface DeliverOrderInput {
 export class DeliverOrderUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
-    private readonly medicationRepository: MedicationRepository,
+    private readonly medicinalProductRepository: MedicinalProductRepository,
     private readonly eventBus: EventBus,
   ) {}
 
@@ -31,15 +31,15 @@ export class DeliverOrderUseCase {
     }
 
     for (const line of order.lines) {
-      const medication = this.medicationRepository.findById(line.medicationId);
-      if (medication === undefined) {
-        return failure('MedicationNotFound');
+      const [product] = this.medicinalProductRepository.findByMedicationId(line.medicationId);
+      if (product === undefined) {
+        return failure('MedicinalProductNotFound');
       }
-      medication.stockLevel = medication.stockLevel.add(line.quantity);
-      this.medicationRepository.save(medication);
+      product.stockLevel = product.stockLevel.add(line.quantity);
+      this.medicinalProductRepository.save(product);
 
-      if (medication.isBelowThreshold) {
-        this.eventBus.publish(new StockBelowThreshold(input.actorId, medication));
+      if (product.isBelowThreshold) {
+        this.eventBus.publish(new StockBelowThreshold(input.actorId, product));
       }
     }
 

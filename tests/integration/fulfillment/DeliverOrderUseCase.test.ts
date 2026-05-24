@@ -3,17 +3,16 @@ import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/
 import { AdvanceOrderStatusUseCase } from '../../../src/domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
 import { DeliverOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { InMemoryOrderRepository } from '../../../src/infrastructure/inMemory/InMemoryOrderRepository';
-import { InMemoryMedicationRepository } from '../../../src/infrastructure/inMemory/InMemoryMedicationRepository';
+import { InMemoryMedicinalProductRepository } from '../../../src/infrastructure/inMemory/InMemoryMedicinalProductRepository';
 import { SimpleEventBus } from '../../../src/infrastructure/events/SimpleEventBus';
 import Decimal from 'decimal.js';
-import { Medication } from '../../../src/domain/medication/Medication';
-import { MedicationForm } from '../../../src/domain/medication/MedicationForm';
+import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
-import { MedicationId, WardUnitId } from '../../../src/domain/shared/Id';
+import { MedicationId, MedicinalProductId, WardUnitId } from '../../../src/domain/shared/Id';
 
 describe('DeliverOrderUseCase', () => {
   let orderRepo: InMemoryOrderRepository;
-  let medicationRepo: InMemoryMedicationRepository;
+  let medicinalProductRepo: InMemoryMedicinalProductRepository;
   let eventBus: SimpleEventBus;
   let createOrder: CreateOrderUseCase;
   let advanceStatus: AdvanceOrderStatusUseCase;
@@ -21,14 +20,14 @@ describe('DeliverOrderUseCase', () => {
 
   beforeEach(() => {
     orderRepo = new InMemoryOrderRepository();
-    medicationRepo = new InMemoryMedicationRepository();
+    medicinalProductRepo = new InMemoryMedicinalProductRepository();
     eventBus = new SimpleEventBus();
     createOrder = new CreateOrderUseCase(orderRepo, eventBus);
     advanceStatus = new AdvanceOrderStatusUseCase(orderRepo, eventBus);
-    deliverOrder = new DeliverOrderUseCase(orderRepo, medicationRepo, eventBus);
+    deliverOrder = new DeliverOrderUseCase(orderRepo, medicinalProductRepo, eventBus);
 
-    medicationRepo.save(
-      new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)),
+    medicinalProductRepo.save(
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(20)),
     );
   });
 
@@ -49,12 +48,12 @@ describe('DeliverOrderUseCase', () => {
     expect(orderRepo.findById(orderId)?.status).toBe(OrderStatus.Delivered);
   });
 
-  it('increases medication stock level by the ordered quantity', () => {
+  it('increases stock level by the ordered quantity', () => {
     const orderId = createConfirmedOrder('med-1' as MedicationId, 5);
 
     deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
 
-    expect(medicationRepo.findById('med-1' as MedicationId)?.stockLevel.toNumber()).toBe(15);
+    expect(medicinalProductRepo.findByMedicationId('med-1' as MedicationId)[0]?.stockLevel.toNumber()).toBe(15);
   });
 
   it('fails when order is not in confirmed status', () => {
@@ -68,22 +67,22 @@ describe('DeliverOrderUseCase', () => {
     expect(result.errors[0]?.code).toBe('InvalidStatusTransition');
   });
 
-  it('fails when a medication in the order does not exist', () => {
+  it('fails when no medicinal product exists for the medication', () => {
     const orderId = createConfirmedOrder('med-unknown' as MedicationId, 5);
 
     const result = deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
-    expect(result.errors[0]?.code).toBe('MedicationNotFound');
+    expect(result.errors[0]?.code).toBe('MedicinalProductNotFound');
   });
 
   it('does not update stock if delivery fails', () => {
     const orderId = createConfirmedOrder('med-unknown' as MedicationId, 5);
-    const stockBefore = medicationRepo.findById('med-1' as MedicationId)?.stockLevel.toNumber();
+    const stockBefore = medicinalProductRepo.findByMedicationId('med-1' as MedicationId)[0]?.stockLevel.toNumber();
 
     deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
 
-    expect(medicationRepo.findById('med-1' as MedicationId)?.stockLevel.toNumber()).toBe(stockBefore);
+    expect(medicinalProductRepo.findByMedicationId('med-1' as MedicationId)[0]?.stockLevel.toNumber()).toBe(stockBefore);
   });
 });

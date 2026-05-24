@@ -1,11 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { graphql } from 'graphql';
 import { schema } from '../../src/graphql/schema';
 import { createTestContext } from '../helpers/createTestContext';
 import Decimal from 'decimal.js';
 import { Medication } from '../../src/domain/medication/Medication';
+import { MedicinalProduct } from '../../src/domain/medication/MedicinalProduct';
 import { MedicationForm } from '../../src/domain/medication/MedicationForm';
-import { MedicationId, WardUnitId } from '../../src/domain/shared/Id';
+import { MedicationId, MedicinalProductId, WardUnitId } from '../../src/domain/shared/Id';
 import { WardUnit } from '../../src/domain/wardUnit/WardUnit';
 
 const CREATE_ORDER = /* GraphQL */ `
@@ -103,7 +104,10 @@ describe('Mutation.deliverOrder', () => {
   it('updates stock and marks order as delivered', async () => {
     const ctx = createTestContext();
     ctx.medicationRepo.save(
-      new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(5)),
+      new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'),
+    );
+    ctx.medicinalProductRepo.save(
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(5)),
     );
 
     const created = await graphql({
@@ -120,7 +124,7 @@ describe('Mutation.deliverOrder', () => {
     expect(result.errors).toBeUndefined();
     expect(result.data?.deliverOrder.successful).toBe(true);
     expect(result.data?.deliverOrder.order.status).toBe('Delivered');
-    expect(ctx.medicationRepo.findById('med-1')?.stockLevel.toNumber()).toBe(30);
+    expect(ctx.medicinalProductRepo.findByMedicationId('med-1' as MedicationId)[0]?.stockLevel.toNumber()).toBe(30);
   });
 });
 
@@ -129,7 +133,7 @@ describe('Query.wardUnit with nested orders', () => {
     const ctx = createTestContext();
     ctx.wardUnitRepo.save(new WardUnit('ward-1' as WardUnitId, 'Akuten'));
     ctx.medicationRepo.save(
-      new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)),
+      new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'),
     );
     await graphql({
       schema, source: CREATE_ORDER, contextValue: ctx,
@@ -145,7 +149,7 @@ describe('Query.wardUnit with nested orders', () => {
             status
             lines {
               quantity
-              medication { name stockLevel }
+              medication { innName }
             }
           }
         }
@@ -157,6 +161,6 @@ describe('Query.wardUnit with nested orders', () => {
     const ward = result.data?.wardUnit;
     expect(ward.name).toBe('Akuten');
     expect(ward.orders).toHaveLength(1);
-    expect(ward.orders[0].lines[0].medication.name).toBe('Paracetamol');
+    expect(ward.orders[0].lines[0].medication.innName).toBe('Paracetamol');
   });
 });

@@ -3,6 +3,8 @@ export const typeDefs = /* GraphQL */ `
     wardUnit(id: ID!): WardUnit
     medications(query: String): [Medication!]!
     medication(id: ID!): Medication
+    medicinalProducts: [MedicinalProduct!]!
+    medicinalProduct(id: ID!): MedicinalProduct
   }
 
   type Mutation {
@@ -33,10 +35,17 @@ export const typeDefs = /* GraphQL */ `
 
   type Medication {
     id: ID!
-    name: String!
+    innName: String!
     atcCode: String!
     form: MedicationForm!
     strength: String!
+  }
+
+  type MedicinalProduct {
+    id: ID!
+    productName: String!
+    medicationId: ID!
+    medication: Medication
     stockLevel: Int!
     stockThreshold: Int!
     isBelowThreshold: Boolean!
@@ -70,7 +79,7 @@ export const typeDefs = /* GraphQL */ `
     OrderLineQuantitiesPositive
     OrderNotFound
     InvalidStatusTransition
-    MedicationNotFound
+    MedicinalProductNotFound
   }
 
   input OrderLineInput {

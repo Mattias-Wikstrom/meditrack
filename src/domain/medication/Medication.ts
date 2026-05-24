@@ -1,25 +1,32 @@
-import Decimal from 'decimal.js';
 import { MedicationForm } from './MedicationForm';
 import { MedicationId } from '../shared/Id';
 
 export class Medication {
-  public stockLevel: Decimal;
-  public readonly stockThreshold: Decimal;
+  public readonly id: MedicationId;
+
+  /** The International Nonproprietary Name (INN) — the generic, non-brand name for the active substance. */
+  public readonly innName: string;
+
+  /** Anatomical Therapeutic Chemical classification code. See https://www.who.int/tools/atc-ddd-toolkit/atc-classification */
+  public readonly atcCode: string;
+
+  /** Tablet, Capsule, Injection, etc. */
+  public readonly form: MedicationForm;
+
+  /** Quantity of active ingredient per unit. Examples: "500mg" (tablet), "5mg/ml" (solution), "1%" (cream), "100mcg/dose" (inhaler). */
+  public readonly strength: string;
 
   constructor(
-    public readonly id: MedicationId,
-    public readonly name: string, // What medication is this?
-    public readonly atcCode: string, // What is its ATC code?
-    public readonly form: MedicationForm, // Tablet, Capsule, etc.
-    public readonly strength: string, // Examples? Why not a number?
-    stockLevel: Decimal,
-    stockThreshold: Decimal,
+    id: MedicationId,
+    innName: string,
+    atcCode: string,
+    form: MedicationForm,
+    strength: string,
   ) {
-    this.stockLevel = stockLevel;
-    this.stockThreshold = stockThreshold;
-  }
-
-  get isBelowThreshold(): boolean {
-    return this.stockLevel.lessThan(this.stockThreshold);
+    this.id = id;
+    this.innName = innName;
+    this.atcCode = atcCode;
+    this.form = form;
+    this.strength = strength;
   }
 }

@@ -3,19 +3,18 @@ import { CreateOrderUseCase } from '../../../src/domain/order/useCases/ordering/
 import { AdvanceOrderStatusUseCase } from '../../../src/domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
 import { DeliverOrderUseCase } from '../../../src/domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { InMemoryOrderRepository } from '../../../src/infrastructure/inMemory/InMemoryOrderRepository';
-import { InMemoryMedicationRepository } from '../../../src/infrastructure/inMemory/InMemoryMedicationRepository';
+import { InMemoryMedicinalProductRepository } from '../../../src/infrastructure/inMemory/InMemoryMedicinalProductRepository';
 import { SimpleEventBus } from '../../../src/infrastructure/events/SimpleEventBus';
 import { AuditListener } from '../../../src/infrastructure/audit/AuditListener';
 import Decimal from 'decimal.js';
-import { Medication } from '../../../src/domain/medication/Medication';
-import { MedicationForm } from '../../../src/domain/medication/MedicationForm';
-import { MedicationId, WardUnitId } from '../../../src/domain/shared/Id';
+import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
+import { MedicationId, MedicinalProductId, WardUnitId } from '../../../src/domain/shared/Id';
 
 describe('AuditListener', () => {
   let eventBus: SimpleEventBus;
   let auditListener: AuditListener;
   let orderRepo: InMemoryOrderRepository;
-  let medicationRepo: InMemoryMedicationRepository;
+  let medicinalProductRepo: InMemoryMedicinalProductRepository;
   let createOrder: CreateOrderUseCase;
   let advanceStatus: AdvanceOrderStatusUseCase;
   let deliverOrder: DeliverOrderUseCase;
@@ -24,18 +23,18 @@ describe('AuditListener', () => {
     eventBus = new SimpleEventBus();
     auditListener = new AuditListener();
     orderRepo = new InMemoryOrderRepository();
-    medicationRepo = new InMemoryMedicationRepository();
+    medicinalProductRepo = new InMemoryMedicinalProductRepository();
     createOrder = new CreateOrderUseCase(orderRepo, eventBus);
     advanceStatus = new AdvanceOrderStatusUseCase(orderRepo, eventBus);
-    deliverOrder = new DeliverOrderUseCase(orderRepo, medicationRepo, eventBus);
+    deliverOrder = new DeliverOrderUseCase(orderRepo, medicinalProductRepo, eventBus);
 
     eventBus.subscribe('OrderPlaced', auditListener);
     eventBus.subscribe('OrderStatusAdvanced', auditListener);
     eventBus.subscribe('OrderDelivered', auditListener);
     eventBus.subscribe('StockBelowThreshold', auditListener);
 
-    medicationRepo.save(
-      new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)),
+    medicinalProductRepo.save(
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(20)),
     );
   });
 

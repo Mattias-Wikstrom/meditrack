@@ -1,11 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { graphql } from 'graphql';
 import { schema } from '../../src/graphql/schema';
 import { createTestContext } from '../helpers/createTestContext';
 import Decimal from 'decimal.js';
 import { Medication } from '../../src/domain/medication/Medication';
+import { MedicinalProduct } from '../../src/domain/medication/MedicinalProduct';
 import { MedicationForm } from '../../src/domain/medication/MedicationForm';
-import { MedicationId } from '../../src/domain/shared/Id';
+import { MedicationId, MedicinalProductId } from '../../src/domain/shared/Id';
 
 describe('Query.medications', () => {
   it('returns an empty list when there are no medications', async () => {
@@ -17,42 +18,28 @@ describe('Query.medications', () => {
 
   it('returns all medications when no search query is given', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)));
-    ctx.medicationRepo.save(new Medication('med-2' as MedicationId, 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg', new Decimal(50), new Decimal(10)));
+    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
+    ctx.medicationRepo.save(new Medication('med-2' as MedicationId, 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg'));
 
-    const result = await graphql({ schema, source: '{ medications { id name } }', contextValue: ctx });
+    const result = await graphql({ schema, source: '{ medications { id innName } }', contextValue: ctx });
 
     expect(result.errors).toBeUndefined();
     expect(result.data?.medications).toHaveLength(2);
   });
 
-  it('filters medications by name when a search query is given', async () => {
+  it('filters medications by INN name when a search query is given', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)));
-    ctx.medicationRepo.save(new Medication('med-2' as MedicationId, 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg', new Decimal(50), new Decimal(10)));
+    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
+    ctx.medicationRepo.save(new Medication('med-2' as MedicationId, 'Ibuprofen', 'M01AE01', MedicationForm.Tablet, '400mg'));
 
     const result = await graphql({
       schema,
-      source: '{ medications(query: "para") { name } }',
+      source: '{ medications(query: "para") { innName } }',
       contextValue: ctx,
     });
 
     expect(result.errors).toBeUndefined();
-    expect(result.data?.medications).toEqual([{ name: 'Paracetamol' }]);
-  });
-
-  it('returns isBelowThreshold correctly', async () => {
-    const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(5), new Decimal(20)));
-
-    const result = await graphql({
-      schema,
-      source: '{ medications { isBelowThreshold } }',
-      contextValue: ctx,
-    });
-
-    expect(result.errors).toBeUndefined();
-    expect(result.data?.medications[0].isBelowThreshold).toBe(true);
+    expect(result.data?.medications).toEqual([{ innName: 'Paracetamol' }]);
   });
 });
 
@@ -70,21 +57,64 @@ describe('Query.medication', () => {
 
   it('returns the medication for a known id', async () => {
     const ctx = createTestContext();
-    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg', new Decimal(10), new Decimal(20)));
+    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
 
     const result = await graphql({
       schema,
-      source: '{ medication(id: "med-1") { name atcCode form strength stockLevel } }',
+      source: '{ medication(id: "med-1") { innName atcCode form strength } }',
       contextValue: ctx,
     });
 
     expect(result.errors).toBeUndefined();
     expect(result.data?.medication).toMatchObject({
-      name: 'Paracetamol',
+      innName: 'Paracetamol',
       atcCode: 'N02BE01',
       form: 'Tablet',
       strength: '500mg',
-      stockLevel: 10,
     });
+  });
+});
+
+describe('Query.medicinalProducts', () => {
+  it('returns an empty list when there are no medicinal products', async () => {
+    const result = await graphql({ schema, source: '{ medicinalProducts { id } }', contextValue: createTestContext() });
+
+    expect(result.errors).toBeUndefined();
+    expect(result.data?.medicinalProducts).toEqual([]);
+  });
+
+  it('returns isBelowThreshold correctly', async () => {
+    const ctx = createTestContext();
+    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
+    ctx.medicinalProductRepo.save(
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, new Decimal(5), new Decimal(20)),
+    );
+
+    const result = await graphql({
+      schema,
+      source: '{ medicinalProducts { isBelowThreshold } }',
+      contextValue: ctx,
+    });
+
+    expect(result.errors).toBeUndefined();
+    expect(result.data?.medicinalProducts[0].isBelowThreshold).toBe(true);
+  });
+
+  it('resolves the nested medication', async () => {
+    const ctx = createTestContext();
+    ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
+    ctx.medicinalProductRepo.save(
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(5)),
+    );
+
+    const result = await graphql({
+      schema,
+      source: '{ medicinalProducts { productName medication { innName } } }',
+      contextValue: ctx,
+    });
+
+    expect(result.errors).toBeUndefined();
+    expect(result.data?.medicinalProducts[0].productName).toBe('Alvedon 500mg');
+    expect(result.data?.medicinalProducts[0].medication.innName).toBe('Paracetamol');
   });
 });

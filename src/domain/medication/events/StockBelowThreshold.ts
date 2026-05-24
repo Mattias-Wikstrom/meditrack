@@ -1,22 +1,22 @@
 import Decimal from 'decimal.js';
 import { DomainEvent } from '../../shared/DomainEvent';
-import { Medication } from '../Medication';
+import { MedicinalProduct } from '../MedicinalProduct';
+import { MedicationId, MedicinalProductId } from '../../shared/Id';
 
 export class StockBelowThreshold implements DomainEvent {
   readonly eventType = 'StockBelowThreshold';
   readonly occurredAt = new Date();
-  readonly medicationId: string;
-  readonly medicationName: string;
+  readonly medicinalProductId: MedicinalProductId;
+  readonly productName: string;
+  readonly medicationId: MedicationId;
   readonly stockLevel: Decimal;
   readonly stockThreshold: Decimal;
 
-  constructor(
-    public readonly actorId: string,
-    medication: Medication,
-  ) {
-    this.medicationId = medication.id;
-    this.medicationName = medication.name;
-    this.stockLevel = medication.stockLevel;
-    this.stockThreshold = medication.stockThreshold;
+  constructor(public readonly actorId: string, product: MedicinalProduct) {
+    this.medicinalProductId = product.id;
+    this.productName = product.productName;
+    this.medicationId = product.medicationId;
+    this.stockLevel = product.stockLevel;
+    this.stockThreshold = product.stockThreshold;
   }
 }

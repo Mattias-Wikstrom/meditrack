@@ -17,7 +17,7 @@ export class InMemoryMedicationRepository implements MedicationRepository {
     const q = query.toLowerCase();
     return this.findAll().filter(
       (m) =>
-        m.name.toLowerCase().includes(q) ||
+        m.innName.toLowerCase().includes(q) ||
         m.atcCode.toLowerCase().includes(q) ||
         m.form.toLowerCase().includes(q),
     );
