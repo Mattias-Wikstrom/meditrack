@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { InMemoryMedicationRepository } from '../../storage/inMemory/InMemoryMedicationRepository';
-import { InMemoryMedicinalProductRepository } from '../../storage/inMemory/InMemoryMedicinalProductRepository';
-import { InMemoryOrderRepository } from '../../storage/inMemory/InMemoryOrderRepository';
+import { prisma } from '../../storage/prisma/prismaClient';
+import { PrismaMedicationRepository } from '../../storage/prisma/PrismaMedicationRepository';
+import { PrismaMedicinalProductRepository } from '../../storage/prisma/PrismaMedicinalProductRepository';
+import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepository';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
 import { AdvanceOrderStatusUseCase } from '../../domain/order/useCases/fulfillment/AdvanceOrderStatusUseCase';
@@ -12,9 +13,9 @@ import { listMedications, showMedication } from './commands/medications';
 import { listOrders, createOrder, advanceOrder, deliverOrder } from './commands/orders';
 
 // --- Wiring ---
-const medicationRepo = new InMemoryMedicationRepository();
-const medicinalProductRepo = new InMemoryMedicinalProductRepository();
-const orderRepo = new InMemoryOrderRepository();
+const medicationRepo = new PrismaMedicationRepository(prisma);
+const medicinalProductRepo = new PrismaMedicinalProductRepository(prisma);
+const orderRepo = new PrismaOrderRepository(prisma);
 const eventBus = new SimpleEventBus();
 
 const createOrderUseCase = new CreateOrderUseCase(orderRepo, eventBus);
