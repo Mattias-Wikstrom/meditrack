@@ -50,12 +50,12 @@ describe('DeliverOrderUseCase', () => {
     expect((await orderRepo.findById(orderId))?.status).toBe(OrderStatus.Delivered);
   });
 
-  it('increases stock level by the ordered quantity', async () => {
+  it('decreases stock level by the ordered quantity', async () => {
     const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
 
     await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: selectProd1 });
 
-    expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(15);
+    expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(5);
   });
 
   it('fails when order is not in confirmed status', async () => {

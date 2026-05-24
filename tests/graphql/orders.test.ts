@@ -107,7 +107,7 @@ describe('Mutation.deliverOrder', () => {
       new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'),
     );
     await ctx.medicinalProductRepo.save(
-      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(5)),
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(50), new Decimal(5)),
     );
 
     const created = await graphql({

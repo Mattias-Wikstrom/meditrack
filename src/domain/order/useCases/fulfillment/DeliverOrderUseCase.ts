@@ -50,7 +50,7 @@ export class DeliverOrderUseCase {
         return failure('ProductMedicationMismatch');
       }
 
-      product.stockLevel = product.stockLevel.add(line.quantity);
+      product.stockLevel = product.stockLevel.sub(line.quantity);
       await this.medicinalProductRepository.save(product);
 
       if (product.isBelowThreshold) {
