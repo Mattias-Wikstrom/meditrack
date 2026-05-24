@@ -30,8 +30,8 @@ const ADVANCE_STATUS = /* GraphQL */ `
 `;
 
 const DELIVER_ORDER = /* GraphQL */ `
-  mutation DeliverOrder($orderId: ID!) {
-    deliverOrder(orderId: $orderId) {
+  mutation DeliverOrder($orderId: ID!, $productSelections: [ProductSelectionInput!]!) {
+    deliverOrder(orderId: $orderId, productSelections: $productSelections) {
       successful
       errors
       order { status }
@@ -119,7 +119,7 @@ describe('Mutation.deliverOrder', () => {
     await graphql({ schema, source: ADVANCE_STATUS, contextValue: ctx, variableValues: { orderId } });
     await graphql({ schema, source: ADVANCE_STATUS, contextValue: ctx, variableValues: { orderId } });
 
-    const result = await graphql({ schema, source: DELIVER_ORDER, contextValue: ctx, variableValues: { orderId } });
+    const result = await graphql({ schema, source: DELIVER_ORDER, contextValue: ctx, variableValues: { orderId, productSelections: [{ medicationId: 'med-1', medicinalProductId: 'prod-1' }] } });
 
     expect(result.errors).toBeUndefined();
     expect((result.data as any)?.deliverOrder.successful).toBe(true);

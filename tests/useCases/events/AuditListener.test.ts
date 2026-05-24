@@ -73,7 +73,11 @@ describe('AuditListener', () => {
     await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
 
     // stock starts at 10, threshold is 20 — already below threshold before delivery
-    await deliverOrder.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    await deliverOrder.execute({
+      actorId: 'pharmacist-1',
+      orderId: created.value.id,
+      productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-1' as MedicinalProductId }],
+    });
 
     const eventTypes = auditListener.getEntries().map((e) => e.eventType);
     expect(eventTypes).toContain('StockBelowThreshold');

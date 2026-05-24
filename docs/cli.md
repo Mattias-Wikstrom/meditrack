@@ -141,16 +141,31 @@ Order ord-abc123 is now: Confirmed
 
 ### deliver
 
-Mark a `Confirmed` order as delivered. This sets the order status to `Delivered` and deducts the ordered quantities from stock for each line.
+Mark a `Confirmed` order as delivered. Requires an explicit product selection for every order line — the pharmacist specifies which medicinal product was used to fulfil each line. Stock is updated accordingly.
 
 ```
-npm run cli -- orders deliver <orderId>
+npm run cli -- orders deliver <orderId> --product <medicationId>:<medicinalProductId> [--product ...]
 ```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--product <medicationId:medicinalProductId>` | Which product fulfils this line. Repeat once per line. |
 
 **Example**
 
 ```
-$ npm run cli -- orders deliver ord-abc123
+$ npm run cli -- orders deliver ord-abc123 --product med-paracetamol:prod-alvedon-500
+Order ord-abc123 delivered.
+```
+
+Multi-line order:
+
+```
+$ npm run cli -- orders deliver ord-abc123 \
+    --product med-paracetamol:prod-alvedon-500 \
+    --product med-ibuprofen:prod-ibumetin-400
 Order ord-abc123 delivered.
 ```
 
@@ -174,4 +189,6 @@ On failure, commands print an error message to stderr and exit with code 1. The 
 ```
 Failed: OrderHasAtLeastOneLine
 Failed: OrderNotFound
+Failed: MissingProductSelection
+Failed: ProductMedicationMismatch
 ```

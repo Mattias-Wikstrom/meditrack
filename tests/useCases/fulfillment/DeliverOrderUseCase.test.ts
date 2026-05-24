@@ -39,10 +39,12 @@ describe('DeliverOrderUseCase', () => {
     return created.value.id;
   };
 
+  const selectProd1 = [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-1' as MedicinalProductId }];
+
   it('sets the order status to delivered', async () => {
     const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
 
-    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
+    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: selectProd1 });
 
     expect(result.successful).toBe(true);
     expect((await orderRepo.findById(orderId))?.status).toBe(OrderStatus.Delivered);
@@ -51,7 +53,7 @@ describe('DeliverOrderUseCase', () => {
   it('increases stock level by the ordered quantity', async () => {
     const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
 
-    await deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
+    await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: selectProd1 });
 
     expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(15);
   });
@@ -60,17 +62,31 @@ describe('DeliverOrderUseCase', () => {
     const created = await createOrder.execute({ actorId: 'nurse-1', wardUnitId: 'ward-1' as WardUnitId, lines: [{ medicationId: 'med-1' as MedicationId, quantity: 5 }] });
     if (!created.successful) return;
 
-    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
+    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', orderId: created.value.id, productSelections: selectProd1 });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
     expect(result.errors[0]?.code).toBe('InvalidStatusTransition');
   });
 
-  it('fails when no medicinal product exists for the medication', async () => {
-    const orderId = await createConfirmedOrder('med-unknown' as MedicationId, 5);
+  it('fails when no product selection is provided for a line', async () => {
+    const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
 
-    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
+    const result = await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: [] });
+
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('MissingProductSelection');
+  });
+
+  it('fails when the specified product does not exist', async () => {
+    const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
+
+    const result = await deliverOrder.execute({
+      actorId: 'pharmacist-1',
+      orderId,
+      productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-nonexistent' as MedicinalProductId }],
+    });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
@@ -78,10 +94,14 @@ describe('DeliverOrderUseCase', () => {
   });
 
   it('does not update stock if delivery fails', async () => {
-    const orderId = await createConfirmedOrder('med-unknown' as MedicationId, 5);
+    const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
     const stockBefore = (await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber();
 
-    await deliverOrder.execute({ actorId: 'pharmacist-1', orderId });
+    await deliverOrder.execute({
+      actorId: 'pharmacist-1',
+      orderId,
+      productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-nonexistent' as MedicinalProductId }],
+    });
 
     expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(stockBefore);
   });

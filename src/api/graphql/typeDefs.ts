@@ -10,7 +10,7 @@ export const typeDefs = /* GraphQL */ `
   type Mutation {
     createOrder(wardUnitId: ID!, lines: [OrderLineInput!]!): OrderPayload!
     advanceOrderStatus(orderId: ID!): OrderPayload!
-    deliverOrder(orderId: ID!): OrderPayload!
+    deliverOrder(orderId: ID!, productSelections: [ProductSelectionInput!]!): OrderPayload!
   }
 
   type WardUnit {
@@ -80,10 +80,17 @@ export const typeDefs = /* GraphQL */ `
     OrderNotFound
     InvalidStatusTransition
     MedicinalProductNotFound
+    MissingProductSelection
+    ProductMedicationMismatch
   }
 
   input OrderLineInput {
     medicationId: ID!
     quantity: Int!
+  }
+
+  input ProductSelectionInput {
+    medicationId: ID!
+    medicinalProductId: ID!
   }
 `;

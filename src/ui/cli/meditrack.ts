@@ -64,6 +64,18 @@ orders
 orders
   .command('deliver <orderId>')
   .description('Mark an order as delivered and update stock')
-  .action(async (orderId) => deliverOrder(deliverOrderUseCase, output, orderId));
+  .option(
+    '--product <spec>',
+    'medicationId:medicinalProductId — repeat once per order line',
+    (val: string, prev: string[]) => [...prev, val],
+    [] as string[],
+  )
+  .action(async (orderId, opts) => {
+    const productSelections = (opts.product as string[]).map((spec) => {
+      const [medicationId, medicinalProductId] = spec.split(':');
+      return { medicationId: medicationId ?? '', medicinalProductId: medicinalProductId ?? '' };
+    });
+    return deliverOrder(deliverOrderUseCase, output, orderId, productSelections);
+  });
 
 program.parse();

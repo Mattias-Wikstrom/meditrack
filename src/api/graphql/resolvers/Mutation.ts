@@ -1,5 +1,5 @@
 import { GraphQLContext } from '../context';
-import { MedicationId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
+import { MedicationId, MedicinalProductId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
 
 export const Mutation = {
   createOrder: async (
@@ -24,8 +24,19 @@ export const Mutation = {
       : { successful: false, order: null, errors: result.errors.map((e) => e.code) };
   },
 
-  deliverOrder: async (_: unknown, { orderId }: { orderId: string }, ctx: GraphQLContext) => {
-    const result = await ctx.deliverOrderUseCase.execute({ actorId: ctx.actorId, orderId: orderId as OrderId });
+  deliverOrder: async (
+    _: unknown,
+    { orderId, productSelections }: { orderId: string; productSelections: { medicationId: string; medicinalProductId: string }[] },
+    ctx: GraphQLContext,
+  ) => {
+    const result = await ctx.deliverOrderUseCase.execute({
+      actorId: ctx.actorId,
+      orderId: orderId as OrderId,
+      productSelections: productSelections.map((s) => ({
+        medicationId: s.medicationId as MedicationId,
+        medicinalProductId: s.medicinalProductId as MedicinalProductId,
+      })),
+    });
     return result.successful
       ? { successful: true, order: result.value, errors: [] }
       : { successful: false, order: null, errors: result.errors.map((e) => e.code) };

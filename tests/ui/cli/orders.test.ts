@@ -90,7 +90,7 @@ describe('deliverOrder', () => {
     const useCase = new DeliverOrderUseCase(orderRepo, medicinalProductRepo, eventBus);
     const output = new RecordingOutput();
 
-    await deliverOrder(useCase, output, created.value.id);
+    await deliverOrder(useCase, output, created.value.id, [{ medicationId: 'med-1', medicinalProductId: 'prod-1' }]);
 
     expect(output.messages[0]).toContain('delivered');
   });

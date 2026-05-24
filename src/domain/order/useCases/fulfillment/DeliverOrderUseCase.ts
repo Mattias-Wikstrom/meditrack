@@ -6,11 +6,17 @@ import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/results/UseCaseResult';
 import { OrderDelivered } from '../../events/OrderDelivered';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';
-import { OrderId } from '../../../shared/IdTypes';
+import { MedicationId, MedicinalProductId, OrderId } from '../../../shared/IdTypes';
+
+export interface ProductSelection {
+  medicationId: MedicationId;
+  medicinalProductId: MedicinalProductId;
+}
 
 export interface DeliverOrderInput {
   actorId: string;
   orderId: OrderId;
+  productSelections: ReadonlyArray<ProductSelection>;
 }
 
 export class DeliverOrderUseCase {
@@ -31,10 +37,19 @@ export class DeliverOrderUseCase {
     }
 
     for (const line of order.lines) {
-      const [product] = await this.medicinalProductRepository.findByMedicationId(line.medicationId);
+      const selection = input.productSelections.find((s) => s.medicationId === line.medicationId);
+      if (selection === undefined) {
+        return failure('MissingProductSelection');
+      }
+
+      const product = await this.medicinalProductRepository.findById(selection.medicinalProductId);
       if (product === undefined) {
         return failure('MedicinalProductNotFound');
       }
+      if (product.medicationId !== line.medicationId) {
+        return failure('ProductMedicationMismatch');
+      }
+
       product.stockLevel = product.stockLevel.add(line.quantity);
       await this.medicinalProductRepository.save(product);
 
