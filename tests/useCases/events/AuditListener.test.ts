@@ -76,7 +76,7 @@ describe('AuditListener', () => {
     await deliverOrder.execute({
       actorId: 'pharmacist-1',
       orderId: created.value.id,
-      productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-1' as MedicinalProductId }],
+      productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-1' as MedicinalProductId, quantity: 5 }],
     });
 
     const eventTypes = auditListener.getEntries().map((e) => e.eventType);

@@ -80,8 +80,9 @@ export const typeDefs = /* GraphQL */ `
     OrderNotFound
     InvalidStatusTransition
     MedicinalProductNotFound
-    MissingProductSelection
     ProductMedicationMismatch
+    SelectionQuantityMismatch
+    InsufficientStock
   }
 
   input OrderLineInput {
@@ -92,5 +93,6 @@ export const typeDefs = /* GraphQL */ `
   input ProductSelectionInput {
     medicationId: ID!
     medicinalProductId: ID!
+    quantity: Int!
   }
 `;

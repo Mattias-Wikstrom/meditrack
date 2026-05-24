@@ -4,5 +4,6 @@ export type ErrorCode =
   | 'OrderNotFound'
   | 'InvalidStatusTransition'
   | 'MedicinalProductNotFound'
-  | 'MissingProductSelection'
-  | 'ProductMedicationMismatch';
+  | 'ProductMedicationMismatch'
+  | 'SelectionQuantityMismatch'
+  | 'InsufficientStock';

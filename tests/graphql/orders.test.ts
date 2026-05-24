@@ -119,7 +119,7 @@ describe('Mutation.deliverOrder', () => {
     await graphql({ schema, source: ADVANCE_STATUS, contextValue: ctx, variableValues: { orderId } });
     await graphql({ schema, source: ADVANCE_STATUS, contextValue: ctx, variableValues: { orderId } });
 
-    const result = await graphql({ schema, source: DELIVER_ORDER, contextValue: ctx, variableValues: { orderId, productSelections: [{ medicationId: 'med-1', medicinalProductId: 'prod-1' }] } });
+    const result = await graphql({ schema, source: DELIVER_ORDER, contextValue: ctx, variableValues: { orderId, productSelections: [{ medicationId: 'med-1', medicinalProductId: 'prod-1', quantity: 20 }] } });
 
     expect(result.errors).toBeUndefined();
     expect((result.data as any)?.deliverOrder.successful).toBe(true);

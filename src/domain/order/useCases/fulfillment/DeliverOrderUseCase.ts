@@ -1,16 +1,24 @@
+import Decimal from 'decimal.js';
 import { Order } from '../../Order';
 import { OrderStatus } from '../../OrderStatus';
 import { OrderRepository } from '../../OrderRepository';
 import { MedicinalProductRepository } from '../../../medication/MedicinalProductRepository';
 import { EventBus } from '../../../shared/eventContracts/EventBus';
-import { UseCaseResult, success, failure } from '../../../shared/results/UseCaseResult';
+import { UseCaseResult, success, failure, failures } from '../../../shared/results/UseCaseResult';
 import { OrderDelivered } from '../../events/OrderDelivered';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';
 import { MedicationId, MedicinalProductId, OrderId } from '../../../shared/IdTypes';
+import { DeliveryRule } from '../../rules/DeliveryRule';
+import { DeliveryPlan, ResolvedLine } from '../../rules/DeliveryPlan';
+import { OrderMustBeConfirmed } from '../../rules/OrderMustBeConfirmed';
+import { DeliveryCoversOrder } from '../../rules/DeliveryCoversOrder';
+import { SufficientStock } from '../../rules/SufficientStock';
+import { ErrorInfo } from '../../../shared/results/ErrorInfo';
 
 export interface ProductSelection {
   medicationId: MedicationId;
   medicinalProductId: MedicinalProductId;
+  quantity: number;
 }
 
 export interface DeliverOrderInput {
@@ -20,6 +28,12 @@ export interface DeliverOrderInput {
 }
 
 export class DeliverOrderUseCase {
+  private readonly rules: DeliveryRule[] = [
+    new OrderMustBeConfirmed(),
+    new DeliveryCoversOrder(),
+    new SufficientStock(),
+  ];
+
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly medicinalProductRepository: MedicinalProductRepository,
@@ -32,29 +46,37 @@ export class DeliverOrderUseCase {
       return failure('OrderNotFound');
     }
 
-    if (order.status !== OrderStatus.Confirmed) {
-      return failure('InvalidStatusTransition');
-    }
-
-    for (const line of order.lines) {
-      const selection = input.productSelections.find((s) => s.medicationId === line.medicationId);
-      if (selection === undefined) {
-        return failure('MissingProductSelection');
-      }
-
+    const resolvedLines: ResolvedLine[] = [];
+    for (const selection of input.productSelections) {
       const product = await this.medicinalProductRepository.findById(selection.medicinalProductId);
       if (product === undefined) {
         return failure('MedicinalProductNotFound');
       }
-      if (product.medicationId !== line.medicationId) {
-        return failure('ProductMedicationMismatch');
+      resolvedLines.push({
+        medicationId: selection.medicationId,
+        product,
+        quantity: new Decimal(selection.quantity),
+      });
+    }
+
+    const plan: DeliveryPlan = { order, resolvedLines };
+
+    const errors: ErrorInfo[] = [];
+    for (const rule of this.rules) {
+      const error = rule.check(plan);
+      if (error !== null) {
+        errors.push(error);
       }
+    }
+    if (errors.length > 0) {
+      return failures(errors);
+    }
 
-      product.stockLevel = product.stockLevel.sub(line.quantity);
-      await this.medicinalProductRepository.save(product);
-
-      if (product.isBelowThreshold) {
-        await this.eventBus.publish(new StockBelowThreshold(input.actorId, product));
+    for (const line of plan.resolvedLines) {
+      line.product.stockLevel = line.product.stockLevel.sub(line.quantity);
+      await this.medicinalProductRepository.save(line.product);
+      if (line.product.isBelowThreshold) {
+        await this.eventBus.publish(new StockBelowThreshold(input.actorId, line.product));
       }
     }
 

@@ -141,31 +141,32 @@ Order ord-abc123 is now: Confirmed
 
 ### deliver
 
-Mark a `Confirmed` order as delivered. Requires an explicit product selection for every order line — the pharmacist specifies which medicinal product was used to fulfil each line. Stock is updated accordingly.
+Mark a `Confirmed` order as delivered. Requires explicit product selections covering every order line — the pharmacist specifies which medicinal products were used and in what quantity. A single line can be fulfilled by multiple products. Stock is updated accordingly.
 
 ```
-npm run cli -- orders deliver <orderId> --product <medicationId>:<medicinalProductId> [--product ...]
+npm run cli -- orders deliver <orderId> --product <medicationId>:<medicinalProductId>:<quantity> [--product ...]
 ```
 
 **Options**
 
 | Flag | Description |
 |------|-------------|
-| `--product <medicationId:medicinalProductId>` | Which product fulfils this line. Repeat once per line. |
+| `--product <medicationId:medicinalProductId:quantity>` | A product used to fulfil this line. Repeat to split a line across multiple products. |
 
 **Example**
 
 ```
-$ npm run cli -- orders deliver ord-abc123 --product med-paracetamol:prod-alvedon-500
+$ npm run cli -- orders deliver ord-abc123 --product med-paracetamol:prod-alvedon-500:50
 Order ord-abc123 delivered.
 ```
 
-Multi-line order:
+Multi-line order, with one line split across two products:
 
 ```
 $ npm run cli -- orders deliver ord-abc123 \
-    --product med-paracetamol:prod-alvedon-500 \
-    --product med-ibuprofen:prod-ibumetin-400
+    --product med-paracetamol:prod-alvedon-500:30 \
+    --product med-paracetamol:prod-panodil-500:20 \
+    --product med-ibuprofen:prod-ibumetin-400:10
 Order ord-abc123 delivered.
 ```
 
@@ -189,6 +190,7 @@ On failure, commands print an error message to stderr and exit with code 1. The 
 ```
 Failed: OrderHasAtLeastOneLine
 Failed: OrderNotFound
-Failed: MissingProductSelection
+Failed: SelectionQuantityMismatch
 Failed: ProductMedicationMismatch
+Failed: InsufficientStock
 ```

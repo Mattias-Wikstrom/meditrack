@@ -39,7 +39,7 @@ describe('DeliverOrderUseCase', () => {
     return created.value.id;
   };
 
-  const selectProd1 = [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-1' as MedicinalProductId }];
+  const selectProd1 = [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-1' as MedicinalProductId, quantity: 5 }];
 
   it('sets the order status to delivered', async () => {
     const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
@@ -76,7 +76,7 @@ describe('DeliverOrderUseCase', () => {
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
-    expect(result.errors[0]?.code).toBe('MissingProductSelection');
+    expect(result.errors[0]?.code).toBe('SelectionQuantityMismatch');
   });
 
   it('fails when the specified product does not exist', async () => {
@@ -85,7 +85,7 @@ describe('DeliverOrderUseCase', () => {
     const result = await deliverOrder.execute({
       actorId: 'pharmacist-1',
       orderId,
-      productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-nonexistent' as MedicinalProductId }],
+      productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-nonexistent' as MedicinalProductId, quantity: 5 }],
     });
 
     expect(result.successful).toBe(false);
@@ -100,7 +100,7 @@ describe('DeliverOrderUseCase', () => {
     await deliverOrder.execute({
       actorId: 'pharmacist-1',
       orderId,
-      productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-nonexistent' as MedicinalProductId }],
+      productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-nonexistent' as MedicinalProductId, quantity: 5 }],
     });
 
     expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(stockBefore);

@@ -58,7 +58,7 @@ export async function deliverOrder(
   useCase: DeliverOrderUseCase,
   output: CliOutput,
   orderId: string,
-  productSelections: ReadonlyArray<{ medicationId: string; medicinalProductId: string }>,
+  productSelections: ReadonlyArray<{ medicationId: string; medicinalProductId: string; quantity: number }>,
 ): Promise<void> {
   const result = await useCase.execute({
     actorId: 'cli',
@@ -66,6 +66,7 @@ export async function deliverOrder(
     productSelections: productSelections.map((s) => ({
       medicationId: s.medicationId as MedicationId,
       medicinalProductId: s.medicinalProductId as MedicinalProductId,
+      quantity: s.quantity,
     })),
   });
 

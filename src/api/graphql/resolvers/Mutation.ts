@@ -26,7 +26,7 @@ export const Mutation = {
 
   deliverOrder: async (
     _: unknown,
-    { orderId, productSelections }: { orderId: string; productSelections: { medicationId: string; medicinalProductId: string }[] },
+    { orderId, productSelections }: { orderId: string; productSelections: { medicationId: string; medicinalProductId: string; quantity: number }[] },
     ctx: GraphQLContext,
   ) => {
     const result = await ctx.deliverOrderUseCase.execute({
@@ -35,6 +35,7 @@ export const Mutation = {
       productSelections: productSelections.map((s) => ({
         medicationId: s.medicationId as MedicationId,
         medicinalProductId: s.medicinalProductId as MedicinalProductId,
+        quantity: s.quantity,
       })),
     });
     return result.successful
