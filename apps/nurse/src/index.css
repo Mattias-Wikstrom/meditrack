@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-accent: #2563EB;
+  --color-accent-light: #DBEAFE;
+}

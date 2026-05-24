@@ -6,6 +6,10 @@
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
