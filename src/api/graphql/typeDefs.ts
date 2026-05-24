@@ -21,9 +21,11 @@ export const typeDefs = /* GraphQL */ `
 
   type Query {
     wardUnit(id: ID!): WardUnit
+    orders(status: OrderStatus): [Order!]!
+    order(id: ID!): Order
     medications(query: String): [Medication!]!
     medication(id: ID!): Medication
-    medicinalProducts: [MedicinalProduct!]!
+    medicinalProducts(medicationId: ID): [MedicinalProduct!]!
     medicinalProduct(id: ID!): MedicinalProduct
   }
 
