@@ -3,26 +3,31 @@
 import { Order } from '../../Order';
 import { OrderStatus } from '../../OrderStatus';
 import { OrderRepository } from '../../OrderRepository';
+import { ActorRepository } from '../../../actor/ActorRepository';
+import { ActorRole } from '../../../shared/ActorRole';
 import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/results/UseCaseResult';
 import { OrderStatusAdvanced } from '../../events/OrderStatusAdvanced';
 import { OrderId } from '../../../shared/IdTypes';
-import { ActorRole } from '../../../shared/ActorRole';
 
 export interface ConfirmOrderInput {
   actorId: string;
-  actorRole: ActorRole;
   orderId: OrderId;
 }
 
 export class ConfirmOrderUseCase {
   constructor(
+    private readonly actorRepository: ActorRepository,
     private readonly orderRepository: OrderRepository,
     private readonly eventBus: EventBus,
   ) {}
 
   async execute(input: ConfirmOrderInput): Promise<UseCaseResult<Order>> {
-    if (input.actorRole !== ActorRole.Pharmacist) {
+    const actor = await this.actorRepository.findById(input.actorId);
+    if (actor === undefined) {
+      return failure('ActorNotFound');
+    }
+    if (actor.role !== ActorRole.Pharmacist) {
       return failure('UnauthorizedRole');
     }
 

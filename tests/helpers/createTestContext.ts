@@ -1,8 +1,10 @@
 import { GraphQLContext } from '../../src/api/graphql/context';
+import { InMemoryActorRepository } from '../../src/storage/inMemory/InMemoryActorRepository';
 import { InMemoryMedicationRepository } from '../../src/storage/inMemory/InMemoryMedicationRepository';
 import { InMemoryMedicinalProductRepository } from '../../src/storage/inMemory/InMemoryMedicinalProductRepository';
 import { InMemoryOrderRepository } from '../../src/storage/inMemory/InMemoryOrderRepository';
 import { InMemoryWardUnitRepository } from '../../src/storage/inMemory/InMemoryWardUnitRepository';
+import { ActorRole } from '../../src/domain/shared/ActorRole';
 import { SimpleEventBus } from '../../src/eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../src/domain/order/useCases/ordering/CreateOrderUseCase';
 import { SendOrderUseCase } from '../../src/domain/order/useCases/fulfillment/SendOrderUseCase';
@@ -15,6 +17,11 @@ export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
   orderRepo: InMemoryOrderRepository;
   wardUnitRepo: InMemoryWardUnitRepository;
 } {
+  const actorRepo = new InMemoryActorRepository([
+    { id: 'nurse-1', role: ActorRole.Nurse },
+    { id: 'pharmacist-1', role: ActorRole.Pharmacist },
+    { id: actorId, role: ActorRole.Nurse },
+  ]);
   const medicationRepo = new InMemoryMedicationRepository();
   const medicinalProductRepo = new InMemoryMedicinalProductRepository();
   const orderRepo = new InMemoryOrderRepository();
@@ -26,10 +33,10 @@ export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
     medicinalProductRepo,
     orderRepo,
     wardUnitRepo,
-    createOrderUseCase: new CreateOrderUseCase(orderRepo, eventBus),
-    sendOrderUseCase: new SendOrderUseCase(orderRepo, eventBus),
-    confirmOrderUseCase: new ConfirmOrderUseCase(orderRepo, eventBus),
-    deliverOrderUseCase: new DeliverOrderUseCase(orderRepo, medicinalProductRepo, eventBus),
+    createOrderUseCase: new CreateOrderUseCase(actorRepo, orderRepo, eventBus),
+    sendOrderUseCase: new SendOrderUseCase(actorRepo, orderRepo, eventBus),
+    confirmOrderUseCase: new ConfirmOrderUseCase(actorRepo, orderRepo, eventBus),
+    deliverOrderUseCase: new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, eventBus),
     actorId,
   };
 }

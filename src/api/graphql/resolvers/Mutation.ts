@@ -1,6 +1,5 @@
 import { GraphQLContext } from '../context';
 import { MedicationId, MedicinalProductId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
-import { ActorRole } from '../../../domain/shared/ActorRole';
 
 export const Mutation = {
   createOrder: async (
@@ -10,7 +9,6 @@ export const Mutation = {
   ) => {
     const result = await ctx.createOrderUseCase.execute({
       actorId: ctx.actorId,
-      actorRole: ActorRole.Nurse,
       wardUnitId: wardUnitId as WardUnitId,
       lines: lines.map((l) => ({ medicationId: l.medicationId as MedicationId, quantity: l.quantity })),
     });
@@ -22,7 +20,6 @@ export const Mutation = {
   sendOrder: async (_: unknown, { orderId }: { orderId: string }, ctx: GraphQLContext) => {
     const result = await ctx.sendOrderUseCase.execute({
       actorId: ctx.actorId,
-      actorRole: ActorRole.Nurse,
       orderId: orderId as OrderId,
     });
     return result.successful
@@ -33,7 +30,6 @@ export const Mutation = {
   confirmOrder: async (_: unknown, { orderId }: { orderId: string }, ctx: GraphQLContext) => {
     const result = await ctx.confirmOrderUseCase.execute({
       actorId: ctx.actorId,
-      actorRole: ActorRole.Pharmacist,
       orderId: orderId as OrderId,
     });
     return result.successful
@@ -48,7 +44,6 @@ export const Mutation = {
   ) => {
     const result = await ctx.deliverOrderUseCase.execute({
       actorId: ctx.actorId,
-      actorRole: ActorRole.Pharmacist,
       orderId: orderId as OrderId,
       productSelections: productSelections.map((s) => ({
         medicationId: s.medicationId as MedicationId,
