@@ -27,7 +27,7 @@ describe('DeliverOrderUseCase', () => {
     deliverOrder = new DeliverOrderUseCase(orderRepo, medicinalProductRepo, eventBus);
 
     await medicinalProductRepo.save(
-      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(20)),
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(3)),
     );
   });
 

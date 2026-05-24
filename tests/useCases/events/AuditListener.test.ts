@@ -34,7 +34,7 @@ describe('AuditListener', () => {
     eventBus.subscribe('StockBelowThreshold', auditListener);
 
     await medicinalProductRepo.save(
-      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(20)),
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(6)),
     );
   });
 
@@ -72,7 +72,7 @@ describe('AuditListener', () => {
     await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
     await advanceStatus.execute({ actorId: 'pharmacist-1', orderId: created.value.id });
 
-    // stock starts at 10, threshold is 20 — already below threshold before delivery
+    // stock starts at 10, threshold is 6 — delivery of 5 units takes it to 5, crossing the threshold
     await deliverOrder.execute({
       actorId: 'pharmacist-1',
       orderId: created.value.id,
