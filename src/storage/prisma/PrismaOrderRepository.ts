@@ -61,32 +61,32 @@ export class PrismaOrderRepository implements OrderRepository {
   }
 
   async save(order: Order): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
-      await tx.order.upsert({
-        where: { id: order.id },
-        create: {
-          id: order.id,
-          wardUnitId: order.wardUnitId,
-          status: order.status,
-          createdAt: order.createdAt,
-        },
-        update: {
-          wardUnitId: order.wardUnitId,
-          status: order.status,
-        },
-      });
-
-      // Replace lines wholesale — they have no domain identity of their own.
-      await tx.orderLine.deleteMany({ where: { orderId: order.id } });
-      if (order.lines.length > 0) {
-        await tx.orderLine.createMany({
-          data: order.lines.map((line) => ({
-            orderId: order.id,
-            medicationId: line.medicationId,
-            quantity: line.quantity.toString(),
-          })),
-        });
-      }
+    await this.prisma.order.upsert({
+      where: { id: order.id },
+      create: {
+        id: order.id,
+        wardUnitId: order.wardUnitId,
+        status: order.status,
+        createdAt: order.createdAt,
+      },
+      update: {
+        wardUnitId: order.wardUnitId,
+        status: order.status,
+      },
     });
+
+    // Replace lines wholesale — they have no domain identity of their own.
+    // The caller (PrismaTransactor) wraps this in a $transaction, so both
+    // operations are atomic with the rest of the use case work.
+    await this.prisma.orderLine.deleteMany({ where: { orderId: order.id } });
+    if (order.lines.length > 0) {
+      await this.prisma.orderLine.createMany({
+        data: order.lines.map((line) => ({
+          orderId: order.id,
+          medicationId: line.medicationId,
+          quantity: line.quantity.toString(),
+        })),
+      });
+    }
   }
 }
