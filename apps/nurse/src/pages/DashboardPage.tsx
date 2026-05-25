@@ -112,10 +112,10 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick }: {
   onRowClick: (id: string) => void;
 }) {
   const cols: { key: SortKey; label: string }[] = [
+    { key: 'createdAt', label: 'Created' },
     { key: 'status',    label: 'Status' },
     { key: 'wardUnit',  label: 'Ward Unit' },
     { key: 'lines',     label: 'Medications' },
-    { key: 'createdAt', label: 'Created' },
   ];
   return (
     <table className="w-full text-sm">
@@ -133,10 +133,10 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick }: {
         {orders.map(order => (
           <tr key={order.id} onClick={() => onRowClick(order.id)}
             className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer transition-colors">
+            <td className="py-2.5 px-4 align-top text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
             <td className="py-2.5 px-4 align-top"><StatusBadge status={order.status} /></td>
             <td className="py-2.5 px-4 align-top text-slate-700">{order.wardUnitId}</td>
             <td className="py-2.5 px-4 align-top"><LineList lines={order.lines} /></td>
-            <td className="py-2.5 px-4 align-top text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
           </tr>
         ))}
       </tbody>
