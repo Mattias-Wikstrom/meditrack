@@ -8,9 +8,10 @@ interface ChangePasswordPageProps {
   token: string;
   actorId: string;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function ChangePasswordPage({ token, actorId, onSuccess }: ChangePasswordPageProps) {
+export function ChangePasswordPage({ token, actorId, onSuccess, onCancel }: ChangePasswordPageProps) {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -48,6 +49,14 @@ export function ChangePasswordPage({ token, actorId, onSuccess }: ChangePassword
 
   return (
     <div className="max-w-sm">
+      {onCancel && (
+        <button
+          onClick={onCancel}
+          className="text-slate-400 hover:text-slate-600 transition-colors text-sm mb-4 inline-block"
+        >
+          ← Back
+        </button>
+      )}
       <h1 className="text-xl font-semibold text-slate-800 mb-6">My Account</h1>
       <Card className="p-6">
         <p className="text-sm text-slate-500 mb-6">

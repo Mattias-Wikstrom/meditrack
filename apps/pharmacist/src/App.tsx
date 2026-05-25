@@ -62,7 +62,7 @@ export function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/inventory" element={<InventoryPage />} />
-          <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} onSuccess={() => navigate('/')} />} />
+          <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} onSuccess={() => navigate('/')} onCancel={() => navigate('/')} />} />
         </Routes>
       </AppShell>
     </Provider>
