@@ -1,10 +1,9 @@
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Badge, Spinner } from '@meditrack/ui';
-import { graphql } from '../gql';
 import { EntityDetailsCard } from '../components/EntityDetailsCard';
 
-const ACTORS_QUERY = graphql(`
+const ACTORS_QUERY = `
   query AdminActorDetails {
     actors {
       id
@@ -12,31 +11,31 @@ const ACTORS_QUERY = graphql(`
       wardUnit { id name }
     }
   }
-`);
+`;
 
-const WARD_UNITS_QUERY = graphql(`
+const WARD_UNITS_QUERY = `
   query AdminWardUnitDetails {
     wardUnits { id name }
   }
-`);
+`;
 
-const MEDICATIONS_QUERY = graphql(`
+const MEDICATIONS_QUERY = `
   query AdminMedicationDetails {
     medicinalProducts {
       id productName stockLevel stockThreshold isBelowThreshold
       medication { id innName atcCode form strength }
     }
   }
-`);
+`;
 
-const ORDERS_QUERY = graphql(`
+const ORDERS_QUERY = `
   query AdminOrderDetails {
     orders {
       id wardUnitId status createdAt
       lines { medicationId quantity medication { innName } }
     }
   }
-`);
+`;
 
 const NotFound = ({ kind, to }: { kind: string; to: string }) => <p className="text-sm text-slate-500">No {kind} found. <Link className="text-accent hover:underline" to={to}>Back to list</Link>.</p>;
 
