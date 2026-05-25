@@ -22,6 +22,7 @@ export function MedicationSearch({ onSelect, placeholder = 'Search medicationsâ€
   const [open, setOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -52,12 +53,14 @@ export function MedicationSearch({ onSelect, placeholder = 'Search medicationsâ€
     setQuery('');
     setResults([]);
     setOpen(false);
+    inputRef.current?.focus();
   }
 
   return (
     <div ref={containerRef} className="relative">
       <div className="relative">
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

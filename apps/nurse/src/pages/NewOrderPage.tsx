@@ -71,6 +71,9 @@ export function NewOrderPage() {
       <div className="mb-6">
         <label className="block text-sm font-medium text-slate-700 mb-2">Search medications</label>
         <MedicationSearch onSelect={addLine} fetcher={fetcher} />
+        {lines.length > 0 && (
+          <p className="mt-2 text-xs text-slate-400">Search again to add another medication.</p>
+        )}
       </div>
 
       {lines.length > 0 && (
