@@ -29,14 +29,20 @@ const PRODUCTS_QUERY = graphql(`
 
 type OrderLine = NonNullable<NonNullable<GetOrderQuery['order']>['lines'][number]>;
 
-function LineDeliveryRow({
+// One row in the split list for a single order line.
+interface Split {
+  medicinalProductId: string;
+  quantity: number;
+}
+
+function LineDeliverySection({
   line,
-  selection,
+  splits,
   onChange,
 }: {
   line: OrderLine;
-  selection: ProductSelection;
-  onChange: (s: ProductSelection) => void;
+  splits: Split[];
+  onChange: (splits: Split[]) => void;
 }) {
   const [{ data }] = useQuery({
     query: PRODUCTS_QUERY,
@@ -44,41 +50,92 @@ function LineDeliveryRow({
   });
 
   const products = data?.medicinalProducts ?? [];
+  const totalAllocated = splits.reduce((sum, s) => sum + s.quantity, 0);
+  const remaining = line.quantity - totalAllocated;
+  const covered = totalAllocated === line.quantity;
+
+  function updateSplit(index: number, patch: Partial<Split>) {
+    onChange(splits.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+  }
+
+  function addSplit() {
+    onChange([...splits, { medicinalProductId: '', quantity: Math.max(1, remaining) }]);
+  }
+
+  function removeSplit(index: number) {
+    onChange(splits.filter((_, i) => i !== index));
+  }
+
+  const multiRow = splits.length > 1;
 
   return (
     <div className="px-5 py-4 border-b border-slate-100 last:border-0">
-      <p className="text-sm font-medium text-slate-800 mb-3">
-        {line.medication?.innName ?? line.medicationId}
-        <span className="ml-2 text-slate-400 font-normal">× {line.quantity} ordered</span>
-      </p>
-      <div className="flex gap-3 items-end">
-        <div className="flex-1">
-          <label className="block text-xs text-slate-500 mb-1">Product</label>
-          <select
-            value={selection.medicinalProductId}
-            onChange={(e) => onChange({ ...selection, medicinalProductId: e.target.value })}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
-          >
-            <option value="">Select product…</option>
-            {products.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.productName} ({p.stockLevel} in stock{p.isBelowThreshold ? ' ⚠︎' : ''})
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="w-24">
-          <label className="block text-xs text-slate-500 mb-1">Quantity</label>
-          <input
-            type="number"
-            min={1}
-            max={line.quantity}
-            value={selection.quantity}
-            onChange={(e) => onChange({ ...selection, quantity: Math.max(1, parseInt(e.target.value) || 1) })}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
-          />
-        </div>
+      {/* Line header */}
+      <div className="flex items-baseline justify-between mb-3">
+        <p className="text-sm font-medium text-slate-800">
+          {line.medication?.innName ?? line.medicationId}
+          <span className="ml-2 text-slate-400 font-normal">× {line.quantity} ordered</span>
+        </p>
+        <span className={`text-xs font-medium tabular-nums ${covered ? 'text-green-600' : 'text-slate-400'}`}>
+          {totalAllocated} / {line.quantity}{covered ? ' ✓' : ''}
+        </span>
       </div>
+
+      {/* Column headers — stable width, always rendered */}
+      <div className="flex gap-2 mb-1.5">
+        <p className="flex-1 text-xs text-slate-500">Product</p>
+        <p className="w-20 text-xs text-slate-500">Qty</p>
+        <div className="w-6" /> {/* spacer keeps headers aligned with rows */}
+      </div>
+
+      {/* Split rows */}
+      <div className="space-y-2">
+        {splits.map((split, i) => (
+          <div key={i} className="flex gap-2 items-center">
+            <select
+              value={split.medicinalProductId}
+              onChange={(e) => updateSplit(i, { medicinalProductId: e.target.value })}
+              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+            >
+              <option value="">Select product…</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.productName} ({p.stockLevel} in stock{p.isBelowThreshold ? ' ⚠︎' : ''})
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min={1}
+              max={line.quantity}
+              value={split.quantity}
+              onChange={(e) => updateSplit(i, { quantity: Math.max(1, parseInt(e.target.value) || 1) })}
+              className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+            />
+            {multiRow ? (
+              <button
+                onClick={() => removeSplit(i)}
+                className="w-6 text-slate-300 hover:text-red-400 transition-colors text-sm"
+                title="Remove"
+              >
+                ✕
+              </button>
+            ) : (
+              <div className="w-6" />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Split button — only when there is remaining quantity to allocate */}
+      {remaining > 0 && (
+        <button
+          onClick={addSplit}
+          className="mt-3 text-xs text-accent hover:text-accent/80 transition-colors"
+        >
+          + Split across products
+        </button>
+      )}
     </div>
   );
 }
@@ -93,23 +150,42 @@ export function OrderDetailPage() {
 
   const order = data?.order;
 
-  const [selections, setSelections] = useState<Record<string, ProductSelection>>({});
+  // One entry per order line; each entry is an array of splits.
+  const [allSplits, setAllSplits] = useState<Record<string, Split[]>>({});
 
-  function getSelection(medicationId: string, quantity: number): ProductSelection {
-    return selections[medicationId] ?? { medicationId, medicinalProductId: '', quantity };
+  function getSplits(medicationId: string, orderedQty: number): Split[] {
+    return allSplits[medicationId] ?? [{ medicinalProductId: '', quantity: orderedQty }];
   }
 
-  function updateSelection(medicationId: string, s: ProductSelection) {
-    setSelections((prev) => ({ ...prev, [medicationId]: s }));
+  function updateSplits(medicationId: string, splits: Split[]) {
+    setAllSplits((prev) => ({ ...prev, [medicationId]: splits }));
   }
 
   async function handleDeliver() {
     if (!order) return;
-    const productSelections = order.lines.map((l) =>
-      getSelection(l.medicationId, l.quantity)
+
+    // Validate: every split must have a product selected and totals must match.
+    for (const line of order.lines) {
+      const splits = getSplits(line.medicationId, line.quantity);
+      if (splits.some((s) => !s.medicinalProductId)) {
+        setSubmitError('Select a product for every row.');
+        return;
+      }
+      const total = splits.reduce((sum, s) => sum + s.quantity, 0);
+      if (total !== line.quantity) {
+        setSubmitError(`Quantities for ${line.medication?.innName ?? line.medicationId} must add up to ${line.quantity}.`);
+        return;
+      }
+    }
+
+    const productSelections: ProductSelection[] = order.lines.flatMap((line) =>
+      getSplits(line.medicationId, line.quantity).map((s) => ({
+        medicationId: line.medicationId,
+        medicinalProductId: s.medicinalProductId,
+        quantity: s.quantity,
+      }))
     );
-    const missing = productSelections.filter((s) => !s.medicinalProductId);
-    if (missing.length > 0) { setSubmitError('Select a product for every line.'); return; }
+
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -137,11 +213,11 @@ export function OrderDetailPage() {
 
       <Card className="mb-6 overflow-hidden">
         {order.lines.map((line) => (
-          <LineDeliveryRow
+          <LineDeliverySection
             key={line.medicationId}
             line={line}
-            selection={getSelection(line.medicationId, line.quantity)}
-            onChange={(s) => updateSelection(line.medicationId, s)}
+            splits={getSplits(line.medicationId, line.quantity)}
+            onChange={(splits) => updateSplits(line.medicationId, splits)}
           />
         ))}
       </Card>
