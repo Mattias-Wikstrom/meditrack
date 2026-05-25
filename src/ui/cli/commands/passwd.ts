@@ -4,24 +4,24 @@ import { PrismaCredentialsRepository } from '../../../storage/prisma/PrismaCrede
 import { SetPasswordUseCase } from '../../../domain/auth/SetPasswordUseCase';
 import { CliOutput } from '../CliOutput';
 
-function promptHidden(prompt: string): Promise<string> {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    // Suppress character echo while still showing the prompt itself
-    (rl as any)._writeToOutput = (str: string) => {
-      if (str === prompt) process.stdout.write(str);
-    };
-    rl.question(prompt, (answer) => {
-      rl.close();
-      process.stdout.write('\n');
-      resolve(answer);
-    });
-  });
-}
-
 export async function passwd(prisma: PrismaClient, output: CliOutput, actorId: string): Promise<void> {
-  const password = await promptHidden('New password: ');
-  const confirm  = await promptHidden('Confirm password: ');
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+  function askHidden(prompt: string): Promise<string> {
+    return new Promise((resolve) => {
+      (rl as any)._writeToOutput = (str: string) => {
+        if (str === prompt) process.stdout.write(str);
+      };
+      rl.question(prompt, (answer) => {
+        process.stdout.write('\n');
+        resolve(answer);
+      });
+    });
+  }
+
+  const password = await askHidden('New password: ');
+  const confirm  = await askHidden('Confirm password: ');
+  rl.close();
 
   if (password.length === 0) {
     output.error('Password cannot be empty.');
