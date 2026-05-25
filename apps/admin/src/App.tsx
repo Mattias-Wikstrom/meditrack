@@ -55,7 +55,7 @@ export function App() {
           <Route path="/ward-units/:wardUnitId" element={<WardUnitDetailsPage />} />
           <Route path="/users/:userId" element={<UserDetailsPage />} />
           <Route path="/medications/:productId" element={<MedicationDetailsPage />} />
-          <Route path="/orders/:wardUnitId" element={<OrderDetailsPage />} />
+          <Route path="/orders/:orderId" element={<OrderDetailsPage />} />
           <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} role={role!} onSuccess={() => navigate('/')} onCancel={() => navigate('/')} />} />
         </Routes>
       </AppShell>

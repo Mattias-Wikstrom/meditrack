@@ -55,7 +55,7 @@ export function UserDetailsPage() {
 }
 
 export function WardUnitDetailsPage() {
-  const { wardUnitId } = useParams();
+  const { orderId } = useParams();
   const [{ data, fetching, error }] = useQuery({ query: WARD_UNITS_QUERY });
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -89,11 +89,11 @@ export function MedicationDetailsPage() {
 }
 
 export function OrderDetailsPage() {
-  const { wardUnitId } = useParams();
+  const { orderId } = useParams();
   const [{ data, fetching, error }] = useQuery({ query: ORDERS_QUERY });
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
-  const order = data?.orders.find(o => o.wardUnitId === wardUnitId);
+  const order = data?.orders.find(o => o.id === orderId);
   if (!order) return <NotFound kind="order" to="/" />;
 
   return <EntityDetailsCard title={`Order for ${order.wardUnitId}`} subtitle="Order details" fields={[
