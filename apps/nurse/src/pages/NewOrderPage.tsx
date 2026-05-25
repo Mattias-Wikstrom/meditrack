@@ -68,14 +68,6 @@ export function NewOrderPage() {
         <h1 className="text-xl font-semibold text-slate-800">New Order</h1>
       </div>
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Medication to add</label>
-        <MedicationSearch onSelect={addLine} fetcher={fetcher} />
-        {lines.length > 0 && (
-          <p className="mt-2 text-xs text-slate-400">Type characters in the field above to find medicines that you want to add to the order.</p>
-        )}
-      </div>
-
       {lines.length > 0 && (
         <Card className="mb-6 divide-y divide-slate-100">
           {lines.map((line) => (
@@ -94,6 +86,14 @@ export function NewOrderPage() {
           ))}
         </Card>
       )}
+
+      <div className="mb-10">
+        <label className="block text-sm font-medium text-slate-700 mb-2">Medication to add</label>
+        <MedicationSearch onSelect={addLine} fetcher={fetcher} />
+        {lines.length > 0 && (
+          <p className="mt-2 text-xs text-slate-400">Add additional medications by typing their names above.</p>
+        )}
+      </div>
 
       {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
