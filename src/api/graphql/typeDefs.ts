@@ -1,7 +1,14 @@
 export const typeDefs = /* GraphQL */ `
   type Subscription {
+    orderPlaced: OrderPlacedEvent!
     orderStatusChanged: OrderStatusChangedEvent!
     stockBelowThreshold: StockAlertEvent!
+  }
+
+  type OrderPlacedEvent {
+    orderId: ID!
+    wardUnitId: ID!
+    actorId: String!
   }
 
   type OrderStatusChangedEvent {
@@ -31,6 +38,7 @@ export const typeDefs = /* GraphQL */ `
 
   type Mutation {
     createOrder(wardUnitId: ID!, lines: [OrderLineInput!]!): OrderPayload!
+    updateOrderLines(orderId: ID!, lines: [OrderLineInput!]!): OrderPayload!
     sendOrder(orderId: ID!): OrderPayload!
     confirmOrder(orderId: ID!): OrderPayload!
     deliverOrder(orderId: ID!, productSelections: [ProductSelectionInput!]!): OrderPayload!
