@@ -139,6 +139,8 @@ export const typeDefs = /* GraphQL */ `
   type Actor {
     id: ID!
     role: String!
+    wardUnitId: ID
+    wardUnit: WardUnit
   }
 
   type AuditEvent {

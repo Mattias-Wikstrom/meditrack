@@ -3,6 +3,7 @@ import { typeDefs } from './typeDefs';
 import { Query } from './resolvers/Query';
 import { Mutation } from './resolvers/Mutation';
 import { WardUnit } from './resolvers/WardUnit';
+import { Actor } from './resolvers/Actor';
 import { Order } from './resolvers/Order';
 import { OrderLine } from './resolvers/OrderLine';
 import { Medication } from './resolvers/Medication';
@@ -11,5 +12,5 @@ import { Subscription } from './resolvers/Subscription';
 
 export const schema = makeExecutableSchema({
   typeDefs,
-  resolvers: { Query, Mutation, Subscription, WardUnit, Order, OrderLine, Medication, MedicinalProduct },
+  resolvers: { Query, Mutation, Subscription, WardUnit, Actor, Order, OrderLine, Medication, MedicinalProduct },
 });

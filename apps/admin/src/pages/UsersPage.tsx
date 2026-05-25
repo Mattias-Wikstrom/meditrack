@@ -8,6 +8,7 @@ const ACTORS_QUERY = graphql(`
     actors {
       id
       role
+      wardUnit { name }
     }
   }
 `);
@@ -26,7 +27,7 @@ function RoleBadge({ role }: { role: string }) {
   );
 }
 
-type SortKey = 'id' | 'role';
+type SortKey = 'id' | 'role' | 'wardUnit';
 type SortDir = 'asc' | 'desc';
 
 export function UsersPage() {
@@ -47,8 +48,11 @@ export function UsersPage() {
   const actors = data?.actors ?? [];
   const filtered = roleFilter ? actors.filter(a => a.role === roleFilter) : actors;
   const sorted = [...filtered].sort((a, b) => {
-    const av = sortKey === 'id' ? a.id : a.role;
-    const bv = sortKey === 'id' ? b.id : b.role;
+    let av: string;
+    let bv: string;
+    if (sortKey === 'id') { av = a.id; bv = b.id; }
+    else if (sortKey === 'role') { av = a.role; bv = b.role; }
+    else { av = a.wardUnit?.name ?? ''; bv = b.wardUnit?.name ?? ''; }
     const cmp = av.localeCompare(bv);
     return sortDir === 'asc' ? cmp : -cmp;
   });
@@ -95,6 +99,7 @@ export function UsersPage() {
             <tr className="border-b border-slate-200 bg-slate-50">
               {th('Username', 'id')}
               {th('Role', 'role')}
+              {th('Ward Unit', 'wardUnit')}
             </tr>
           </thead>
           <tbody>
@@ -102,11 +107,12 @@ export function UsersPage() {
               <tr key={actor.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                 <td className="py-3 px-4 font-medium text-slate-800">{actor.id}</td>
                 <td className="py-3 px-4"><RoleBadge role={actor.role} /></td>
+                <td className="py-3 px-4 text-slate-600">{actor.wardUnit?.name ?? <span className="text-slate-300">—</span>}</td>
               </tr>
             ))}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={2} className="py-12 text-center text-slate-400">No users found.</td>
+                <td colSpan={3} className="py-12 text-center text-slate-400">No users found.</td>
               </tr>
             )}
           </tbody>
