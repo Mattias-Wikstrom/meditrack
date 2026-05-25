@@ -10,10 +10,11 @@ interface Actor {
 
 interface LoginPageProps {
   role: string;
+  appName?: string;
   onLogin: (token: string) => void;
 }
 
-export function LoginPage({ role, onLogin }: LoginPageProps) {
+export function LoginPage({ role, appName, onLogin }: LoginPageProps) {
   const [actors, setActors] = useState<Actor[]>([]);
   const [actorId, setActorId] = useState('');
   const [password, setPassword] = useState('');
@@ -55,7 +56,7 @@ export function LoginPage({ role, onLogin }: LoginPageProps) {
       <div className="w-full max-w-sm px-4">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-slate-800">MediTrack</h1>
-          <p className="text-slate-500 text-sm mt-1">{role} sign in</p>
+          <p className="text-slate-500 text-sm mt-1">{appName ?? role} sign in</p>
         </div>
         <form
           onSubmit={handleSubmit}

@@ -46,7 +46,7 @@ export function App() {
   const urqlClient = useMemo(() => (token ? createUrqlClient(token) : null), [token]);
 
   if (!token || !urqlClient) {
-    return <LoginPage role="Pharmacist" onLogin={login} />;
+    return <LoginPage role="Pharmacist" appName="Pharmacy" onLogin={login} />;
   }
 
   return (
