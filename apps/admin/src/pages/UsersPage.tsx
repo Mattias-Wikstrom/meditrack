@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from 'urql';
 import { Card, Spinner } from '@meditrack/ui';
-import { graphql } from '../gql';
 
-const ACTORS_QUERY = graphql(`
+const ACTORS_QUERY = /* GraphQL */ `
   query AdminActors {
     actors {
       id
@@ -12,7 +11,7 @@ const ACTORS_QUERY = graphql(`
       wardUnit { name }
     }
   }
-`);
+`;
 
 const ROLE_STYLES: Record<string, string> = {
   Nurse:       'bg-blue-100 text-blue-700',
