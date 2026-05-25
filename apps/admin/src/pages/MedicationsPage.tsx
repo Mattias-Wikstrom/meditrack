@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -124,7 +125,7 @@ export function MedicationsPage() {
                 <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.atcCode ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-600">{p.medication?.form ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.strength ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-600">{p.productName}</td>
+                <td className="px-4 py-3 text-slate-600"><Link to={`/medications/${p.id}`} className="text-accent hover:underline">{p.productName}</Link></td>
                 <td className={`px-4 py-3 text-right font-medium tabular-nums ${p.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
                   {p.stockLevel}
                   {p.isBelowThreshold && <span className="ml-1 text-xs">⚠</span>}
