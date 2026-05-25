@@ -12,6 +12,7 @@ import { CreateOrderUseCase } from '../../src/domain/order/useCases/ordering/Cre
 import { SendOrderUseCase } from '../../src/domain/order/useCases/fulfillment/SendOrderUseCase';
 import { ConfirmOrderUseCase } from '../../src/domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../src/domain/order/useCases/fulfillment/DeliverOrderUseCase';
+import { RestockUseCase } from '../../src/domain/medication/useCases/RestockUseCase';
 
 export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
   medicationRepo: InMemoryMedicationRepository;
@@ -41,6 +42,7 @@ export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
     sendOrderUseCase: new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
     confirmOrderUseCase: new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
     deliverOrderUseCase: new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus),
+    restockUseCase: new RestockUseCase(actorRepo, medicinalProductRepo, transactor),
     actorId,
   };
 }

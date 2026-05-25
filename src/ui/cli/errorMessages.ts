@@ -11,4 +11,5 @@ export const errorMessages: Record<ErrorCode, string> = {
   ProductMedicationMismatch: 'A selected product does not match the medication on the order line.',
   SelectionQuantityMismatch: 'The selected quantities do not match the ordered quantities.',
   InsufficientStock: 'Insufficient stock to fulfil this order.',
+  InvalidQuantity: 'Quantity must be greater than zero.',
 };

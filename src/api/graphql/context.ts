@@ -6,6 +6,7 @@ import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateO
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
 import { ConfirmOrderUseCase } from '../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
+import { RestockUseCase } from '../../domain/medication/useCases/RestockUseCase';
 
 export interface GraphQLContext {
   medicationRepo: MedicationRepository;
@@ -16,5 +17,6 @@ export interface GraphQLContext {
   sendOrderUseCase: SendOrderUseCase;
   confirmOrderUseCase: ConfirmOrderUseCase;
   deliverOrderUseCase: DeliverOrderUseCase;
+  restockUseCase: RestockUseCase;
   actorId: string;
 }

@@ -8,4 +8,5 @@ export type ErrorCode =
   | 'MedicinalProductNotFound'
   | 'ProductMedicationMismatch'
   | 'SelectionQuantityMismatch'
-  | 'InsufficientStock';
+  | 'InsufficientStock'
+  | 'InvalidQuantity';

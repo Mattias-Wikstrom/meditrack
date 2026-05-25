@@ -4,11 +4,12 @@ interface AppShellProps {
   appName: string;
   actorName: string;
   children: React.ReactNode;
+  nav?: React.ReactNode;
   onProfile?: () => void;
   onLogout?: () => void;
 }
 
-export function AppShell({ appName, actorName, children, onProfile, onLogout }: AppShellProps) {
+export function AppShell({ appName, actorName, children, nav, onProfile, onLogout }: AppShellProps) {
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
       <header className="bg-accent shadow-sm">
@@ -40,6 +41,13 @@ export function AppShell({ appName, actorName, children, onProfile, onLogout }: 
           </div>
         </div>
       </header>
+      {nav && (
+        <div className="border-b border-slate-200 bg-white">
+          <div className="max-w-5xl mx-auto px-6">
+            {nav}
+          </div>
+        </div>
+      )}
       <main className="max-w-5xl mx-auto px-6 py-8">
         {children}
       </main>

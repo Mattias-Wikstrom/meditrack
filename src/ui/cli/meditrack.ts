@@ -13,6 +13,7 @@ import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateO
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
 import { ConfirmOrderUseCase } from '../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
+import { RestockUseCase } from '../../domain/medication/useCases/RestockUseCase';
 import { verifyToken } from '../../domain/auth/jwt';
 import { readToken } from './auth/tokenStore';
 import { ConsoleOutput } from './ConsoleOutput';
@@ -39,6 +40,7 @@ const createOrderUseCase = new CreateOrderUseCase(actorRepo, transactor, eventBu
 const sendOrderUseCase = new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
 const confirmOrderUseCase = new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
 const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus);
+const restockUseCase = new RestockUseCase(actorRepo, medicinalProductRepo, transactor);
 
 const output = new ConsoleOutput();
 
@@ -183,6 +185,7 @@ program
       sendOrderUseCase,
       confirmOrderUseCase,
       deliverOrderUseCase,
+      restockUseCase,
       actorId,
     };
     await runGraphQL(context, output, query, variables);

@@ -34,6 +34,7 @@ export const typeDefs = /* GraphQL */ `
     sendOrder(orderId: ID!): OrderPayload!
     confirmOrder(orderId: ID!): OrderPayload!
     deliverOrder(orderId: ID!, productSelections: [ProductSelectionInput!]!): OrderPayload!
+    restockProduct(medicinalProductId: ID!, quantity: Int!): RestockPayload!
   }
 
   type WardUnit {
@@ -80,6 +81,12 @@ export const typeDefs = /* GraphQL */ `
     errors: [ErrorCode!]!
   }
 
+  type RestockPayload {
+    successful: Boolean!
+    product: MedicinalProduct
+    errors: [ErrorCode!]!
+  }
+
   enum OrderStatus {
     Draft
     Sent
@@ -108,6 +115,7 @@ export const typeDefs = /* GraphQL */ `
     ProductMedicationMismatch
     SelectionQuantityMismatch
     InsufficientStock
+    InvalidQuantity
   }
 
   input OrderLineInput {

@@ -1,6 +1,7 @@
 import { GraphQLContext } from '../context';
 import { MedicationId, MedicinalProductId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
 
+
 export const Mutation = {
   createOrder: async (
     _: unknown,
@@ -54,5 +55,20 @@ export const Mutation = {
     return result.successful
       ? { successful: true, order: result.value, errors: [] }
       : { successful: false, order: null, errors: result.errors.map((e) => e.code) };
+  },
+
+  restockProduct: async (
+    _: unknown,
+    { medicinalProductId, quantity }: { medicinalProductId: string; quantity: number },
+    ctx: GraphQLContext,
+  ) => {
+    const result = await ctx.restockUseCase.execute({
+      actorId: ctx.actorId,
+      medicinalProductId: medicinalProductId as MedicinalProductId,
+      quantity,
+    });
+    return result.successful
+      ? { successful: true, product: result.value, errors: [] }
+      : { successful: false, product: null, errors: result.errors.map((e) => e.code) };
   },
 };
