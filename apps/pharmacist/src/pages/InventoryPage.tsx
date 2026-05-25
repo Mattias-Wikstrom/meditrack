@@ -77,7 +77,7 @@ function RestockDialog({ productName, currentStock, onConfirm, onCancel, submitt
   );
 }
 
-type SortKey = 'medication' | 'form' | 'strength' | 'product' | 'stock' | 'min';
+type SortKey = 'medication' | 'product';
 type SortDir = 'asc' | 'desc';
 
 type Product = {
@@ -91,16 +91,8 @@ type Product = {
 
 function sortProducts(products: Product[], key: SortKey, dir: SortDir): Product[] {
   const sorted = [...products].sort((a, b) => {
-    let av: string | number;
-    let bv: string | number;
-    switch (key) {
-      case 'medication': av = a.medication?.innName ?? ''; bv = b.medication?.innName ?? ''; break;
-      case 'form':       av = a.medication?.form ?? '';    bv = b.medication?.form ?? '';    break;
-      case 'strength':   av = a.medication?.strength ?? ''; bv = b.medication?.strength ?? ''; break;
-      case 'product':    av = a.productName;               bv = b.productName;               break;
-      case 'stock':      av = a.stockLevel;                bv = b.stockLevel;                break;
-      case 'min':        av = a.stockThreshold;            bv = b.stockThreshold;            break;
-    }
+    const av = key === 'medication' ? (a.medication?.innName ?? '') : a.productName;
+    const bv = key === 'medication' ? (b.medication?.innName ?? '') : b.productName;
     if (av < bv) return -1;
     if (av > bv) return  1;
     return 0;
@@ -220,11 +212,11 @@ export function InventoryPage() {
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-left">
               {th('Medication', 'medication')}
-              {th('Form', 'form')}
-              {th('Strength', 'strength')}
+              <th className="px-4 py-3 font-medium text-slate-600">Form</th>
+              <th className="px-4 py-3 font-medium text-slate-600">Strength</th>
               {th('Product', 'product')}
-              {th('Stock', 'stock', 'right')}
-              {th('Min', 'min', 'right')}
+              <th className="px-4 py-3 font-medium text-slate-600 text-right">Stock</th>
+              <th className="px-4 py-3 font-medium text-slate-600 text-right">Min</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
