@@ -55,7 +55,7 @@ export function UserDetailsPage() {
 }
 
 export function WardUnitDetailsPage() {
-  const { orderId } = useParams();
+  const { wardUnitId } = useParams();
   const [{ data, fetching, error }] = useQuery({ query: WARD_UNITS_QUERY });
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
