@@ -1,6 +1,7 @@
 export const typeDefs = /* GraphQL */ `
   type Subscription {
     orderDraftCreated: OrderDraftCreatedEvent!
+    orderDraftUpdated: OrderDraftUpdatedEvent!
     orderStatusChanged: OrderStatusChangedEvent!
     stockBelowThreshold: StockAlertEvent!
   }
@@ -8,6 +9,11 @@ export const typeDefs = /* GraphQL */ `
   type OrderDraftCreatedEvent {
     orderId: ID!
     wardUnitId: ID!
+    actorId: String!
+  }
+
+  type OrderDraftUpdatedEvent {
+    orderId: ID!
     actorId: String!
   }
 

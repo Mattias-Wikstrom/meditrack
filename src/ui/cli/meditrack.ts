@@ -38,7 +38,7 @@ const transactor = new PrismaTransactor(prisma);
 const eventBus = new SimpleEventBus();
 
 const createOrderUseCase = new CreateOrderUseCase(actorRepo, transactor, eventBus);
-const updateOrderLinesUseCase = new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor);
+const updateOrderLinesUseCase = new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor, eventBus);
 const sendOrderUseCase = new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
 const confirmOrderUseCase = new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
 const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus);

@@ -8,8 +8,10 @@ import { OrderRepository } from '../../OrderRepository';
 import { ActorRepository } from '../../../actor/ActorRepository';
 import { ActorRole } from '../../../shared/ActorRole';
 import { Transactor } from '../../../shared/Transactor';
+import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/results/UseCaseResult';
 import { MedicationId, OrderId } from '../../../shared/IdTypes';
+import { DraftOrderUpdated } from '../../events/DraftOrderUpdated';
 
 export interface UpdateOrderLinesInput {
   actorId: string;
@@ -22,6 +24,7 @@ export class UpdateOrderLinesUseCase {
     private readonly actorRepository: ActorRepository,
     private readonly orderRepository: OrderRepository,
     private readonly transactor: Transactor,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(input: UpdateOrderLinesInput): Promise<UseCaseResult<Order>> {
@@ -47,6 +50,7 @@ export class UpdateOrderLinesUseCase {
       await tx.orderRepository.save(updatedOrder);
     });
 
+    await this.eventBus.publish(new DraftOrderUpdated(input.actorId, updatedOrder));
     return success(updatedOrder);
   }
 }

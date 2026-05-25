@@ -19,6 +19,12 @@ const ORDER_DRAFT_CREATED_SUB = graphql(`
   }
 `);
 
+const ORDER_DRAFT_UPDATED_SUB = graphql(`
+  subscription NurseOrderDraftUpdated {
+    orderDraftUpdated { orderId }
+  }
+`);
+
 const ORDER_STATUS_SUB = graphql(`
   subscription NurseOrderStatusChanged {
     orderStatusChanged { orderId from to }
@@ -30,6 +36,11 @@ export function DashboardPage() {
   const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
 
   useSubscription({ query: ORDER_DRAFT_CREATED_SUB }, () => {
+    refetch({ requestPolicy: 'network-only' });
+    return undefined;
+  });
+
+  useSubscription({ query: ORDER_DRAFT_UPDATED_SUB }, () => {
     refetch({ requestPolicy: 'network-only' });
     return undefined;
   });

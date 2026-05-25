@@ -2,6 +2,7 @@ import { DomainEvent } from '../../domain/shared/eventContracts/DomainEvent';
 import { EventBus } from '../../domain/shared/eventContracts/EventBus';
 import { EventListener } from '../../domain/shared/eventContracts/EventListener';
 import { DraftOrderCreated } from '../../domain/order/events/DraftOrderCreated';
+import { DraftOrderUpdated } from '../../domain/order/events/DraftOrderUpdated';
 import { OrderStatusAdvanced } from '../../domain/order/events/OrderStatusAdvanced';
 import { StockBelowThreshold } from '../../domain/medication/events/StockBelowThreshold';
 import { pubSub } from '../../eventBus/pubSub';
@@ -13,6 +14,8 @@ export class PubSubEventBus implements EventBus {
   async publish(event: DomainEvent): Promise<void> {
     if (event instanceof DraftOrderCreated) {
       pubSub.publish('DraftOrderCreated', event);
+    } else if (event instanceof DraftOrderUpdated) {
+      pubSub.publish('DraftOrderUpdated', event);
     } else if (event instanceof OrderStatusAdvanced) {
       pubSub.publish('OrderStatusAdvanced', event);
     } else if (event instanceof StockBelowThreshold) {

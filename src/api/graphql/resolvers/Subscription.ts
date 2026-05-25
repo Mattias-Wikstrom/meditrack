@@ -1,5 +1,6 @@
 import { pubSub } from '../../../eventBus/pubSub';
 import type { DraftOrderCreated } from '../../../domain/order/events/DraftOrderCreated';
+import type { DraftOrderUpdated } from '../../../domain/order/events/DraftOrderUpdated';
 import type { OrderStatusAdvanced } from '../../../domain/order/events/OrderStatusAdvanced';
 import type { StockBelowThreshold } from '../../../domain/medication/events/StockBelowThreshold';
 
@@ -9,6 +10,13 @@ export const Subscription = {
     resolve: (event: DraftOrderCreated) => ({
       orderId: event.order.id,
       wardUnitId: event.order.wardUnitId,
+      actorId: event.actorId,
+    }),
+  },
+  orderDraftUpdated: {
+    subscribe: () => pubSub.subscribe('DraftOrderUpdated'),
+    resolve: (event: DraftOrderUpdated) => ({
+      orderId: event.order.id,
       actorId: event.actorId,
     }),
   },
