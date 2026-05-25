@@ -9,6 +9,7 @@ import { UsersPage } from './pages/UsersPage';
 import { AuditPage } from './pages/AuditPage';
 import { WardUnitsPage } from './pages/WardUnitsPage';
 import { UserDetailsPage, WardUnitDetailsPage, MedicationDetailsPage, OrderDetailsPage } from './pages/DetailPages';
+import { OverviewPage } from './pages/OverviewPage';
 
 function AdminNav() {
   return (
@@ -46,7 +47,7 @@ export function App() {
         onLogout={logout}
       >
         <Routes>
-          <Route path="/" element={<div className="text-sm text-slate-600">Overview</div>} />
+          <Route path="/" element={<OverviewPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/medications" element={<MedicationsPage />} />
           <Route path="/users" element={<UsersPage />} />
