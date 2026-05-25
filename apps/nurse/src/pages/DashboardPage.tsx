@@ -8,7 +8,7 @@ const ORDERS_QUERY = graphql(`
   query NurseOrders {
     orders {
       id wardUnitId status createdAt
-      lines { medicationId quantity }
+      lines { medicationId quantity medication { innName } }
     }
   }
 `);
@@ -31,7 +31,7 @@ const ORDER_STATUS_SUB = graphql(`
   }
 `);
 
-type SortKey = 'status' | 'wardUnit' | 'lines' | 'createdAt' | 'id';
+type SortKey = 'status' | 'wardUnit' | 'lines' | 'createdAt';
 type SortDir = 'asc' | 'desc';
 
 const STATUS_RANK: Record<string, number> = { Draft: 0, Sent: 1, Confirmed: 2, Delivered: 3 };
@@ -41,18 +41,17 @@ type OrderRow = {
   wardUnitId: string;
   status: string;
   createdAt: string;
-  lines: { medicationId: string; quantity: number }[];
+  lines: { medicationId: string; quantity: number; medication?: { innName: string } | null }[];
 };
 
 function sortOrders(orders: OrderRow[], key: SortKey, dir: SortDir): OrderRow[] {
   return [...orders].sort((a, b) => {
     let cmp = 0;
     switch (key) {
-      case 'id':       cmp = a.id.localeCompare(b.id); break;
-      case 'wardUnit': cmp = a.wardUnitId.localeCompare(b.wardUnitId); break;
-      case 'lines':    cmp = a.lines.length - b.lines.length; break;
-      case 'createdAt':cmp = a.createdAt.localeCompare(b.createdAt); break;
-      case 'status':   cmp = (STATUS_RANK[a.status] ?? 0) - (STATUS_RANK[b.status] ?? 0); break;
+      case 'wardUnit':  cmp = a.wardUnitId.localeCompare(b.wardUnitId); break;
+      case 'lines':     cmp = a.lines.length - b.lines.length; break;
+      case 'createdAt': cmp = a.createdAt.localeCompare(b.createdAt); break;
+      case 'status':    cmp = (STATUS_RANK[a.status] ?? 0) - (STATUS_RANK[b.status] ?? 0); break;
     }
     return dir === 'asc' ? cmp : -cmp;
   });
@@ -81,6 +80,24 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+const LINE_LIMIT = 3;
+
+function LineList({ lines }: { lines: OrderRow['lines'] }) {
+  const shown = lines.slice(0, LINE_LIMIT);
+  const extra = lines.length - LINE_LIMIT;
+  return (
+    <div className="space-y-0.5">
+      {shown.map(l => (
+        <div key={l.medicationId} className="flex items-baseline gap-1.5">
+          <span className="text-slate-700">{l.medication?.innName ?? l.medicationId}</span>
+          <span className="text-slate-400 text-xs">×{l.quantity}</span>
+        </div>
+      ))}
+      {extra > 0 && <div className="text-slate-400 text-xs">+{extra} more</div>}
+    </div>
+  );
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-GB', {
     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
@@ -99,7 +116,6 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick }: {
     { key: 'wardUnit',  label: 'Ward Unit' },
     { key: 'lines',     label: 'Medications' },
     { key: 'createdAt', label: 'Created' },
-    { key: 'id',        label: 'Order ID' },
   ];
   return (
     <table className="w-full text-sm">
@@ -117,11 +133,10 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick }: {
         {orders.map(order => (
           <tr key={order.id} onClick={() => onRowClick(order.id)}
             className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer transition-colors">
-            <td className="py-2.5 px-4"><StatusBadge status={order.status} /></td>
-            <td className="py-2.5 px-4 text-slate-700">{order.wardUnitId}</td>
-            <td className="py-2.5 px-4 text-slate-700">{order.lines.length}</td>
-            <td className="py-2.5 px-4 text-slate-500">{formatDate(order.createdAt)}</td>
-            <td className="py-2.5 px-4 text-slate-400 font-mono text-xs">{order.id.slice(0, 8)}</td>
+            <td className="py-2.5 px-4 align-top"><StatusBadge status={order.status} /></td>
+            <td className="py-2.5 px-4 align-top text-slate-700">{order.wardUnitId}</td>
+            <td className="py-2.5 px-4 align-top"><LineList lines={order.lines} /></td>
+            <td className="py-2.5 px-4 align-top text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
           </tr>
         ))}
       </tbody>
