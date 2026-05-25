@@ -46,15 +46,15 @@ const restockUseCase = new RestockUseCase(actorRepo, medicinalProductRepo, trans
 
 const output = new ConsoleOutput();
 
-async function requireActorId(): Promise<string> {
+async function requireAuth(): Promise<{ actorId: string; wardUnitId?: string }> {
   const token = readToken();
   if (!token) {
     output.error('Not logged in. Run: meditrack login --actor-id <id> --password <password>');
     process.exit(1);
   }
   try {
-    const { actorId } = await verifyToken(token);
-    return actorId;
+    const { actorId, wardUnitId } = await verifyToken(token);
+    return { actorId, wardUnitId };
   } catch {
     output.error('Session expired. Run: meditrack login --actor-id <id> --password <password>');
     process.exit(1);
@@ -117,19 +117,24 @@ orders
 orders
   .command('create')
   .description('Create a new order')
-  .requiredOption('--ward-unit-id <id>', 'ward unit ID')
+  .option('--ward-unit-id <id>', 'ward unit ID (defaults to the one in your session token)')
   .requiredOption('--medication-id <id>', 'medication ID')
   .requiredOption('--quantity <n>', 'quantity', parseInt)
   .action(async (opts) => {
-    const actorId = await requireActorId();
-    return createOrder(createOrderUseCase, output, actorId, opts.wardUnitId, opts.medicationId, opts.quantity);
+    const { actorId, wardUnitId: sessionWardUnitId } = await requireAuth();
+    const wardUnitId = (opts.wardUnitId as string | undefined) ?? sessionWardUnitId;
+    if (!wardUnitId) {
+      output.error('No ward unit ID: pass --ward-unit-id or log in as a nurse.');
+      output.exit(1);
+    }
+    return createOrder(createOrderUseCase, output, actorId, wardUnitId, opts.medicationId, opts.quantity);
   });
 
 orders
   .command('send <orderId>')
   .description('Send a draft order to the pharmacy')
   .action(async (orderId) => {
-    const actorId = await requireActorId();
+    const { actorId } = await requireAuth();
     return sendOrder(sendOrderUseCase, output, actorId, orderId);
   });
 
@@ -137,7 +142,7 @@ orders
   .command('confirm <orderId>')
   .description('Confirm receipt of a sent order')
   .action(async (orderId) => {
-    const actorId = await requireActorId();
+    const { actorId } = await requireAuth();
     return confirmOrder(confirmOrderUseCase, output, actorId, orderId);
   });
 
@@ -151,7 +156,7 @@ orders
     [] as string[],
   )
   .action(async (orderId, opts) => {
-    const actorId = await requireActorId();
+    const { actorId } = await requireAuth();
     const productSelections = (opts.product as string[]).map((spec) => {
       const [medicationId, medicinalProductId, quantityStr] = spec.split(':');
       return {
@@ -168,7 +173,7 @@ program
   .description('Execute a GraphQL query or mutation in-process')
   .option('--variables <json>', 'variables as a JSON object')
   .action(async (query: string, opts: { variables?: string }) => {
-    const actorId = await requireActorId();
+    const { actorId } = await requireAuth();
     let variables: Record<string, unknown> | undefined;
     if (opts.variables) {
       try {
