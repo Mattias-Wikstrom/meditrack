@@ -1,6 +1,7 @@
 import readline from 'readline';
 import { PrismaClient } from '@prisma/client';
 import { PrismaCredentialsRepository } from '../../../storage/prisma/PrismaCredentialsRepository';
+import { PrismaAuditRepository } from '../../../storage/prisma/PrismaAuditRepository';
 import { SetPasswordUseCase } from '../../../domain/auth/SetPasswordUseCase';
 import { CliOutput } from '../CliOutput';
 
@@ -32,7 +33,7 @@ export async function passwd(prisma: PrismaClient, output: CliOutput, actorId: s
     process.exit(1);
   }
 
-  const useCase = new SetPasswordUseCase(new PrismaCredentialsRepository(prisma));
+  const useCase = new SetPasswordUseCase(new PrismaCredentialsRepository(prisma), new PrismaAuditRepository(prisma));
   try {
     await useCase.execute(actorId, password);
     output.print('Password updated.');

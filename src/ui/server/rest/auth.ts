@@ -1,9 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../../../storage/prisma/prismaClient';
 import { PrismaCredentialsRepository } from '../../../storage/prisma/PrismaCredentialsRepository';
+import { PrismaAuditRepository } from '../../../storage/prisma/PrismaAuditRepository';
 import { LoginUseCase } from '../../../domain/auth/LoginUseCase';
 
-const loginUseCase = new LoginUseCase(new PrismaCredentialsRepository(prisma));
+const loginUseCase = new LoginUseCase(
+  new PrismaCredentialsRepository(prisma),
+  new PrismaAuditRepository(prisma),
+);
 
 export function createAuthRouter(): Router {
   const router = Router();

@@ -1,4 +1,7 @@
-export type AuditAction = 'OrderPlaced' | 'OrderSent' | 'OrderConfirmed' | 'OrderDelivered';
+export type AuditAction =
+  | 'OrderPlaced' | 'OrderSent' | 'OrderConfirmed' | 'OrderDelivered'
+  | 'ActorLoggedIn' | 'ActorLoginFailed'
+  | 'PasswordChanged';
 
 export interface AuditEntry {
   actorId: string;
