@@ -8,6 +8,7 @@ const ACTORS_QUERY = graphql(`
     actors {
       id
       role
+      wardUnitId
       wardUnit { name }
     }
   }
@@ -52,7 +53,7 @@ export function UsersPage() {
     let bv: string;
     if (sortKey === 'id') { av = a.id; bv = b.id; }
     else if (sortKey === 'role') { av = a.role; bv = b.role; }
-    else { av = a.wardUnit?.name ?? ''; bv = b.wardUnit?.name ?? ''; }
+    else { av = a.wardUnit?.name ?? a.wardUnitId ?? ''; bv = b.wardUnit?.name ?? b.wardUnitId ?? ''; }
     const cmp = av.localeCompare(bv);
     return sortDir === 'asc' ? cmp : -cmp;
   });
@@ -107,7 +108,7 @@ export function UsersPage() {
               <tr key={actor.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                 <td className="py-3 px-4 font-medium text-slate-800">{actor.id}</td>
                 <td className="py-3 px-4"><RoleBadge role={actor.role} /></td>
-                <td className="py-3 px-4 text-slate-600">{actor.wardUnit?.name ?? <span className="text-slate-300">—</span>}</td>
+                <td className="py-3 px-4 text-slate-600">{actor.wardUnit?.name ?? actor.wardUnitId ?? <span className="text-slate-300">—</span>}</td>
               </tr>
             ))}
             {sorted.length === 0 && (
