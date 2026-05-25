@@ -14,4 +14,12 @@ export class PrismaCredentialsRepository implements CredentialsRepository {
       role: actor.role as ActorRole,
     };
   }
+
+  async setPasswordHash(actorId: string, passwordHash: string): Promise<void> {
+    try {
+      await this.prisma.actor.update({ where: { id: actorId }, data: { passwordHash } });
+    } catch {
+      throw new Error('ActorNotFound');
+    }
+  }
 }

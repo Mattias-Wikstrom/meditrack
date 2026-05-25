@@ -18,6 +18,7 @@ import { ConsoleOutput } from './ConsoleOutput';
 import { listMedications, showMedication } from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
 import { login } from './commands/auth';
+import { passwd } from './commands/passwd';
 import { runGraphQL } from './commands/graphql';
 import { GraphQLContext } from '../../api/graphql/context';
 
@@ -62,6 +63,12 @@ program
   .requiredOption('--actor-id <id>', 'actor ID')
   .requiredOption('--password <password>', 'password')
   .action(async (opts) => login(prisma, output, opts.actorId, opts.password));
+
+program
+  .command('passwd')
+  .description('Set the password for an actor')
+  .requiredOption('--actor-id <id>', 'actor ID')
+  .action(async (opts) => passwd(prisma, output, opts.actorId));
 
 const medications = program.command('medications');
 

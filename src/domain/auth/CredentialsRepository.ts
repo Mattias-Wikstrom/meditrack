@@ -8,4 +8,5 @@ export interface Credentials {
 
 export interface CredentialsRepository {
   findByActorId(id: string): Promise<Credentials | undefined>;
+  setPasswordHash(actorId: string, passwordHash: string): Promise<void>;
 }

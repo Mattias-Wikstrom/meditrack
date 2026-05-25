@@ -47,6 +47,31 @@ Once logged in, subsequent commands read your identity from the stored token —
 
 ---
 
+### passwd
+
+Set the password for an actor. Prompts for the new password twice (input is not echoed). Does not require an active session — this is an administrative operation for operators with server access.
+
+```
+npm run cli -- passwd --actor-id <id>
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--actor-id <id>` | The actor whose password to set |
+
+**Example**
+
+```
+$ npm run cli -- passwd --actor-id nurse-anna
+New password: 
+Confirm password: 
+Password updated.
+```
+
+---
+
 ## medications
 
 ### list
