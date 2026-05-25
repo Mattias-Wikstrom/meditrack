@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { Routes, Route, useNavigate, NavLink } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Provider } from 'urql';
-import { AppShell, LoginPage, ChangePasswordPage } from '@meditrack/ui';
+import { AppShell, LoginPage, ChangePasswordPage, TabNav } from '@meditrack/ui';
 import { useAuth, createUrqlClient } from '@meditrack/client';
 import { DashboardPage } from './pages/DashboardPage';
 import { InventoryPage } from './pages/InventoryPage';
@@ -9,33 +9,13 @@ import { OrderDetailPage } from './pages/OrderDetailPage';
 
 function PharmacistNav() {
   return (
-    <nav className="flex gap-1">
-      <NavLink
-        to="/"
-        end
-        className={({ isActive }) =>
-          `px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-            isActive
-              ? 'border-accent text-accent'
-              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-          }`
-        }
-      >
-        Orders
-      </NavLink>
-      <NavLink
-        to="/inventory"
-        className={({ isActive }) =>
-          `px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-            isActive
-              ? 'border-accent text-accent'
-              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-          }`
-        }
-      >
-        Inventory
-      </NavLink>
-    </nav>
+    <TabNav
+      items={[
+        { to: '/', label: 'Overview', end: true },
+        { to: '/orders', label: 'Orders' },
+        { to: '/inventory', label: 'Inventory' },
+      ]}
+    />
   );
 }
 
@@ -60,7 +40,8 @@ export function App() {
         onLogout={logout}
       >
         <Routes>
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/" element={<div className="text-sm text-slate-600">Overview</div>} />
+          <Route path="/orders" element={<DashboardPage />} />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} role={role!} onSuccess={() => navigate('/')} onCancel={() => navigate('/')} />} />

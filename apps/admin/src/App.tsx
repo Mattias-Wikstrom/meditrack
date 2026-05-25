@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { Routes, Route, useNavigate, NavLink } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Provider } from 'urql';
-import { AppShell, LoginPage, ChangePasswordPage } from '@meditrack/ui';
+import { AppShell, LoginPage, ChangePasswordPage, TabNav } from '@meditrack/ui';
 import { useAuth, createUrqlClient } from '@meditrack/client';
 import { OrdersPage } from './pages/OrdersPage';
 import { MedicationsPage } from './pages/MedicationsPage';
@@ -10,30 +10,17 @@ import { AuditPage } from './pages/AuditPage';
 import { WardUnitsPage } from './pages/WardUnitsPage';
 
 function AdminNav() {
-  const link = (to: string, label: string, end = false) => (
-    <NavLink
-      to={to}
-      end={end}
-      className={({ isActive }) =>
-        `px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-          isActive
-            ? 'border-accent text-accent'
-            : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-        }`
-      }
-    >
-      {label}
-    </NavLink>
-  );
-
   return (
-    <nav className="flex gap-1">
-      {link('/', 'Orders', true)}
-      {link('/medications', 'Medications')}
-      {link('/users', 'Users')}
-      {link('/audit', 'Audit')}
-      {link('/ward-units', 'Ward Units')}
-    </nav>
+    <TabNav
+      items={[
+        { to: '/', label: 'Overview', end: true },
+        { to: '/orders', label: 'Orders' },
+        { to: '/medications', label: 'Medications' },
+        { to: '/users', label: 'Users' },
+        { to: '/audit', label: 'Audit' },
+        { to: '/ward-units', label: 'Ward Units' },
+      ]}
+    />
   );
 }
 
@@ -58,7 +45,8 @@ export function App() {
         onLogout={logout}
       >
         <Routes>
-          <Route path="/" element={<OrdersPage />} />
+          <Route path="/" element={<div className="text-sm text-slate-600">Overview</div>} />
+          <Route path="/orders" element={<OrdersPage />} />
           <Route path="/medications" element={<MedicationsPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/audit" element={<AuditPage />} />
