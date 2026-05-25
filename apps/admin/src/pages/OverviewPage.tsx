@@ -29,13 +29,13 @@ const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
 
 function StatCard({ title, value, subtitle, danger = false }: { title: string; value: number; subtitle: string; danger?: boolean }) {
   return (
-    <Card className={`p-4 ${danger ? 'border-red-300' : ''}`}>
-      <div className="flex items-start justify-between">
-        <h2 className="text-base font-semibold text-slate-700">{title}</h2>
-        <span className={`text-base ${danger ? 'text-red-500' : 'text-slate-300'}`}>{danger ? '⚠' : '◻'}</span>
+    <Card className={`p-3 ${danger ? 'border-red-300' : ''}`}>
+      <div className="flex items-baseline justify-between">
+        <span className={`text-2xl font-bold tabular-nums ${danger ? 'text-red-600' : 'text-slate-900'}`}>{value}</span>
+        {danger && <span className="text-red-400 text-sm">⚠</span>}
       </div>
-      <div className={`mt-4 text-3xl font-bold tabular-nums ${danger ? 'text-red-600' : 'text-slate-900'}`}>{value}</div>
-      <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
+      <p className="mt-0.5 text-sm font-medium text-slate-700">{title}</p>
+      <p className="text-xs text-slate-400">{subtitle}</p>
     </Card>
   );
 }
@@ -66,7 +66,7 @@ export function OverviewPage() {
   const byStatus = (s: string) => orders.filter((o) => o.status === s).length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="grid gap-3 grid-cols-4">
         <StatCard title="Total Medications" value={products.length} subtitle="In drug registry" />
         <StatCard title="Low Stock Alerts" value={lowStock.length} subtitle="Below minimum threshold" danger={lowStock.length > 0} />
@@ -75,20 +75,20 @@ export function OverviewPage() {
       </div>
 
       <div className="grid gap-3 grid-cols-2">
-        <Card className={`p-4 ${lowStock.length > 0 ? 'border-red-300' : ''}`}>
-          <h3 className={`text-base font-semibold mb-1 ${lowStock.length > 0 ? 'text-red-600' : 'text-slate-800'}`}>
+        <Card className={`p-3 ${lowStock.length > 0 ? 'border-red-300' : ''}`}>
+          <h3 className={`text-sm font-semibold mb-0.5 ${lowStock.length > 0 ? 'text-red-600' : 'text-slate-800'}`}>
             ⚠ Low Stock Alerts
           </h3>
-          <p className="text-sm text-slate-500 mb-3">
+          <p className="text-xs text-slate-500 mb-2">
             {lowStock.length} medication{lowStock.length === 1 ? '' : 's'} below minimum threshold
           </p>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {lowStock.length === 0 && <p className="text-sm text-slate-400">No low stock medications.</p>}
             {lowStock.map((product) => (
               <Link
                 key={product.id}
                 to={`/medications/${product.id}`}
-                className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 hover:bg-red-100 transition-colors"
+                className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2 hover:bg-red-100 transition-colors"
               >
                 <div>
                   <div className="text-sm font-medium text-slate-900">{product.medication?.innName ?? product.productName}</div>
@@ -104,11 +104,11 @@ export function OverviewPage() {
           </div>
         </Card>
 
-        <Card className="p-4">
-          <h3 className="text-base font-semibold text-slate-800 mb-3">Quick Stats</h3>
-          <dl className="space-y-3">
+        <Card className="p-3">
+          <h3 className="text-sm font-semibold text-slate-800 mb-2">Quick Stats</h3>
+          <dl className="space-y-1.5">
             {ORDER_STATUSES.map((status) => (
-              <div key={status} className="flex items-center justify-between text-sm border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+              <div key={status} className="flex items-center justify-between text-sm border-b border-slate-100 pb-1.5 last:border-0 last:pb-0">
                 <dt className="text-slate-500">{ORDER_STATUS_LABELS[status]}</dt>
                 <dd className="font-semibold tabular-nums text-slate-900">{byStatus(status)}</dd>
               </div>
