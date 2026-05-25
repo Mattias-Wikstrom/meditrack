@@ -7,11 +7,13 @@ const API = 'http://localhost:4000/api';
 interface ChangePasswordPageProps {
   token: string;
   actorId: string;
+  role: string;
+  wardUnitName?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function ChangePasswordPage({ token, actorId, onSuccess, onCancel }: ChangePasswordPageProps) {
+export function ChangePasswordPage({ token, actorId, role, wardUnitName, onSuccess, onCancel }: ChangePasswordPageProps) {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -59,9 +61,19 @@ export function ChangePasswordPage({ token, actorId, onSuccess, onCancel }: Chan
       )}
       <h1 className="text-xl font-semibold text-slate-800 mb-6">My Account</h1>
       <Card className="p-6">
-        <p className="text-sm text-slate-500 mb-6">
-          Signed in as <span className="font-medium text-slate-700">{actorId}</span>
-        </p>
+        <div className="mb-6 space-y-1">
+          <p className="text-sm text-slate-500">
+            Signed in as <span className="font-medium text-slate-700">{actorId}</span>
+          </p>
+          <p className="text-sm text-slate-500">
+            Role: <span className="font-medium text-slate-700">{role}</span>
+          </p>
+          {wardUnitName && (
+            <p className="text-sm text-slate-500">
+              Ward unit: <span className="font-medium text-slate-700">{wardUnitName}</span>
+            </p>
+          )}
+        </div>
         {success ? (
           <p className="text-green-600 text-sm">Password changed successfully.</p>
         ) : (

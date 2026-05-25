@@ -38,7 +38,7 @@ function AdminNav() {
 }
 
 export function App() {
-  const { token, actorId, login, logout } = useAuth();
+  const { token, actorId, role, login, logout } = useAuth();
   const navigate = useNavigate();
 
   const urqlClient = useMemo(() => (token ? createUrqlClient(token) : null), [token]);
@@ -63,7 +63,7 @@ export function App() {
           <Route path="/users" element={<UsersPage />} />
           <Route path="/audit" element={<AuditPage />} />
           <Route path="/ward-units" element={<WardUnitsPage />} />
-          <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} onSuccess={() => navigate('/')} onCancel={() => navigate('/')} />} />
+          <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} role={role!} onSuccess={() => navigate('/')} onCancel={() => navigate('/')} />} />
         </Routes>
       </AppShell>
     </Provider>

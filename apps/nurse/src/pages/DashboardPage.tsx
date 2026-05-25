@@ -2,13 +2,17 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
 import { Button, Spinner } from '@meditrack/ui';
+import { useAuth } from '@meditrack/client';
 import { graphql } from '../gql';
 
-const ORDERS_QUERY = graphql(`
-  query NurseOrders {
-    orders {
-      id wardUnitId status createdAt
-      lines { medicationId quantity medication { innName } }
+const WARD_UNIT_ORDERS_QUERY = graphql(`
+  query NurseWardUnitOrders($wardUnitId: ID!) {
+    wardUnit(id: $wardUnitId) {
+      id
+      orders {
+        id status createdAt
+        lines { medicationId quantity medication { innName } }
+      }
     }
   }
 `);
@@ -31,14 +35,13 @@ const ORDER_STATUS_SUB = graphql(`
   }
 `);
 
-type SortKey = 'status' | 'wardUnit' | 'lines' | 'createdAt';
+type SortKey = 'status' | 'lines' | 'createdAt';
 type SortDir = 'asc' | 'desc';
 
 const STATUS_RANK: Record<string, number> = { Draft: 0, Sent: 1, Confirmed: 2, Delivered: 3 };
 
 type OrderRow = {
   id: string;
-  wardUnitId: string;
   status: string;
   createdAt: string;
   lines: { medicationId: string; quantity: number; medication?: { innName: string } | null }[];
@@ -48,7 +51,6 @@ function sortOrders(orders: OrderRow[], key: SortKey, dir: SortDir): OrderRow[] 
   return [...orders].sort((a, b) => {
     let cmp = 0;
     switch (key) {
-      case 'wardUnit':  cmp = a.wardUnitId.localeCompare(b.wardUnitId); break;
       case 'lines':     cmp = a.lines.length - b.lines.length; break;
       case 'createdAt': cmp = a.createdAt.localeCompare(b.createdAt); break;
       case 'status':    cmp = (STATUS_RANK[a.status] ?? 0) - (STATUS_RANK[b.status] ?? 0); break;
@@ -115,7 +117,6 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick, sortable = t
   const cols: { key: SortKey; label: string }[] = [
     { key: 'createdAt', label: 'Created' },
     { key: 'status',    label: 'Status' },
-    { key: 'wardUnit',  label: 'Ward Unit' },
     { key: 'lines',     label: 'Medications' },
   ];
   return (
@@ -138,7 +139,6 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick, sortable = t
             className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer transition-colors">
             <td className="py-2.5 px-4 align-top text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
             <td className="py-2.5 px-4 align-top"><StatusBadge status={order.status} /></td>
-            <td className="py-2.5 px-4 align-top text-slate-700">{order.wardUnitId}</td>
             <td className="py-2.5 px-4 align-top"><LineList lines={order.lines} /></td>
           </tr>
         ))}
@@ -149,10 +149,15 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick, sortable = t
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const { wardUnitId } = useAuth();
   const [sortKey, setSortKey] = useState<SortKey>('createdAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
-  const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
+  const [{ data, fetching, error }, refetch] = useQuery({
+    query: WARD_UNIT_ORDERS_QUERY,
+    variables: { wardUnitId: wardUnitId! },
+    requestPolicy: 'cache-and-network',
+  });
 
   function handleSub() { refetch({ requestPolicy: 'network-only' }); return undefined; }
   useSubscription({ query: ORDER_DRAFT_CREATED_SUB }, handleSub);
@@ -167,7 +172,7 @@ export function DashboardPage() {
   if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
-  const all = data?.orders ?? [];
+  const all = data?.wardUnit?.orders ?? [];
   const active    = sortOrders(all.filter(o => o.status !== 'Delivered'), sortKey, sortDir);
   const delivered = sortOrders(all.filter(o => o.status === 'Delivered'), 'createdAt', 'desc');
 

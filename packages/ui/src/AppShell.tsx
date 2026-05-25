@@ -5,12 +5,13 @@ interface AppShellProps {
   actorName: string;
   children: React.ReactNode;
   nav?: React.ReactNode;
+  context?: string;
   onHome?: () => void;
   onProfile?: () => void;
   onLogout?: () => void;
 }
 
-export function AppShell({ appName, actorName, children, nav, onHome, onProfile, onLogout }: AppShellProps) {
+export function AppShell({ appName, actorName, children, nav, context, onHome, onProfile, onLogout }: AppShellProps) {
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
       <header className="bg-accent shadow-sm">
@@ -25,6 +26,9 @@ export function AppShell({ appName, actorName, children, nav, onHome, onProfile,
             <span className="text-white/90 text-sm font-medium">{appName}</span>
           </div>
           <div className="flex items-center gap-4">
+            {context && (
+              <span className="text-white/60 text-sm">{context}</span>
+            )}
             {onProfile ? (
               <button
                 onClick={onProfile}

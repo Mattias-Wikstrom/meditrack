@@ -8,20 +8,20 @@ export class PrismaActorRepository implements ActorRepository {
 
   async findAll(): Promise<Actor[]> {
     const rows = await this.prisma.actor.findMany({ orderBy: { id: 'asc' } });
-    return rows.map((r) => ({ id: r.id, role: r.role as ActorRole }));
+    return rows.map((r) => ({ id: r.id, role: r.role as ActorRole, wardUnitId: r.wardUnitId ?? undefined }));
   }
 
   async findById(id: string): Promise<Actor | undefined> {
     const row = await this.prisma.actor.findUnique({ where: { id } });
     if (!row) return undefined;
-    return { id: row.id, role: row.role as ActorRole };
+    return { id: row.id, role: row.role as ActorRole, wardUnitId: row.wardUnitId ?? undefined };
   }
 
   async save(actor: Actor): Promise<void> {
     await this.prisma.actor.upsert({
       where: { id: actor.id },
-      create: { id: actor.id, role: actor.role },
-      update: { role: actor.role },
+      create: { id: actor.id, role: actor.role, wardUnitId: actor.wardUnitId },
+      update: { role: actor.role, wardUnitId: actor.wardUnitId },
     });
   }
 }

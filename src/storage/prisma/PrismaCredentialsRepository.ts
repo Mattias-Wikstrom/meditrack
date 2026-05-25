@@ -12,6 +12,7 @@ export class PrismaCredentialsRepository implements CredentialsRepository {
       actorId: actor.id,
       passwordHash: actor.passwordHash,
       role: actor.role as ActorRole,
+      wardUnitId: actor.wardUnitId ?? undefined,
     };
   }
 

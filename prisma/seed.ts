@@ -9,11 +9,11 @@ async function main() {
   const passwordHash = await bcrypt.hash('password', 10);
 
   const actors = [
-    { id: 'nurse-anna',       role: ActorRole.Nurse,      passwordHash },
-    { id: 'nurse-erik',       role: ActorRole.Nurse,      passwordHash },
-    { id: 'pharmacist-sofia', role: ActorRole.Pharmacist, passwordHash },
-    { id: 'pharmacist-lars',  role: ActorRole.Pharmacist, passwordHash },
-    { id: 'admin',            role: ActorRole.Admin,       passwordHash },
+    { id: 'nurse-anna',       role: ActorRole.Nurse,       passwordHash, wardUnitId: 'ward-akuten'  },
+    { id: 'nurse-erik',       role: ActorRole.Nurse,       passwordHash, wardUnitId: 'ward-medicin' },
+    { id: 'pharmacist-sofia', role: ActorRole.Pharmacist,  passwordHash, wardUnitId: null },
+    { id: 'pharmacist-lars',  role: ActorRole.Pharmacist,  passwordHash, wardUnitId: null },
+    { id: 'admin',            role: ActorRole.Admin,        passwordHash, wardUnitId: null },
   ];
 
   for (const a of actors) {

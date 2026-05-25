@@ -4,6 +4,7 @@ import { ActorRole } from '../shared/ActorRole';
 export interface TokenPayload {
   actorId: string;
   role: ActorRole;
+  wardUnitId?: string;
 }
 
 const secret = new TextEncoder().encode(
@@ -11,7 +12,7 @@ const secret = new TextEncoder().encode(
 );
 
 export async function signToken(payload: TokenPayload): Promise<string> {
-  return new SignJWT({ actorId: payload.actorId, role: payload.role })
+  return new SignJWT({ actorId: payload.actorId, role: payload.role, wardUnitId: payload.wardUnitId })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('8h')
     .sign(secret);
@@ -22,5 +23,6 @@ export async function verifyToken(token: string): Promise<TokenPayload> {
   return {
     actorId: payload['actorId'] as string,
     role: payload['role'] as ActorRole,
+    wardUnitId: payload['wardUnitId'] as string | undefined,
   };
 }

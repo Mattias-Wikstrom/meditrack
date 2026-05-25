@@ -4,6 +4,7 @@ export interface Credentials {
   actorId: string;
   passwordHash: string;
   role: ActorRole;
+  wardUnitId?: string;
 }
 
 export interface CredentialsRepository {

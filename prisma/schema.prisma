@@ -75,14 +75,17 @@ model OrderLine {
 }
 
 model WardUnit {
-  id   String @id
-  name String
+  id     String  @id
+  name   String
+  actors Actor[]
 }
 
 model Actor {
   id           String    @id
   role         ActorRole
   passwordHash String?
+  wardUnitId   String?
+  wardUnit     WardUnit? @relation(fields: [wardUnitId], references: [id])
 }
 
 model AuditLog {

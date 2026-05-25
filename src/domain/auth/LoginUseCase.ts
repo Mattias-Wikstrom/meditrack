@@ -16,6 +16,6 @@ export class LoginUseCase {
       throw new Error('InvalidCredentials');
     }
     await this.audit.record({ actorId, action: 'ActorLoggedIn', entityId: actorId, occurredAt: new Date() });
-    return signToken({ actorId, role: creds.role });
+    return signToken({ actorId, role: creds.role, wardUnitId: creds.wardUnitId });
   }
 }
