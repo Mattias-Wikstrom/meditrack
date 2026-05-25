@@ -22,6 +22,22 @@ export function createOrdersRouter(wiring: ServerWiring): Router {
     }
   });
 
+  router.post('/:id/lines', async (req: Request, res: Response) => {
+    const { lines } = req.body as {
+      lines: { medicationId: string; quantity: number }[];
+    };
+    const result = await wiring.updateOrderLinesUseCase.execute({
+      actorId: res.locals.actorId as string,
+      orderId: req.params.id as OrderId,
+      lines: lines.map((l) => ({ medicationId: l.medicationId as MedicationId, quantity: l.quantity })),
+    });
+    if (result.successful) {
+      res.json({ data: result.value });
+    } else {
+      res.status(422).json({ errors: result.errors.map((e) => e.code) });
+    }
+  });
+
   router.post('/:id/send', async (req: Request, res: Response) => {
     const result = await wiring.sendOrderUseCase.execute({
       actorId: res.locals.actorId as string,

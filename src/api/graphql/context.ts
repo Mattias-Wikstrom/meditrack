@@ -3,6 +3,7 @@ import { MedicinalProductRepository } from '../../domain/medication/MedicinalPro
 import { OrderRepository } from '../../domain/order/OrderRepository';
 import { WardUnitRepository } from '../../domain/wardUnit/WardUnitRepository';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
+import { UpdateOrderLinesUseCase } from '../../domain/order/useCases/ordering/UpdateOrderLinesUseCase';
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
 import { ConfirmOrderUseCase } from '../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
@@ -14,6 +15,7 @@ export interface GraphQLContext {
   orderRepo: OrderRepository;
   wardUnitRepo: WardUnitRepository;
   createOrderUseCase: CreateOrderUseCase;
+  updateOrderLinesUseCase: UpdateOrderLinesUseCase;
   sendOrderUseCase: SendOrderUseCase;
   confirmOrderUseCase: ConfirmOrderUseCase;
   deliverOrderUseCase: DeliverOrderUseCase;

@@ -18,6 +18,21 @@ export const Mutation = {
       : { successful: false, order: null, errors: result.errors.map((e) => e.code) };
   },
 
+  updateOrderLines: async (
+    _: unknown,
+    { orderId, lines }: { orderId: string; lines: { medicationId: string; quantity: number }[] },
+    ctx: GraphQLContext,
+  ) => {
+    const result = await ctx.updateOrderLinesUseCase.execute({
+      actorId: ctx.actorId,
+      orderId: orderId as OrderId,
+      lines: lines.map((l) => ({ medicationId: l.medicationId as MedicationId, quantity: l.quantity })),
+    });
+    return result.successful
+      ? { successful: true, order: result.value, errors: [] }
+      : { successful: false, order: null, errors: result.errors.map((e) => e.code) };
+  },
+
   sendOrder: async (_: unknown, { orderId }: { orderId: string }, ctx: GraphQLContext) => {
     const result = await ctx.sendOrderUseCase.execute({
       actorId: ctx.actorId,

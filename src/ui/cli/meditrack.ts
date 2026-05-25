@@ -10,6 +10,7 @@ import { PrismaAuditRepository } from '../../storage/prisma/PrismaAuditRepositor
 import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
+import { UpdateOrderLinesUseCase } from '../../domain/order/useCases/ordering/UpdateOrderLinesUseCase';
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
 import { ConfirmOrderUseCase } from '../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
@@ -37,6 +38,7 @@ const transactor = new PrismaTransactor(prisma);
 const eventBus = new SimpleEventBus();
 
 const createOrderUseCase = new CreateOrderUseCase(actorRepo, transactor, eventBus);
+const updateOrderLinesUseCase = new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor);
 const sendOrderUseCase = new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
 const confirmOrderUseCase = new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
 const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus);
@@ -182,6 +184,7 @@ program
       orderRepo,
       wardUnitRepo,
       createOrderUseCase,
+      updateOrderLinesUseCase,
       sendOrderUseCase,
       confirmOrderUseCase,
       deliverOrderUseCase,

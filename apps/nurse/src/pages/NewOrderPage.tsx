@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClient } from 'urql';
 import { MedicationSearch, Button, Card } from '@meditrack/ui';
@@ -26,46 +26,80 @@ export function NewOrderPage() {
   const urql = useClient();
   const ordersApi = useOrdersApi();
   const [lines, setLines] = useState<Line[]>([]);
-  const [submitting, setSubmitting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Stable ref so async callbacks always see the current draft id
+  const draftIdRef = useRef<string | null>(null);
 
   const fetcher = useCallback(async (query: string): Promise<MedicationOption[]> => {
     const result = await urql.query(MEDICATIONS_QUERY, { query }).toPromise();
     return result.data?.medications ?? [];
   }, [urql]);
 
+  /**
+   * Persist the current lines to the server.
+   * First call creates the draft; subsequent calls update its lines.
+   */
+  async function persist(nextLines: Line[]) {
+    setSaving(true);
+    setError(null);
+    try {
+      const apiLines = nextLines.map(({ medicationId, quantity }) => ({ medicationId, quantity }));
+      if (draftIdRef.current === null) {
+        const { id } = await ordersApi.create(WARD_UNIT_ID, apiLines);
+        draftIdRef.current = id;
+      } else {
+        await ordersApi.updateLines(draftIdRef.current, apiLines);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save draft');
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function addLine(med: MedicationOption) {
     if (lines.some((l) => l.medicationId === med.id)) return;
-    setLines((prev) => [...prev, { medicationId: med.id, innName: med.innName, strength: med.strength, quantity: 1 }]);
+    const next = [...lines, { medicationId: med.id, innName: med.innName, strength: med.strength, quantity: 1 }];
+    setLines(next);
+    void persist(next);
   }
 
   function updateQty(medicationId: string, qty: number) {
-    setLines((prev) => prev.map((l) => l.medicationId === medicationId ? { ...l, quantity: Math.max(1, qty) } : l));
+    const next = lines.map((l) => l.medicationId === medicationId ? { ...l, quantity: Math.max(1, qty) } : l);
+    setLines(next);
+    if (draftIdRef.current !== null) void persist(next);
   }
 
   function removeLine(medicationId: string) {
-    setLines((prev) => prev.filter((l) => l.medicationId !== medicationId));
+    const next = lines.filter((l) => l.medicationId !== medicationId);
+    setLines(next);
+    if (draftIdRef.current !== null) void persist(next);
   }
 
-  async function handleSubmit() {
-    if (lines.length === 0) { setError('Add at least one medication.'); return; }
-    setSubmitting(true);
+  async function handleSend() {
+    if (!draftIdRef.current || lines.length === 0) return;
+    setSending(true);
     setError(null);
     try {
-      await ordersApi.create(WARD_UNIT_ID, lines.map(({ medicationId, quantity }) => ({ medicationId, quantity })));
+      await ordersApi.send(draftIdRef.current);
       navigate('/');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to create order');
-    } finally {
-      setSubmitting(false);
+      setError(e instanceof Error ? e.message : 'Failed to send order');
+      setSending(false);
     }
   }
+
+  const busy = saving || sending;
 
   return (
     <div className="max-w-xl">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate('/')} className="text-slate-400 hover:text-slate-600 transition-colors text-sm">← Back</button>
         <h1 className="text-xl font-semibold text-slate-800">New Order</h1>
+        {saving && <span className="ml-auto text-xs text-slate-400">Saving…</span>}
       </div>
 
       {lines.length > 0 && (
@@ -97,8 +131,8 @@ export function NewOrderPage() {
 
       {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
-      <Button onClick={handleSubmit} disabled={submitting || lines.length === 0} className="w-full">
-        {submitting ? 'Creating…' : 'Create Order'}
+      <Button onClick={handleSend} disabled={busy || lines.length === 0} className="w-full">
+        {sending ? 'Sending…' : 'Send Order'}
       </Button>
     </div>
   );

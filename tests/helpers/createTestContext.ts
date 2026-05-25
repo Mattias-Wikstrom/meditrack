@@ -9,6 +9,7 @@ import { InMemoryTransactor } from '../../src/storage/inMemory/InMemoryTransacto
 import { ActorRole } from '../../src/domain/shared/ActorRole';
 import { SimpleEventBus } from '../../src/eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../src/domain/order/useCases/ordering/CreateOrderUseCase';
+import { UpdateOrderLinesUseCase } from '../../src/domain/order/useCases/ordering/UpdateOrderLinesUseCase';
 import { SendOrderUseCase } from '../../src/domain/order/useCases/fulfillment/SendOrderUseCase';
 import { ConfirmOrderUseCase } from '../../src/domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../src/domain/order/useCases/fulfillment/DeliverOrderUseCase';
@@ -39,6 +40,7 @@ export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
     orderRepo,
     wardUnitRepo,
     createOrderUseCase: new CreateOrderUseCase(actorRepo, transactor, eventBus),
+    updateOrderLinesUseCase: new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor),
     sendOrderUseCase: new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
     confirmOrderUseCase: new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
     deliverOrderUseCase: new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus),
