@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Badge, Button, Card, Spinner } from '@meditrack/ui';
+import { Badge, Button, Card, Spinner, BackButton } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import type { ProductSelection } from '../api/orders';
 import { graphql } from '../gql';
@@ -206,7 +206,7 @@ export function OrderDetailPage() {
   return (
     <div className="max-w-xl">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/')} className="text-slate-400 hover:text-slate-600 transition-colors text-sm">← Back</button>
+        <BackButton onClick={() => navigate('/')} />
         <h1 className="text-xl font-semibold text-slate-800">Order <span className="font-mono">{shortId}…</span></h1>
         <Badge status={order.status} />
       </div>

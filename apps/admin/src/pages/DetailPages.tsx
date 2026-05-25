@@ -1,6 +1,6 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Badge, Spinner } from '@meditrack/ui';
+import { BackButton, Badge, Spinner } from '@meditrack/ui';
 import { EntityDetailsCard } from '../components/EntityDetailsCard';
 
 const ACTORS_QUERY = `
@@ -40,6 +40,7 @@ const ORDERS_QUERY = `
 const NotFound = ({ kind, to }: { kind: string; to: string }) => <p className="text-sm text-slate-500">No {kind} found. <Link className="text-accent hover:underline" to={to}>Back to list</Link>.</p>;
 
 export function UserDetailsPage() {
+  const navigate = useNavigate();
   const { userId } = useParams();
   const [{ data, fetching, error }] = useQuery({ query: ACTORS_QUERY });
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
@@ -47,14 +48,18 @@ export function UserDetailsPage() {
   const actor = data?.actors.find(a => a.id === userId);
   if (!actor) return <NotFound kind="user" to="/users" />;
 
-  return <EntityDetailsCard title={actor.id} subtitle="User details" fields={[
-    { label: 'Role', value: actor.role },
-    { label: 'Ward unit', value: actor.wardUnit?.name ?? '—' },
-    { label: 'Ward unit ID', value: actor.wardUnit?.id ?? '—' },
-  ]} />;
+  return <div>
+    <BackButton onClick={() => navigate('/users')} className="mb-4" />
+    <EntityDetailsCard title={actor.id} subtitle="User details" fields={[
+      { label: 'Role', value: actor.role },
+      { label: 'Ward unit', value: actor.wardUnit?.name ?? '—' },
+      { label: 'Ward unit ID', value: actor.wardUnit?.id ?? '—' },
+    ]} />
+  </div>;
 }
 
 export function WardUnitDetailsPage() {
+  const navigate = useNavigate();
   const { wardUnitId } = useParams();
   const [{ data, fetching, error }] = useQuery({ query: WARD_UNITS_QUERY });
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
@@ -62,10 +67,13 @@ export function WardUnitDetailsPage() {
   const unit = data?.wardUnits.find(w => w.id === wardUnitId);
   if (!unit) return <NotFound kind="ward unit" to="/ward-units" />;
 
-  return <EntityDetailsCard title={unit.name} subtitle="Ward unit details" fields={[
-    { label: 'Name', value: unit.name },
-    { label: 'ID', value: <span className="font-mono text-xs text-slate-500">{unit.id}</span> },
-  ]} />;
+  return <div>
+    <BackButton onClick={() => navigate('/ward-units')} className="mb-4" />
+    <EntityDetailsCard title={unit.name} subtitle="Ward unit details" fields={[
+      { label: 'Name', value: unit.name },
+      { label: 'ID', value: <span className="font-mono text-xs text-slate-500">{unit.id}</span> },
+    ]} />
+  </div>;
 }
 
 export function MedicationDetailsPage() {
@@ -89,6 +97,7 @@ export function MedicationDetailsPage() {
 }
 
 export function OrderDetailsPage() {
+  const navigate = useNavigate();
   const { orderId } = useParams();
   const [{ data, fetching, error }] = useQuery({ query: ORDERS_QUERY });
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
@@ -96,15 +105,18 @@ export function OrderDetailsPage() {
   const order = data?.orders.find(o => o.id === orderId);
   if (!order) return <NotFound kind="order" to="/" />;
 
-  return <EntityDetailsCard title={`Order for ${order.wardUnitId}`} subtitle="Order details" fields={[
-    { label: 'Order ID', value: <span className="font-mono text-xs text-slate-500">{order.id}</span> },
-    { label: 'Ward Unit', value: order.wardUnitId },
-    { label: 'Status', value: <Badge status={order.status} /> },
-    { label: 'Created', value: new Date(order.createdAt).toLocaleString('en-GB') },
-    { label: 'Lines', value: order.lines.length === 0 ? '—' : (
-      <ul className="space-y-1">
-        {order.lines.map(line => <li key={line.medicationId}>{line.medication?.innName ?? line.medicationId} ×{line.quantity}</li>)}
-      </ul>
-    ) },
-  ]} />;
+  return <div>
+    <BackButton onClick={() => navigate('/')} className="mb-4" />
+    <EntityDetailsCard title={`Order for ${order.wardUnitId}`} subtitle="Order details" fields={[
+      { label: 'Order ID', value: <span className="font-mono text-xs text-slate-500">{order.id}</span> },
+      { label: 'Ward Unit', value: order.wardUnitId },
+      { label: 'Status', value: <Badge status={order.status} /> },
+      { label: 'Created', value: new Date(order.createdAt).toLocaleString('en-GB') },
+      { label: 'Lines', value: order.lines.length === 0 ? '—' : (
+        <ul className="space-y-1">
+          {order.lines.map(line => <li key={line.medicationId}>{line.medication?.innName ?? line.medicationId} ×{line.quantity}</li>)}
+        </ul>
+      ) },
+    ]} />
+  </div>;
 }

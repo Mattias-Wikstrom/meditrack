@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from './Button';
 import { Card } from './Card';
+import { BackButton } from './BackButton';
 
 const API = 'http://localhost:4000/api';
 
@@ -52,12 +53,7 @@ export function ChangePasswordPage({ token, actorId, role, wardUnitName, onSucce
   return (
     <div className="max-w-sm">
       {onCancel && (
-        <button
-          onClick={onCancel}
-          className="text-slate-400 hover:text-slate-600 transition-colors text-sm mb-4 inline-block"
-        >
-          ← Back
-        </button>
+        <BackButton onClick={onCancel} className="mb-4 inline-block" />
       )}
       <h1 className="text-xl font-semibold text-slate-800 mb-6">My Account</h1>
       <Card className="p-6">
