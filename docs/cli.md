@@ -17,6 +17,36 @@ npm run cli -- <command> [options]
 
 ---
 
+## Authentication
+
+Commands that modify state (`orders create`, `send`, `confirm`, `deliver`, and `graphql` mutations) require an active session. Read-only commands (`medications list/show`, `orders list`) do not.
+
+### login
+
+Verify your credentials and store a session token in `~/.meditrack/token`. The token is valid for 8 hours.
+
+```
+npm run cli -- login --actor-id <id> --password <password>
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--actor-id <id>` | Your actor ID (e.g. `nurse-anna`, `pharmacist-sofia`) |
+| `--password <password>` | Your password |
+
+**Example**
+
+```
+$ npm run cli -- login --actor-id nurse-anna --password password
+Logged in as nurse-anna.
+```
+
+Once logged in, subsequent commands read your identity from the stored token — no `--actor-id` flag is needed.
+
+---
+
 ## medications
 
 ### list
@@ -195,7 +225,17 @@ create ──► Draft ──► Sent ──► Confirmed ──► Delivered
 
 ## Error handling
 
-On failure, commands print an error message to stderr and exit with code 1. The error text contains the rule code that was violated, for example:
+On failure, commands print an error message to stderr and exit with code 1.
+
+Auth errors:
+
+```
+Not logged in. Run: meditrack login --actor-id <id> --password <password>
+Session expired. Run: meditrack login --actor-id <id> --password <password>
+Login failed: invalid actor ID or password.
+```
+
+Domain rule violations include the rule code, for example:
 
 ```
 Failed: OrderHasAtLeastOneLine
