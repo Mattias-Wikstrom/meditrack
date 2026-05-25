@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useClient } from 'urql';
 import { MedicationSearch, Button, Card } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
-import { useAuth } from '@meditrack/client';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
 
@@ -22,7 +21,6 @@ interface Line {
 
 export function NewOrderPage() {
   const navigate = useNavigate();
-  const { wardUnitId } = useAuth();
   const urql = useClient();
   const ordersApi = useOrdersApi();
   const [lines, setLines] = useState<Line[]>([]);
@@ -48,7 +46,7 @@ export function NewOrderPage() {
     try {
       const apiLines = nextLines.map(({ medicationId, quantity }) => ({ medicationId, quantity }));
       if (draftIdRef.current === null) {
-        const { id } = await ordersApi.create(wardUnitId!, apiLines);
+        const { id } = await ordersApi.create(apiLines);
         draftIdRef.current = id;
       } else {
         await ordersApi.updateLines(draftIdRef.current, apiLines);

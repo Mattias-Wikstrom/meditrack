@@ -3,7 +3,7 @@ import { CreateOrderUseCase } from '../../../domain/order/useCases/ordering/Crea
 import { SendOrderUseCase } from '../../../domain/order/useCases/fulfillment/SendOrderUseCase';
 import { ConfirmOrderUseCase } from '../../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
-import { MedicationId, MedicinalProductId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
+import { MedicationId, MedicinalProductId, OrderId } from '../../../domain/shared/IdTypes';
 import { CliOutput } from '../CliOutput';
 import { errorMessages } from '../errorMessages';
 
@@ -24,13 +24,11 @@ export async function createOrder(
   useCase: CreateOrderUseCase,
   output: CliOutput,
   actorId: string,
-  wardUnitId: string,
   medicationId: string,
   quantity: number,
 ): Promise<void> {
   const result = await useCase.execute({
     actorId,
-    wardUnitId: wardUnitId as WardUnitId,
     lines: [{ medicationId: medicationId as MedicationId, quantity }],
   });
 

@@ -8,8 +8,8 @@ export function useOrdersApi() {
   return useMemo(() => {
     const { post } = createApiClient(token!);
     return {
-      create: (wardUnitId: string, lines: OrderLine[]) =>
-        post('/orders', { wardUnitId, lines }) as Promise<{ id: string }>,
+      create: (lines: OrderLine[]) =>
+        post('/orders', { lines }) as Promise<{ id: string }>,
       updateLines: (orderId: string, lines: OrderLine[]) =>
         post(`/orders/${orderId}/lines`, { lines }),
       send: (orderId: string) =>

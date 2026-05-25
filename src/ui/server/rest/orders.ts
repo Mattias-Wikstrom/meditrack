@@ -1,18 +1,16 @@
 import { Router, Request, Response } from 'express';
 import { ServerWiring } from '../wiring';
-import { MedicationId, MedicinalProductId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
+import { MedicationId, MedicinalProductId, OrderId } from '../../../domain/shared/IdTypes';
 
 export function createOrdersRouter(wiring: ServerWiring): Router {
   const router = Router();
 
   router.post('/', async (req: Request, res: Response) => {
-    const { wardUnitId, lines } = req.body as {
-      wardUnitId: string;
+    const { lines } = req.body as {
       lines: { medicationId: string; quantity: number }[];
     };
     const result = await wiring.createOrderUseCase.execute({
       actorId: res.locals.actorId as string,
-      wardUnitId: wardUnitId as WardUnitId,
       lines: lines.map((l) => ({ medicationId: l.medicationId as MedicationId, quantity: l.quantity })),
     });
     if (result.successful) {

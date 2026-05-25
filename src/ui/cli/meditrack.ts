@@ -116,18 +116,12 @@ orders
 
 orders
   .command('create')
-  .description('Create a new order')
-  .option('--ward-unit-id <id>', 'ward unit ID (defaults to the one in your session token)')
+  .description('Create a new order (nurse only — ward unit derived from your session)')
   .requiredOption('--medication-id <id>', 'medication ID')
   .requiredOption('--quantity <n>', 'quantity', parseInt)
   .action(async (opts) => {
-    const { actorId, wardUnitId: sessionWardUnitId } = await requireAuth();
-    const wardUnitId = (opts.wardUnitId as string | undefined) ?? sessionWardUnitId;
-    if (!wardUnitId) {
-      output.error('No ward unit ID: pass --ward-unit-id or log in as a nurse.');
-      output.exit(1);
-    }
-    return createOrder(createOrderUseCase, output, actorId, wardUnitId, opts.medicationId, opts.quantity);
+    const { actorId } = await requireAuth();
+    return createOrder(createOrderUseCase, output, actorId, opts.medicationId, opts.quantity);
   });
 
 orders

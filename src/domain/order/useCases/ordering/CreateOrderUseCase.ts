@@ -18,7 +18,6 @@ import { MedicationId, OrderId, WardUnitId } from '../../../shared/IdTypes';
 
 export interface CreateOrderInput {
   actorId: string;
-  wardUnitId: WardUnitId;
   lines: { medicationId: MedicationId; quantity: number }[];
 }
 
@@ -42,10 +41,13 @@ export class CreateOrderUseCase {
     if (actor.role !== ActorRole.Nurse) {
       return failure('UnauthorizedRole');
     }
+    if (!actor.wardUnitId) {
+      return failure('ActorNotAssignedToWardUnit');
+    }
 
     const order = new Order(
       randomUUID() as OrderId,
-      input.wardUnitId,
+      actor.wardUnitId as WardUnitId,
       input.lines.map((l) => new OrderLine(l.medicationId, l.quantity)),
       OrderStatus.Draft,
       new Date(),

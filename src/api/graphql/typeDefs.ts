@@ -46,7 +46,7 @@ export const typeDefs = /* GraphQL */ `
   }
 
   type Mutation {
-    createOrder(wardUnitId: ID!, lines: [OrderLineInput!]!): OrderPayload!
+    createOrder(lines: [OrderLineInput!]!): OrderPayload!
     updateOrderLines(orderId: ID!, lines: [OrderLineInput!]!): OrderPayload!
     sendOrder(orderId: ID!): OrderPayload!
     confirmOrder(orderId: ID!): OrderPayload!
@@ -124,6 +124,7 @@ export const typeDefs = /* GraphQL */ `
   enum ErrorCode {
     ActorNotFound
     UnauthorizedRole
+    ActorNotAssignedToWardUnit
     OrderHasAtLeastOneLine
     OrderLineQuantitiesPositive
     OrderNotFound

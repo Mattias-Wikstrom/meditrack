@@ -1,16 +1,15 @@
 import { GraphQLContext } from '../context';
-import { MedicationId, MedicinalProductId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
+import { MedicationId, MedicinalProductId, OrderId } from '../../../domain/shared/IdTypes';
 
 
 export const Mutation = {
   createOrder: async (
     _: unknown,
-    { wardUnitId, lines }: { wardUnitId: string; lines: { medicationId: string; quantity: number }[] },
+    { lines }: { lines: { medicationId: string; quantity: number }[] },
     ctx: GraphQLContext,
   ) => {
     const result = await ctx.createOrderUseCase.execute({
       actorId: ctx.actorId,
-      wardUnitId: wardUnitId as WardUnitId,
       lines: lines.map((l) => ({ medicationId: l.medicationId as MedicationId, quantity: l.quantity })),
     });
     return result.successful
