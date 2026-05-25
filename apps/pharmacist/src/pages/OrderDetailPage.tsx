@@ -4,9 +4,11 @@ import { useQuery } from 'urql';
 import { Badge, Button, Card, Spinner } from '@meditrack/ui';
 import { ordersApi } from '../api/orders';
 import type { ProductSelection } from '../api/orders';
+import { graphql } from '../gql';
+import type { GetOrderQuery } from '../gql/graphql';
 
-const ORDER_QUERY = `
-  query Order($id: ID!) {
+const ORDER_QUERY = graphql(`
+  query GetOrder($id: ID!) {
     order(id: $id) {
       id wardUnitId status createdAt
       lines {
@@ -15,22 +17,24 @@ const ORDER_QUERY = `
       }
     }
   }
-`;
+`);
 
-const PRODUCTS_QUERY = `
-  query Products($medicationId: ID) {
+const PRODUCTS_QUERY = graphql(`
+  query GetProducts($medicationId: ID) {
     medicinalProducts(medicationId: $medicationId) {
       id productName stockLevel isBelowThreshold
     }
   }
-`;
+`);
+
+type OrderLine = NonNullable<NonNullable<GetOrderQuery['order']>['lines'][number]>;
 
 function LineDeliveryRow({
   line,
   selection,
   onChange,
 }: {
-  line: { medicationId: string; quantity: number; medication?: { id: string; innName: string } | null };
+  line: OrderLine;
   selection: ProductSelection;
   onChange: (s: ProductSelection) => void;
 }) {
@@ -39,8 +43,7 @@ function LineDeliveryRow({
     variables: { medicationId: line.medicationId },
   });
 
-  const products: { id: string; productName: string; stockLevel: number; isBelowThreshold: boolean }[] =
-    data?.medicinalProducts ?? [];
+  const products = data?.medicinalProducts ?? [];
 
   return (
     <div className="px-5 py-4 border-b border-slate-100 last:border-0">
@@ -101,7 +104,7 @@ export function OrderDetailPage() {
 
   async function handleDeliver() {
     if (!order) return;
-    const productSelections = order.lines.map((l: { medicationId: string; quantity: number }) =>
+    const productSelections = order.lines.map((l) =>
       getSelection(l.medicationId, l.quantity)
     );
     const missing = productSelections.filter((s) => !s.medicinalProductId);
@@ -132,7 +135,7 @@ export function OrderDetailPage() {
       </div>
 
       <Card className="mb-6 overflow-hidden">
-        {order.lines.map((line: { medicationId: string; quantity: number; medication?: { id: string; innName: string } | null }) => (
+        {order.lines.map((line) => (
           <LineDeliveryRow
             key={line.medicationId}
             line={line}

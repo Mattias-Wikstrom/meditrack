@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
 import { OrderCard, Button, Spinner } from '@meditrack/ui';
 import { ordersApi } from '../api/orders';
+import { graphql } from '../gql';
 
-const ORDERS_QUERY = `
-  query Orders {
+const ORDERS_QUERY = graphql(`
+  query PharmacistOrders {
     sent: orders(status: Sent) {
       id wardUnitId status createdAt
       lines { medicationId quantity medication { innName } }
@@ -15,13 +16,13 @@ const ORDERS_QUERY = `
       lines { medicationId quantity medication { innName } }
     }
   }
-`;
+`);
 
-const ORDER_STATUS_SUB = `
-  subscription {
+const ORDER_STATUS_SUB = graphql(`
+  subscription PharmacistOrderStatusChanged {
     orderStatusChanged { orderId from to }
   }
-`;
+`);
 
 export function DashboardPage() {
   const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY });
@@ -56,7 +57,7 @@ export function DashboardPage() {
         {sent.length === 0
           ? <p className="text-slate-400 text-sm py-8 text-center">No orders awaiting confirmation.</p>
           : <div className="space-y-4">
-              {sent.map((order: typeof sent[number]) => (
+              {sent.map((order) => (
                 <OrderCard key={order.id} order={order}>
                   <Button size="sm" className="w-full" onClick={() => handleConfirm(order.id)}>
                     Confirm →
@@ -75,7 +76,7 @@ export function DashboardPage() {
         {confirmed.length === 0
           ? <p className="text-slate-400 text-sm py-8 text-center">No orders ready for delivery.</p>
           : <div className="space-y-4">
-              {confirmed.map((order: typeof confirmed[number]) => (
+              {confirmed.map((order) => (
                 <OrderCard key={order.id} order={order}>
                   <Link to={`/orders/${order.id}`}>
                     <Button size="sm" variant="ghost" className="w-full border border-slate-200">

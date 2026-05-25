@@ -1,3 +1,5 @@
 node_modules/
 dist/
 .env
+# GraphQL codegen output — regenerate with `npm run codegen`
+apps/*/src/gql/
