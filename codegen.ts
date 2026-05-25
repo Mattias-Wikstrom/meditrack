@@ -13,6 +13,11 @@ const config: CodegenConfig = {
       presetConfig: { fragmentMasking: false },
       documents: 'apps/pharmacist/src/**/*.{ts,tsx}',
     },
+    'apps/admin/src/gql/': {
+      preset: 'client',
+      presetConfig: { fragmentMasking: false },
+      documents: 'apps/admin/src/**/*.{ts,tsx}',
+    },
   },
 };
 

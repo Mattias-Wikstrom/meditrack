@@ -34,12 +34,15 @@ export const typeDefs = /* GraphQL */ `
 
   type Query {
     wardUnit(id: ID!): WardUnit
+    wardUnits: [WardUnit!]!
     orders(status: OrderStatus): [Order!]!
     order(id: ID!): Order
     medications(query: String): [Medication!]!
     medication(id: ID!): Medication
     medicinalProducts(medicationId: ID): [MedicinalProduct!]!
     medicinalProduct(id: ID!): MedicinalProduct
+    actors: [Actor!]!
+    auditLog: [AuditEvent!]!
   }
 
   type Mutation {
@@ -130,6 +133,18 @@ export const typeDefs = /* GraphQL */ `
     SelectionQuantityMismatch
     InsufficientStock
     InvalidQuantity
+  }
+
+  type Actor {
+    id: ID!
+    role: String!
+  }
+
+  type AuditEvent {
+    actorId: String!
+    action: String!
+    entityId: String!
+    occurredAt: String!
   }
 
   input OrderLineInput {

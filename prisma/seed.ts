@@ -13,6 +13,7 @@ async function main() {
     { id: 'nurse-erik',       role: ActorRole.Nurse,      passwordHash },
     { id: 'pharmacist-sofia', role: ActorRole.Pharmacist, passwordHash },
     { id: 'pharmacist-lars',  role: ActorRole.Pharmacist, passwordHash },
+    { id: 'admin',            role: ActorRole.Admin,       passwordHash },
   ];
 
   for (const a of actors) {

@@ -6,6 +6,18 @@ export const Query = {
   wardUnit: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) =>
     (await ctx.wardUnitRepo.findById(id as WardUnitId)) ?? null,
 
+  wardUnits: async (_: unknown, __: unknown, ctx: GraphQLContext) =>
+    ctx.wardUnitRepo.findAll(),
+
+  actors: async (_: unknown, __: unknown, ctx: GraphQLContext) =>
+    ctx.actorRepo.findAll(),
+
+  auditLog: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
+    const entries = await ctx.auditRepo.findAll();
+    return [...entries].sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime())
+      .map(e => ({ ...e, occurredAt: e.occurredAt.toISOString() }));
+  },
+
   orders: async (_: unknown, { status }: { status?: OrderStatus }, ctx: GraphQLContext) => {
     const all = await ctx.orderRepo.findAll();
     return status ? all.filter((o) => o.status === status) : all;

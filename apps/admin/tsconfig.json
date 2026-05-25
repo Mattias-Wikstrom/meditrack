@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.app.json",
+  "compilerOptions": {
+    "paths": {
+      "@meditrack/ui": ["../../packages/ui/src"],
+      "@meditrack/client": ["../../packages/client/src"]
+    }
+  },
+  "include": ["src", "../../packages/ui/src", "../../packages/client/src"]
+}

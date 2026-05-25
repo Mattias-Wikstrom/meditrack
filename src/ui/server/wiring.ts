@@ -5,6 +5,7 @@ import { PrismaMedicinalProductRepository } from '../../storage/prisma/PrismaMed
 import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepository';
 import { PrismaWardUnitRepository } from '../../storage/prisma/PrismaWardUnitRepository';
 import { PrismaActorRepository } from '../../storage/prisma/PrismaActorRepository';
+import { PrismaAuditRepository } from '../../storage/prisma/PrismaAuditRepository';
 import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
 import { UpdateOrderLinesUseCase } from '../../domain/order/useCases/ordering/UpdateOrderLinesUseCase';
@@ -19,6 +20,7 @@ export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
   const orderRepo = new PrismaOrderRepository(prisma);
   const wardUnitRepo = new PrismaWardUnitRepository(prisma);
   const actorRepo = new PrismaActorRepository(prisma);
+  const auditRepo = new PrismaAuditRepository(prisma);
   const transactor = new PrismaTransactor(prisma);
 
   return {
@@ -26,6 +28,8 @@ export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
     medicinalProductRepo,
     orderRepo,
     wardUnitRepo,
+    actorRepo,
+    auditRepo,
     createOrderUseCase: new CreateOrderUseCase(actorRepo, transactor, eventBus),
     updateOrderLinesUseCase: new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor, eventBus),
     sendOrderUseCase: new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
