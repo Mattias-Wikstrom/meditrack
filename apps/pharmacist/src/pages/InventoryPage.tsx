@@ -77,8 +77,46 @@ function RestockDialog({ productName, currentStock, onConfirm, onCancel, submitt
   );
 }
 
+type SortKey = 'medication' | 'form' | 'strength' | 'product' | 'stock' | 'min';
+type SortDir = 'asc' | 'desc';
+
+type Product = {
+  id: string;
+  productName: string;
+  stockLevel: number;
+  stockThreshold: number;
+  isBelowThreshold: boolean;
+  medication?: { id: string; innName: string; atcCode: string; form: string; strength: string } | null;
+};
+
+function sortProducts(products: Product[], key: SortKey, dir: SortDir): Product[] {
+  const sorted = [...products].sort((a, b) => {
+    let av: string | number;
+    let bv: string | number;
+    switch (key) {
+      case 'medication': av = a.medication?.innName ?? ''; bv = b.medication?.innName ?? ''; break;
+      case 'form':       av = a.medication?.form ?? '';    bv = b.medication?.form ?? '';    break;
+      case 'strength':   av = a.medication?.strength ?? ''; bv = b.medication?.strength ?? ''; break;
+      case 'product':    av = a.productName;               bv = b.productName;               break;
+      case 'stock':      av = a.stockLevel;                bv = b.stockLevel;                break;
+      case 'min':        av = a.stockThreshold;            bv = b.stockThreshold;            break;
+    }
+    if (av < bv) return -1;
+    if (av > bv) return  1;
+    return 0;
+  });
+  return dir === 'asc' ? sorted : sorted.reverse();
+}
+
+function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
+  if (!active) return <span className="ml-1 text-slate-300">↕</span>;
+  return <span className="ml-1 text-accent">{dir === 'asc' ? '↑' : '↓'}</span>;
+}
+
 export function InventoryPage() {
   const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey>('medication');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [restocking, setRestocking] = useState<{ id: string; name: string; stock: number } | null>(null);
   const [restockError, setRestockError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -90,6 +128,15 @@ export function InventoryPage() {
     refetch({ requestPolicy: 'network-only' });
     return undefined;
   });
+
+  function handleSort(key: SortKey) {
+    if (key === sortKey) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
 
   async function handleRestock(quantity: number) {
     if (!restocking) return;
@@ -123,6 +170,17 @@ export function InventoryPage() {
         p.medication?.atcCode.toLowerCase().includes(q)
       )
     : products;
+
+  const sorted = sortProducts(filtered, sortKey, sortDir);
+
+  const th = (label: string, key: SortKey, align: 'left' | 'right' = 'left') => (
+    <th
+      className={`px-4 py-3 font-medium text-slate-600 cursor-pointer select-none hover:text-slate-900 whitespace-nowrap ${align === 'right' ? 'text-right' : ''}`}
+      onClick={() => handleSort(key)}
+    >
+      {label}<SortIcon active={sortKey === key} dir={sortDir} />
+    </th>
+  );
 
   return (
     <div>
@@ -158,17 +216,17 @@ export function InventoryPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-left">
-              <th className="px-4 py-3 font-medium text-slate-600">Medication</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Form</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Strength</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Product</th>
-              <th className="px-4 py-3 font-medium text-slate-600 text-right">Stock</th>
-              <th className="px-4 py-3 font-medium text-slate-600 text-right">Min</th>
+              {th('Medication', 'medication')}
+              {th('Form', 'form')}
+              {th('Strength', 'strength')}
+              {th('Product', 'product')}
+              {th('Stock', 'stock', 'right')}
+              {th('Min', 'min', 'right')}
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map(p => (
+            {sorted.map(p => (
               <tr key={p.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                 <td className="px-4 py-3 font-medium text-slate-800">{p.medication?.innName ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-600">{p.medication?.form ?? '—'}</td>
@@ -193,7 +251,7 @@ export function InventoryPage() {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-12 text-center text-slate-400">
                   {q ? 'No results.' : 'No products in inventory.'}
