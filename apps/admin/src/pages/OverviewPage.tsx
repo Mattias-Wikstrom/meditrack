@@ -77,14 +77,14 @@ export function OverviewPage() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard title="Total Medications" value={products.length} subtitle="In drug registry" />
         <StatCard title="Low Stock Alerts" value={lowStock.length} subtitle="Below minimum threshold" danger={lowStock.length > 0} />
         <StatCard title="Total Orders" value={orders.length} subtitle="All time orders" />
         <StatCard title="Pending Orders" value={pendingOrders} subtitle="Awaiting completion" />
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-2">
+      <div className="grid gap-3 grid-cols-1 xl:grid-cols-2">
         <Card className={`p-4 ${lowStock.length > 0 ? 'border-red-300' : ''}`}>
           <h3 className={`text-lg font-semibold ${lowStock.length > 0 ? 'text-red-600' : 'text-slate-800'}`}>⚠ Low Stock Alerts</h3>
           <p className="mt-1 text-sm text-slate-500">{lowStock.length} medication{lowStock.length === 1 ? '' : 's'} below minimum threshold</p>
