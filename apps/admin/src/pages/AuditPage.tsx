@@ -46,7 +46,7 @@ function toEntityDetailsRoute(action: string, entityId: string): string | null {
     case 'OrderSent':
     case 'OrderConfirmed':
     case 'OrderDelivered':
-      return `/orders/${entityId}`;
+      return '/orders';
     default:
       return null;
   }
