@@ -4,12 +4,13 @@ import { useClient } from 'urql';
 import { MedicationSearch, Button, Card } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
 import { ordersApi } from '../api/orders';
+import { graphql } from '../gql';
 
-const MEDICATIONS_QUERY = `
+const MEDICATIONS_QUERY = graphql(`
   query SearchMedications($query: String) {
     medications(query: $query) { id innName atcCode form strength }
   }
-`;
+`);
 
 interface Line {
   medicationId: string;

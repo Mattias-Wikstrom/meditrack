@@ -3,21 +3,22 @@ import { Link } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
 import { OrderCard, Button, Spinner } from '@meditrack/ui';
 import { ordersApi } from '../api/orders';
+import { graphql } from '../gql';
 
-const ORDERS_QUERY = `
-  query Orders {
+const ORDERS_QUERY = graphql(`
+  query NurseOrders {
     orders {
       id wardUnitId status createdAt
       lines { medicationId quantity medication { innName } }
     }
   }
-`;
+`);
 
-const ORDER_STATUS_SUB = `
-  subscription {
+const ORDER_STATUS_SUB = graphql(`
+  subscription NurseOrderStatusChanged {
     orderStatusChanged { orderId from to }
   }
-`;
+`);
 
 export function DashboardPage() {
   const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY });
@@ -39,7 +40,7 @@ export function DashboardPage() {
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
-  const orders: ReturnType<typeof data>['orders'] = data?.orders ?? [];
+  const orders = data?.orders ?? [];
 
   return (
     <div>
@@ -53,7 +54,7 @@ export function DashboardPage() {
         <p className="text-slate-400 text-sm text-center py-16">No orders yet. Create one to get started.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {orders.map((order: typeof orders[number]) => (
+          {orders.map((order) => (
             <OrderCard key={order.id} order={order}>
               {order.status === 'Draft' && (
                 <Button size="sm" className="w-full" onClick={() => handleSend(order.id)}>
