@@ -60,6 +60,7 @@ export function App() {
       >
         <Routes>
           <Route path="/" element={<OrdersPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
           <Route path="/medications" element={<MedicationsPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/audit" element={<AuditPage />} />

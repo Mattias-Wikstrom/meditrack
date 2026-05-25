@@ -103,10 +103,10 @@ export function OrderDetailsPage() {
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
   const order = data?.orders.find(o => o.id === orderId);
-  if (!order) return <NotFound kind="order" to="/" />;
+  if (!order) return <NotFound kind="order" to="/orders" />;
 
   return <div>
-    <BackButton onClick={() => navigate('/')} className="mb-4" />
+    <BackButton onClick={() => navigate('/orders')} className="mb-4" />
     <EntityDetailsCard title={`Order for ${order.wardUnitId}`} subtitle="Order details" fields={[
       { label: 'Order ID', value: <span className="font-mono text-xs text-slate-500">{order.id}</span> },
       { label: 'Ward Unit', value: order.wardUnitId },
