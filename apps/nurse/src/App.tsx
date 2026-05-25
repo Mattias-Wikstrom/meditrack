@@ -18,7 +18,7 @@ function NurseShell({ token, actorId, wardUnitId, role }: { token: string; actor
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const [{ data }] = useQuery({ query: WARD_UNIT_NAME_QUERY, variables: { id: wardUnitId } });
+  const [{ data }] = useQuery({ query: WARD_UNIT_NAME_QUERY, variables: { id: wardUnitId }, pause: !wardUnitId });
   const wardUnitName = data?.wardUnit?.name ?? wardUnitId;
 
   return (

@@ -155,7 +155,8 @@ export function DashboardPage() {
 
   const [{ data, fetching, error }, refetch] = useQuery({
     query: WARD_UNIT_ORDERS_QUERY,
-    variables: { wardUnitId: wardUnitId! },
+    variables: { wardUnitId: wardUnitId ?? '' },
+    pause: !wardUnitId,
     requestPolicy: 'cache-and-network',
   });
 
@@ -169,6 +170,7 @@ export function DashboardPage() {
     else { setSortKey(key); setSortDir('asc'); }
   }
 
+  if (!wardUnitId) return <p className="text-red-600 text-sm">Error: Nurse account is not assigned to a ward unit.</p>;
   if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
