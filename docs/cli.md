@@ -72,6 +72,35 @@ Password updated.
 
 ---
 
+## audit
+
+### list
+
+List audit log entries, optionally filtered by actor or order.
+
+```
+npm run cli -- audit list [--actor-id <id>] [--order-id <id>]
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--actor-id <id>` | Show only entries for this actor |
+| `--order-id <id>` | Show only entries for this order |
+
+**Examples**
+
+```
+$ npm run cli -- audit list --order-id d5d7cc27-7ce7-4881-b569-72b414d5916b
+2026-05-25T10:14:22.000Z  nurse-anna               OrderPlaced      d5d7cc27-7ce7-4881-b569-72b414d5916b
+
+$ npm run cli -- audit list --actor-id nurse-anna
+2026-05-25T10:14:22.000Z  nurse-anna               OrderPlaced      d5d7cc27-7ce7-4881-b569-72b414d5916b
+```
+
+---
+
 ## actors
 
 ### list

@@ -6,6 +6,7 @@ import { PrismaMedicinalProductRepository } from '../../storage/prisma/PrismaMed
 import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepository';
 import { PrismaWardUnitRepository } from '../../storage/prisma/PrismaWardUnitRepository';
 import { PrismaActorRepository } from '../../storage/prisma/PrismaActorRepository';
+import { PrismaAuditRepository } from '../../storage/prisma/PrismaAuditRepository';
 import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
@@ -16,6 +17,7 @@ import { verifyToken } from '../../domain/auth/jwt';
 import { readToken } from './auth/tokenStore';
 import { ConsoleOutput } from './ConsoleOutput';
 import { listActors } from './commands/actors';
+import { listAudit } from './commands/audit';
 import { listMedications, showMedication } from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
 import { login } from './commands/auth';
@@ -29,6 +31,7 @@ const medicinalProductRepo = new PrismaMedicinalProductRepository(prisma);
 const orderRepo = new PrismaOrderRepository(prisma);
 const wardUnitRepo = new PrismaWardUnitRepository(prisma);
 const actorRepo = new PrismaActorRepository(prisma);
+const auditRepo = new PrismaAuditRepository(prisma);
 const transactor = new PrismaTransactor(prisma);
 const eventBus = new SimpleEventBus();
 
@@ -70,6 +73,15 @@ program
   .description('Set the password for an actor')
   .requiredOption('--actor-id <id>', 'actor ID')
   .action(async (opts) => passwd(prisma, output, opts.actorId));
+
+const audit = program.command('audit');
+
+audit
+  .command('list')
+  .description('List audit log entries')
+  .option('--actor-id <id>', 'filter by actor')
+  .option('--order-id <id>', 'filter by order')
+  .action(async (opts) => listAudit(auditRepo, output, { actorId: opts.actorId, orderId: opts.orderId }));
 
 const actors = program.command('actors');
 
