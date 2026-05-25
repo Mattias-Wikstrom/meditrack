@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -39,7 +40,7 @@ export function WardUnitsPage() {
           <tbody>
             {units.map(unit => (
               <tr key={unit.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-slate-800">{unit.name}</td>
+                <td className="px-4 py-3 font-medium text-slate-800"><Link to={`/ward-units/${unit.id}`} className="text-accent hover:underline">{unit.name}</Link></td>
                 <td className="px-4 py-3 text-slate-400 font-mono text-xs">{unit.id}</td>
               </tr>
             ))}

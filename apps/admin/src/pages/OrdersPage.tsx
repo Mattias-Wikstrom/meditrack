@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Badge, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -134,7 +135,7 @@ export function OrdersPage() {
               <tr key={order.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                 <td className="py-3 px-4 text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
                 <td className="py-3 px-4"><Badge status={order.status} /></td>
-                <td className="py-3 px-4 text-slate-700">{order.wardUnitId}</td>
+                <td className="py-3 px-4 text-slate-700"><Link to={`/orders/${order.wardUnitId}`} className="text-accent hover:underline">{order.wardUnitId}</Link></td>
                 <td className="py-3 px-4"><LineList lines={order.lines} /></td>
                 <td className="py-3 px-4 text-slate-400 font-mono text-xs">{order.id}</td>
               </tr>
