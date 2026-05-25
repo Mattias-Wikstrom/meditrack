@@ -34,16 +34,23 @@ function ActionBadge({ action }: { action: string }) {
   );
 }
 
-const ENTITY_ROUTES: Record<string, string> = {
-  DraftOrderCreated: '/',
-  OrderSent:         '/',
-  OrderConfirmed:    '/',
-  OrderDelivered:    '/',
-  ActorLoggedIn:     '/users',
-  ActorLoginFailed:  '/users',
-  PasswordChanged:   '/users',
-  ProductRestocked:  '/medications',
-};
+function toEntityDetailsRoute(action: string, entityId: string): string | null {
+  switch (action) {
+    case 'ActorLoggedIn':
+    case 'ActorLoginFailed':
+    case 'PasswordChanged':
+      return `/users/${entityId}`;
+    case 'ProductRestocked':
+      return `/medications/${entityId}`;
+    case 'DraftOrderCreated':
+    case 'OrderSent':
+    case 'OrderConfirmed':
+    case 'OrderDelivered':
+      return `/orders/${entityId}`;
+    default:
+      return null;
+  }
+}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-GB', {
@@ -107,14 +114,16 @@ export function AuditPage() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((e, i) => (
+            {filtered.map((e, i) => {
+              const detailsRoute = toEntityDetailsRoute(e.action, e.entityId);
+              return (
               <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                 <td className="px-4 py-3 text-slate-500 whitespace-nowrap tabular-nums">{formatDate(e.occurredAt)}</td>
                 <td className="px-4 py-3 font-medium text-slate-800">{e.actorId}</td>
                 <td className="px-4 py-3"><ActionBadge action={e.action} /></td>
                 <td className="px-4 py-3 font-mono text-xs">
-                  {ENTITY_ROUTES[e.action] ? (
-                    <Link to={ENTITY_ROUTES[e.action]} className="text-accent hover:underline">
+                  {detailsRoute ? (
+                    <Link to={detailsRoute} className="text-accent hover:underline">
                       {e.entityId}
                     </Link>
                   ) : (
@@ -122,7 +131,8 @@ export function AuditPage() {
                   )}
                 </td>
               </tr>
-            ))}
+              );
+            })}
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-12 text-center text-slate-400">No audit events found.</td>
