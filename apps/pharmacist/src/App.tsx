@@ -6,6 +6,7 @@ import { useAuth, createUrqlClient } from '@meditrack/client';
 import { DashboardPage } from './pages/DashboardPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { OrderDetailPage } from './pages/OrderDetailPage';
+import { OverviewPage } from './pages/OverviewPage';
 
 function PharmacistNav() {
   return (
@@ -40,7 +41,7 @@ export function App() {
         onLogout={logout}
       >
         <Routes>
-          <Route path="/" element={<div className="text-sm text-slate-600">Overview</div>} />
+          <Route path="/" element={<OverviewPage />} />
           <Route path="/orders" element={<DashboardPage />} />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/inventory" element={<InventoryPage />} />

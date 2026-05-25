@@ -2,7 +2,7 @@ import { useQuery } from 'urql';
 import { OrderAndStockOverview, Spinner } from '@meditrack/ui';
 
 const OVERVIEW_QUERY = `
-  query AdminOverview {
+  query PharmacistOverview {
     medicinalProducts {
       id productName stockLevel stockThreshold isBelowThreshold
       medication { innName atcCode strength }
@@ -21,7 +21,7 @@ export function OverviewPage() {
     <OrderAndStockOverview
       products={data?.medicinalProducts ?? []}
       orders={data?.orders ?? []}
-      getProductHref={id => `/medications/${id}`}
+      getProductHref={() => '/inventory'}
     />
   );
 }
