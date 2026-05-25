@@ -13,9 +13,9 @@ const ORDERS_QUERY = graphql(`
   }
 `);
 
-const ORDER_PLACED_SUB = graphql(`
-  subscription NurseOrderPlaced {
-    orderPlaced { orderId }
+const ORDER_DRAFT_CREATED_SUB = graphql(`
+  subscription NurseOrderDraftCreated {
+    orderDraftCreated { orderId }
   }
 `);
 
@@ -29,7 +29,7 @@ export function DashboardPage() {
   const ordersApi = useOrdersApi();
   const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
 
-  useSubscription({ query: ORDER_PLACED_SUB }, () => {
+  useSubscription({ query: ORDER_DRAFT_CREATED_SUB }, () => {
     refetch({ requestPolicy: 'network-only' });
     return undefined;
   });

@@ -13,7 +13,7 @@ import { Transactor } from '../../../shared/Transactor';
 import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure, failures } from '../../../shared/results/UseCaseResult';
 import { ErrorInfo } from '../../../shared/results/ErrorInfo';
-import { OrderPlaced } from '../../events/OrderPlaced';
+import { DraftOrderCreated } from '../../events/DraftOrderCreated';
 import { MedicationId, OrderId, WardUnitId } from '../../../shared/IdTypes';
 
 export interface CreateOrderInput {
@@ -65,10 +65,10 @@ export class CreateOrderUseCase {
 
     await this.transactor.run(async (tx) => {
       await tx.orderRepository.save(order);
-      await tx.auditRepository.record({ actorId: input.actorId, action: 'OrderPlaced', entityId: order.id, occurredAt: new Date() });
+      await tx.auditRepository.record({ actorId: input.actorId, action: 'DraftOrderCreated', entityId: order.id, occurredAt: new Date() });
     });
 
-    await this.eventBus.publish(new OrderPlaced(input.actorId, order));
+    await this.eventBus.publish(new DraftOrderCreated(input.actorId, order));
     return success(order);
   }
 }

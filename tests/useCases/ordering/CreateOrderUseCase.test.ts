@@ -49,7 +49,7 @@ describe('CreateOrderUseCase', () => {
     if (!result.successful) return;
 
     expect(auditRepo.getEntries()).toHaveLength(1);
-    expect(auditRepo.getEntries()[0]?.action).toBe('OrderPlaced');
+    expect(auditRepo.getEntries()[0]?.action).toBe('DraftOrderCreated');
     expect(auditRepo.getEntries()[0]?.actorId).toBe('nurse-1');
     expect(auditRepo.getEntries()[0]?.entityId).toBe(result.value.id);
   });

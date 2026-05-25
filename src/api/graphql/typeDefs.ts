@@ -1,11 +1,11 @@
 export const typeDefs = /* GraphQL */ `
   type Subscription {
-    orderPlaced: OrderPlacedEvent!
+    orderDraftCreated: OrderDraftCreatedEvent!
     orderStatusChanged: OrderStatusChangedEvent!
     stockBelowThreshold: StockAlertEvent!
   }
 
-  type OrderPlacedEvent {
+  type OrderDraftCreatedEvent {
     orderId: ID!
     wardUnitId: ID!
     actorId: String!

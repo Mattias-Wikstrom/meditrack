@@ -1,5 +1,5 @@
 export type AuditAction =
-  | 'OrderPlaced' | 'OrderSent' | 'OrderConfirmed' | 'OrderDelivered'
+  | 'DraftOrderCreated' | 'OrderSent' | 'OrderConfirmed' | 'OrderDelivered'
   | 'ActorLoggedIn' | 'ActorLoginFailed'
   | 'PasswordChanged'
   | 'ProductRestocked';

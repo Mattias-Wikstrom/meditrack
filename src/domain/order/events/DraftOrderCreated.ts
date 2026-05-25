@@ -1,8 +1,8 @@
 import { DomainEvent } from '../../shared/eventContracts/DomainEvent';
 import { Order } from '../Order';
 
-export class OrderPlaced implements DomainEvent {
-  readonly eventType = 'OrderPlaced';
+export class DraftOrderCreated implements DomainEvent {
+  readonly eventType = 'DraftOrderCreated';
   readonly occurredAt = new Date();
 
   constructor(
