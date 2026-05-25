@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import Decimal from 'decimal.js';
 import { listMedications, showMedication } from '../../../src/ui/cli/commands/medications';
 import { InMemoryMedicationRepository } from '../../../src/storage/inMemory/InMemoryMedicationRepository';
 import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';
@@ -81,7 +80,7 @@ describe('showMedication', () => {
 
   it('lists registered medicinal products', async () => {
     await medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
-    await medicinalProductRepo.save(new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(5)));
+    await medicinalProductRepo.save(new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, 10, 5));
 
     await showMedication(medicationRepo, medicinalProductRepo, output, 'med-1');
 
@@ -90,7 +89,7 @@ describe('showMedication', () => {
 
   it('flags a medicinal product that is below threshold', async () => {
     await medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
-    await medicinalProductRepo.save(new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, new Decimal(3), new Decimal(20)));
+    await medicinalProductRepo.save(new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, 3, 20));
 
     await showMedication(medicationRepo, medicinalProductRepo, output, 'med-1');
 

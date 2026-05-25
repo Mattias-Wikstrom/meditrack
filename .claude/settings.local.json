@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wsl -d ubuntu -e bash -c \"cd /home/mattias/meditrack/.claude/worktrees/magical-bose-45d0e3 && git status && git log --oneline -3\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}

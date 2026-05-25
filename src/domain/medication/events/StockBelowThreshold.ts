@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { DomainEvent } from '../../shared/eventContracts/DomainEvent';
 import { MedicinalProduct } from '../MedicinalProduct';
 import { MedicationId, MedicinalProductId } from '../../shared/IdTypes';
@@ -9,8 +8,8 @@ export class StockBelowThreshold implements DomainEvent {
   readonly medicinalProductId: MedicinalProductId;
   readonly productName: string;
   readonly medicationId: MedicationId;
-  readonly stockLevel: Decimal;
-  readonly stockThreshold: Decimal;
+  readonly stockLevel: number;
+  readonly stockThreshold: number;
 
   constructor(public readonly actorId: string, product: MedicinalProduct) {
     this.medicinalProductId = product.id;

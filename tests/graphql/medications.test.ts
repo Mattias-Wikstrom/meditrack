@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { graphql } from 'graphql';
 import { schema } from '../../src/api/graphql/schema';
 import { createTestContext } from '../helpers/createTestContext';
-import Decimal from 'decimal.js';
 import { Medication } from '../../src/domain/medication/Medication';
 import { MedicinalProduct } from '../../src/domain/medication/MedicinalProduct';
 import { MedicationForm } from '../../src/domain/medication/MedicationForm';
@@ -87,7 +86,7 @@ describe('Query.medicinalProducts', () => {
     const ctx = createTestContext();
     await ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
     await ctx.medicinalProductRepo.save(
-      new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, new Decimal(5), new Decimal(20)),
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, 5, 20),
     );
 
     const result = await graphql({
@@ -104,7 +103,7 @@ describe('Query.medicinalProducts', () => {
     const ctx = createTestContext();
     await ctx.medicationRepo.save(new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'));
     await ctx.medicinalProductRepo.save(
-      new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(5)),
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Alvedon 500mg', 'med-1' as MedicationId, 10, 5),
     );
 
     const result = await graphql({

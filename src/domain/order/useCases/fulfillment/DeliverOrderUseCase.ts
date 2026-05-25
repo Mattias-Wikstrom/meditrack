@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { Order } from '../../Order';
 import { OrderStatus } from '../../OrderStatus';
 import { OrderRepository } from '../../OrderRepository';
@@ -81,7 +80,7 @@ export class DeliverOrderUseCase {
       resolvedLines.push({
         medicationId: selection.medicationId, // What was requested?
         product, // The product that has been picked from the shelf
-        quantity: new Decimal(selection.quantity), // How much was requested?
+        quantity: selection.quantity, // How much was requested?
       });
     }
 
@@ -109,7 +108,7 @@ export class DeliverOrderUseCase {
       for (const line of plan.resolvedLines) {
         const wasBelowThreshold = line.product.isBelowThreshold;
 
-        line.product.stockLevel = line.product.stockLevel.sub(line.quantity);
+        line.product.stockLevel = line.product.stockLevel - line.quantity;
         await tx.medicinalProductRepository.save(line.product);
 
         if (line.product.isBelowThreshold && !wasBelowThreshold) {

@@ -5,7 +5,7 @@ import { DeliveryRule } from './DeliveryRule';
 export class SufficientStock implements DeliveryRule {
   check(plan: DeliveryPlan): ErrorInfo | null {
     for (const line of plan.resolvedLines) {
-      if (line.product.stockLevel.lessThan(line.quantity)) {
+      if (line.product.stockLevel < line.quantity) {
         return new ErrorInfo('InsufficientStock');
       }
     }

@@ -1,13 +1,8 @@
-import Decimal from 'decimal.js';
 import { MedicationId } from '../shared/IdTypes';
 
 export class OrderLine {
-  public readonly quantity: Decimal;
-
   constructor(
     public readonly medicationId: MedicationId,
-    quantity: number,
-  ) {
-    this.quantity = new Decimal(quantity);
-  }
+    public readonly quantity: number,
+  ) {}
 }
