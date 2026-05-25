@@ -1,3 +1,13 @@
-import { createViteConfig } from '@meditrack/config';
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
-export default createViteConfig(__dirname);
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@meditrack/ui':     path.resolve(__dirname, '../../packages/ui/src'),
+      '@meditrack/client': path.resolve(__dirname, '../../packages/client/src'),
+    },
+  },
+});
