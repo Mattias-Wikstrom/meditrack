@@ -109,8 +109,11 @@ function sortProducts(products: Product[], key: SortKey, dir: SortDir): Product[
 }
 
 function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
-  if (!active) return <span className="ml-1 text-slate-300">↕</span>;
-  return <span className="ml-1 text-accent">{dir === 'asc' ? '↑' : '↓'}</span>;
+  return (
+    <span className={`ml-1 ${active ? 'text-accent' : 'invisible'}`}>
+      {dir === 'asc' ? '↑' : '↓'}
+    </span>
+  );
 }
 
 export function InventoryPage() {
