@@ -142,14 +142,13 @@ export function NurseOrderDetailPage() {
 
   return (
     <div className="max-w-xl">
-      <div className="flex items-center gap-3 mb-1">
+      <div className="flex items-center gap-3 mb-2">
         <button onClick={() => navigate('/')} className="text-slate-400 hover:text-slate-600 transition-colors text-sm">← Back</button>
         <h1 className="text-xl font-semibold text-slate-800">Order</h1>
         <StatusBadge status={order.status} />
         {saving && <span className="ml-auto text-xs text-slate-400">Saving…</span>}
       </div>
 
-      <p className="font-mono text-xs text-slate-400 mb-1">{order.id}</p>
       <p className="text-xs text-slate-400 mb-6">{order.wardUnitId} · {formatDate(order.createdAt)}</p>
 
       {lines.length > 0 ? (
@@ -196,6 +195,10 @@ export function NurseOrderDetailPage() {
           {sending ? 'Sending…' : 'Send Order'}
         </Button>
       )}
+
+      <p className="mt-10 text-xs text-slate-300">
+        Order id: <span className="font-mono">{order.id}</span>
+      </p>
     </div>
   );
 }
