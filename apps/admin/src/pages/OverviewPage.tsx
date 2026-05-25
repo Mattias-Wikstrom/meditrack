@@ -35,13 +35,13 @@ const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
 
 function StatCard({ title, value, subtitle, danger = false }: { title: string; value: number; subtitle: string; danger?: boolean }) {
   return (
-    <Card className={`p-6 ${danger ? 'border-red-300' : ''}`}>
+    <Card className={`p-4 ${danger ? 'border-red-300' : ''}`}>
       <div className="flex items-start justify-between">
-        <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        <span className={`text-xl ${danger ? 'text-red-500' : 'text-slate-400'}`}>{danger ? '⚠' : '•'}</span>
+        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+        <span className={`text-base ${danger ? 'text-red-500' : 'text-slate-400'}`}>{danger ? '⚠' : '•'}</span>
       </div>
-      <div className={`mt-8 text-5xl font-semibold tabular-nums ${danger ? 'text-red-600' : 'text-slate-900'}`}>{value}</div>
-      <p className="mt-2 text-slate-500">{subtitle}</p>
+      <div className={`mt-4 text-3xl font-semibold tabular-nums ${danger ? 'text-red-600' : 'text-slate-900'}`}>{value}</div>
+      <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
     </Card>
   );
 }
@@ -76,41 +76,41 @@ export function OverviewPage() {
   }, {} as Record<OrderStatus, number>);
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="space-y-4">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Medications" value={products.length} subtitle="In drug registry" />
         <StatCard title="Low Stock Alerts" value={lowStock.length} subtitle="Below minimum threshold" danger={lowStock.length > 0} />
         <StatCard title="Total Orders" value={orders.length} subtitle="All time orders" />
         <StatCard title="Pending Orders" value={pendingOrders} subtitle="Awaiting completion" />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <Card className={`p-6 ${lowStock.length > 0 ? 'border-red-300' : ''}`}>
-          <h3 className={`text-2xl font-semibold ${lowStock.length > 0 ? 'text-red-600' : 'text-slate-800'}`}>⚠ Low Stock Alerts</h3>
-          <p className="mt-2 text-slate-500">{lowStock.length} medication{lowStock.length === 1 ? '' : 's'} below minimum threshold</p>
-          <div className="mt-4 space-y-3">
+      <div className="grid gap-3 xl:grid-cols-2">
+        <Card className={`p-4 ${lowStock.length > 0 ? 'border-red-300' : ''}`}>
+          <h3 className={`text-lg font-semibold ${lowStock.length > 0 ? 'text-red-600' : 'text-slate-800'}`}>⚠ Low Stock Alerts</h3>
+          <p className="mt-1 text-sm text-slate-500">{lowStock.length} medication{lowStock.length === 1 ? '' : 's'} below minimum threshold</p>
+          <div className="mt-3 space-y-2">
             {lowStock.length === 0 && <p className="text-slate-500">No low stock medications 🎉</p>}
             {lowStock.map((product) => (
-              <div key={product.id} className="rounded-xl border border-red-200 bg-red-50/40 px-4 py-3 flex items-center justify-between">
+              <div key={product.id} className="rounded-lg border border-red-200 bg-red-50/40 px-3 py-2.5 flex items-center justify-between">
                 <div>
-                  <div className="font-medium text-slate-900">{product.medication?.innName ?? product.productName}</div>
-                  <div className="text-sm text-slate-500">{product.medication?.atcCode ?? '—'} · {product.medication?.strength ?? '—'}</div>
+                  <div className="text-sm font-medium text-slate-900">{product.medication?.innName ?? product.productName}</div>
+                  <div className="text-xs text-slate-500">{product.medication?.atcCode ?? '—'} · {product.medication?.strength ?? '—'}</div>
                 </div>
-                <div className="text-sm font-medium tabular-nums text-slate-700">
-                  <span className="rounded-full bg-red-600 text-white px-2 py-1">{product.stockLevel}</span>
+                <div className="text-xs font-medium tabular-nums text-slate-700">
+                  <span className="rounded-full bg-red-600 text-white px-2 py-0.5">{product.stockLevel}</span>
                   <span className="mx-2">→</span>
-                  <span className="rounded-full border border-slate-300 px-2 py-1">{product.stockThreshold}</span>
+                  <span className="rounded-full border border-slate-300 px-2 py-0.5">{product.stockThreshold}</span>
                 </div>
               </div>
             ))}
           </div>
         </Card>
 
-        <Card className="p-6">
-          <h3 className="text-2xl font-semibold text-slate-900">Quick Stats</h3>
-          <dl className="mt-4 space-y-3">
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold text-slate-900">Quick Stats</h3>
+          <dl className="mt-3 space-y-2">
             {ORDER_STATUSES.map((status) => (
-              <div key={status} className="flex items-center justify-between text-slate-700">
+              <div key={status} className="flex items-center justify-between text-sm text-slate-700">
                 <dt>{ORDER_STATUS_LABELS[status]}</dt>
                 <dd className="font-semibold tabular-nums text-slate-900">{statusCounts[status]}</dd>
               </div>
