@@ -22,7 +22,7 @@ export function WardUnitsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 min-h-[38px]">
         <h1 className="text-xl font-semibold text-slate-800">
           Ward Units
           <span className="ml-2 text-sm font-normal text-slate-400">{units.length}</span>
