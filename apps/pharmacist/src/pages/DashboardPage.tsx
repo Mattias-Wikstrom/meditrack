@@ -25,7 +25,7 @@ const ORDER_STATUS_SUB = graphql(`
 
 export function DashboardPage() {
   const ordersApi = useOrdersApi();
-  const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY });
+  const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
 
   useSubscription({ query: ORDER_STATUS_SUB }, () => {
     refetch({ requestPolicy: 'network-only' });
