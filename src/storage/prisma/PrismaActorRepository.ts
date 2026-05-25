@@ -6,6 +6,11 @@ import { ActorRole } from '../../domain/shared/ActorRole';
 export class PrismaActorRepository implements ActorRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async findAll(): Promise<Actor[]> {
+    const rows = await this.prisma.actor.findMany({ orderBy: { id: 'asc' } });
+    return rows.map((r) => ({ id: r.id, role: r.role as ActorRole }));
+  }
+
   async findById(id: string): Promise<Actor | undefined> {
     const row = await this.prisma.actor.findUnique({ where: { id } });
     if (!row) return undefined;

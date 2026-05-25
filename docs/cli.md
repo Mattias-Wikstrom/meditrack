@@ -72,6 +72,28 @@ Password updated.
 
 ---
 
+## actors
+
+### list
+
+List all actors and their roles.
+
+```
+npm run cli -- actors list
+```
+
+**Example**
+
+```
+$ npm run cli -- actors list
+nurse-anna               Nurse
+nurse-erik               Nurse
+pharmacist-lars          Pharmacist
+pharmacist-sofia         Pharmacist
+```
+
+---
+
 ## medications
 
 ### list

@@ -15,6 +15,7 @@ import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/Del
 import { verifyToken } from '../../domain/auth/jwt';
 import { readToken } from './auth/tokenStore';
 import { ConsoleOutput } from './ConsoleOutput';
+import { listActors } from './commands/actors';
 import { listMedications, showMedication } from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
 import { login } from './commands/auth';
@@ -69,6 +70,13 @@ program
   .description('Set the password for an actor')
   .requiredOption('--actor-id <id>', 'actor ID')
   .action(async (opts) => passwd(prisma, output, opts.actorId));
+
+const actors = program.command('actors');
+
+actors
+  .command('list')
+  .description('List all actors and their roles')
+  .action(async () => listActors(actorRepo, output));
 
 const medications = program.command('medications');
 

@@ -10,6 +10,10 @@ export class InMemoryActorRepository implements ActorRepository {
     }
   }
 
+  async findAll(): Promise<Actor[]> {
+    return [...this.store.values()];
+  }
+
   async findById(id: string): Promise<Actor | undefined> {
     return this.store.get(id);
   }
