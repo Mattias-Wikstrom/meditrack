@@ -22,6 +22,7 @@ export function App() {
       <AppShell
         appName="Nurse Station"
         actorName={actorId!}
+        onHome={() => navigate('/')}
         onProfile={() => navigate('/me')}
         onLogout={logout}
       >

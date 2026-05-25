@@ -5,17 +5,22 @@ interface AppShellProps {
   actorName: string;
   children: React.ReactNode;
   nav?: React.ReactNode;
+  onHome?: () => void;
   onProfile?: () => void;
   onLogout?: () => void;
 }
 
-export function AppShell({ appName, actorName, children, nav, onProfile, onLogout }: AppShellProps) {
+export function AppShell({ appName, actorName, children, nav, onHome, onProfile, onLogout }: AppShellProps) {
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
       <header className="bg-accent shadow-sm">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-white font-semibold text-lg tracking-tight">MediTrack</span>
+            {onHome ? (
+              <button onClick={onHome} className="text-white font-semibold text-lg tracking-tight hover:text-white/80 transition-colors">MediTrack</button>
+            ) : (
+              <span className="text-white font-semibold text-lg tracking-tight">MediTrack</span>
+            )}
             <span className="text-white/50 text-sm">·</span>
             <span className="text-white/90 text-sm font-medium">{appName}</span>
           </div>

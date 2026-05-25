@@ -55,6 +55,7 @@ export function App() {
         appName="Pharmacy"
         actorName={actorId!}
         nav={<PharmacistNav />}
+        onHome={() => navigate('/')}
         onProfile={() => navigate('/me')}
         onLogout={logout}
       >
