@@ -50,8 +50,8 @@ model MedicinalProduct {
   id             String     @id
   productName    String
   medicationId   String
-  stockLevel     Decimal    @db.Decimal(18, 4)
-  stockThreshold Decimal    @db.Decimal(18, 4)
+  stockLevel     Int
+  stockThreshold Int
   medication     Medication @relation(fields: [medicationId], references: [id])
 }
 
@@ -69,7 +69,7 @@ model OrderLine {
   id           Int     @id @default(autoincrement())
   orderId      String
   medicationId String
-  quantity     Decimal @db.Decimal(18, 4)
+  quantity     Int
   order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 

@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import Decimal from 'decimal.js';
 import { Order } from '../../domain/order/Order';
 import { OrderLine } from '../../domain/order/OrderLine';
 import { OrderRepository } from '../../domain/order/OrderRepository';
@@ -8,7 +7,7 @@ import { MedicationId, OrderId, WardUnitId } from '../../domain/shared/IdTypes';
 
 type OrderLineRow = {
   medicationId: string;
-  quantity: { toString(): string };
+  quantity: number;
 };
 
 type OrderRow = {
@@ -20,10 +19,7 @@ type OrderRow = {
 };
 
 function lineToDomain(row: OrderLineRow): OrderLine {
-  // OrderLine stores quantity as Decimal in the domain but the constructor takes a number.
-  // We convert via the numeric value.
-  const quantity = new Decimal(row.quantity.toString());
-  return new OrderLine(row.medicationId as MedicationId, quantity.toNumber());
+  return new OrderLine(row.medicationId as MedicationId, row.quantity);
 }
 
 function toDomain(row: OrderRow): Order {
@@ -84,7 +80,7 @@ export class PrismaOrderRepository implements OrderRepository {
         data: order.lines.map((line) => ({
           orderId: order.id,
           medicationId: line.medicationId,
-          quantity: line.quantity.toString(),
+          quantity: line.quantity,
         })),
       });
     }

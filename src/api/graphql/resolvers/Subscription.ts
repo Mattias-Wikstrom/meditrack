@@ -18,8 +18,8 @@ export const Subscription = {
       medicinalProductId: event.medicinalProductId,
       productName: event.productName,
       medicationId: event.medicationId,
-      stockLevel: event.stockLevel.toNumber(),
-      stockThreshold: event.stockThreshold.toNumber(),
+      stockLevel: event.stockLevel,
+      stockThreshold: event.stockThreshold,
     }),
   },
 };

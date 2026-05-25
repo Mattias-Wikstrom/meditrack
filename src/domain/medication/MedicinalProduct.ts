@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { MedicationId, MedicinalProductId } from '../shared/IdTypes';
 
 export class MedicinalProduct {
@@ -11,17 +10,17 @@ export class MedicinalProduct {
   public readonly medicationId: MedicationId;
 
   /** Current stock in dispensable units (tablets, vials, etc.). */
-  public stockLevel: Decimal;
+  public stockLevel: number;
 
   /** Stock level at or below which a StockBelowThreshold event is raised. */
-  public readonly stockThreshold: Decimal;
+  public readonly stockThreshold: number;
 
   constructor(
     id: MedicinalProductId,
     productName: string,
     medicationId: MedicationId,
-    stockLevel: Decimal,
-    stockThreshold: Decimal,
+    stockLevel: number,
+    stockThreshold: number,
   ) {
     this.id = id;
     this.productName = productName;
@@ -31,6 +30,6 @@ export class MedicinalProduct {
   }
 
   get isBelowThreshold(): boolean {
-    return this.stockLevel.lessThan(this.stockThreshold);
+    return this.stockLevel < this.stockThreshold;
   }
 }

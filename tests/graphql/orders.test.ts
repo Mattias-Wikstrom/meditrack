@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { graphql } from 'graphql';
 import { schema } from '../../src/api/graphql/schema';
 import { createTestContext } from '../helpers/createTestContext';
-import Decimal from 'decimal.js';
 import { Medication } from '../../src/domain/medication/Medication';
 import { MedicinalProduct } from '../../src/domain/medication/MedicinalProduct';
 import { MedicationForm } from '../../src/domain/medication/MedicationForm';
@@ -150,7 +149,7 @@ describe('Mutation.deliverOrder', () => {
       new Medication('med-1' as MedicationId, 'Paracetamol', 'N02BE01', MedicationForm.Tablet, '500mg'),
     );
     await ctx.medicinalProductRepo.save(
-      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(50), new Decimal(5)),
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, 50, 5),
     );
 
     const created = await graphql({
@@ -167,7 +166,7 @@ describe('Mutation.deliverOrder', () => {
     expect(result.errors).toBeUndefined();
     expect((result.data as any)?.deliverOrder.successful).toBe(true);
     expect((result.data as any)?.deliverOrder.order.status).toBe('Delivered');
-    expect((await ctx.medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(30);
+    expect((await ctx.medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel).toBe(30);
   });
 });
 

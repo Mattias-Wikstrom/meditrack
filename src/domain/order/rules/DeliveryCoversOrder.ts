@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js';
 import { DeliveryPlan } from './DeliveryPlan';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
 import { DeliveryRule } from './DeliveryRule';
@@ -16,11 +15,8 @@ export class DeliveryCoversOrder implements DeliveryRule {
         }
       }
 
-      const totalSelected = selectionsForLine.reduce(
-        (sum, l) => sum.add(l.quantity),
-        new Decimal(0),
-      );
-      if (!totalSelected.equals(orderLine.quantity)) {
+      const totalSelected = selectionsForLine.reduce((sum, l) => sum + l.quantity, 0);
+      if (totalSelected !== orderLine.quantity) {
         return new ErrorInfo('SelectionQuantityMismatch');
       }
     }

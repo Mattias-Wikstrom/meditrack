@@ -13,7 +13,6 @@ import { DeliverOrderUseCase } from '../../../src/domain/order/useCases/fulfillm
 import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
 import { ActorRole } from '../../../src/domain/shared/ActorRole';
 import { MedicationId, MedicinalProductId, WardUnitId } from '../../../src/domain/shared/IdTypes';
-import Decimal from 'decimal.js';
 import { RecordingOutput, ExitError } from './RecordingOutput';
 
 const makeActorRepo = () =>
@@ -139,7 +138,7 @@ describe('deliverOrder', () => {
     const eventBus = new SimpleEventBus();
     const actorRepo = makeActorRepo();
     const transactor = makeTransactor(orderRepo, medicinalProductRepo);
-    await medicinalProductRepo.save(new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(5)));
+    await medicinalProductRepo.save(new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, 10, 5));
     const created = await new CreateOrderUseCase(actorRepo, transactor, eventBus).execute({
       actorId: 'nurse-1',
       wardUnitId: 'ward-1' as WardUnitId,

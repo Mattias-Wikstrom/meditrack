@@ -9,7 +9,6 @@ import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemor
 import { InMemoryAuditRepository } from '../../../src/storage/inMemory/InMemoryAuditRepository';
 import { InMemoryTransactor } from '../../../src/storage/inMemory/InMemoryTransactor';
 import { SimpleEventBus } from '../../../src/eventBus/SimpleEventBus';
-import Decimal from 'decimal.js';
 import { MedicinalProduct } from '../../../src/domain/medication/MedicinalProduct';
 import { OrderStatus } from '../../../src/domain/order/OrderStatus';
 import { ActorRole } from '../../../src/domain/shared/ActorRole';
@@ -42,7 +41,7 @@ describe('DeliverOrderUseCase', () => {
     deliverOrder = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus);
 
     await medicinalProductRepo.save(
-      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, new Decimal(10), new Decimal(3)),
+      new MedicinalProduct('prod-1' as MedicinalProductId, 'Paracetamol 500mg', 'med-1' as MedicationId, 10, 3),
     );
   });
 
@@ -74,7 +73,7 @@ describe('DeliverOrderUseCase', () => {
 
     await deliverOrder.execute({ actorId: 'pharmacist-1', orderId, productSelections: selectProd1 });
 
-    expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(5);
+    expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel).toBe(5);
   });
 
   it('writes an audit entry on success', async () => {
@@ -146,7 +145,7 @@ describe('DeliverOrderUseCase', () => {
 
   it('does not update stock if delivery fails', async () => {
     const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
-    const stockBefore = (await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber();
+    const stockBefore = (await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel;
 
     await deliverOrder.execute({
       actorId: 'pharmacist-1',
@@ -154,6 +153,6 @@ describe('DeliverOrderUseCase', () => {
       productSelections: [{ medicationId: 'med-1' as MedicationId, medicinalProductId: 'prod-nonexistent' as MedicinalProductId, quantity: 5 }],
     });
 
-    expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel.toNumber()).toBe(stockBefore);
+    expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel).toBe(stockBefore);
   });
 });
