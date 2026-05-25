@@ -1,13 +1,17 @@
-import { createApiClient } from '@meditrack/client';
-
-const { post } = createApiClient('nurse-anna');
+import { useMemo } from 'react';
+import { useAuth, createApiClient } from '@meditrack/client';
 
 export interface OrderLine { medicationId: string; quantity: number }
 
-export const ordersApi = {
-  create: (wardUnitId: string, lines: OrderLine[]) =>
-    post('/orders', { wardUnitId, lines }),
-
-  send: (orderId: string) =>
-    post(`/orders/${orderId}/send`),
-};
+export function useOrdersApi() {
+  const { token } = useAuth();
+  return useMemo(() => {
+    const { post } = createApiClient(token!);
+    return {
+      create: (wardUnitId: string, lines: OrderLine[]) =>
+        post('/orders', { wardUnitId, lines }),
+      send: (orderId: string) =>
+        post(`/orders/${orderId}/send`),
+    };
+  }, [token]);
+}

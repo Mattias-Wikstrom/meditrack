@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
 import { OrderCard, Button, Spinner } from '@meditrack/ui';
-import { ordersApi } from '../api/orders';
+import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
 
 const ORDERS_QUERY = graphql(`
@@ -21,6 +20,7 @@ const ORDER_STATUS_SUB = graphql(`
 `);
 
 export function DashboardPage() {
+  const ordersApi = useOrdersApi();
   const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY });
 
   useSubscription({ query: ORDER_STATUS_SUB }, () => {

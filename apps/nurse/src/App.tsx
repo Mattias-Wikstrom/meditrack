@@ -1,16 +1,35 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { AppShell } from '@meditrack/ui';
+import { useMemo } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Provider } from 'urql';
+import { AppShell, LoginPage, ChangePasswordPage } from '@meditrack/ui';
+import { useAuth, createUrqlClient } from '@meditrack/client';
 import { DashboardPage } from './pages/DashboardPage';
 import { NewOrderPage } from './pages/NewOrderPage';
 
 export function App() {
+  const { token, actorId, login, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const urqlClient = useMemo(() => (token ? createUrqlClient(token) : null), [token]);
+
+  if (!token || !urqlClient) {
+    return <LoginPage role="Nurse" onLogin={login} />;
+  }
+
   return (
-    <AppShell appName="Nurse Station" actorName="Anna Lindgren">
-      <Routes>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/orders/new" element={<NewOrderPage />} />
-      </Routes>
-    </AppShell>
+    <Provider value={urqlClient}>
+      <AppShell
+        appName="Nurse Station"
+        actorName={actorId!}
+        onProfile={() => navigate('/me')}
+        onLogout={logout}
+      >
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/orders/new" element={<NewOrderPage />} />
+          <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} onSuccess={() => navigate('/')} />} />
+        </Routes>
+      </AppShell>
+    </Provider>
   );
 }

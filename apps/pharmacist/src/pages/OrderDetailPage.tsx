@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Badge, Button, Card, Spinner } from '@meditrack/ui';
-import { ordersApi } from '../api/orders';
+import { useOrdersApi } from '../api/orders';
 import type { ProductSelection } from '../api/orders';
 import { graphql } from '../gql';
 import type { GetOrderQuery } from '../gql/graphql';
@@ -86,7 +86,8 @@ function LineDeliveryRow({
 export function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [{ data, fetching, error }] = useQuery({ query: ORDER_QUERY, variables: { id } });
+  const ordersApi = useOrdersApi();
+  const [{ data, fetching, error }] = useQuery({ query: ORDER_QUERY, variables: { id: id! } });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 

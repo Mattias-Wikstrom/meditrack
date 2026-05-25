@@ -1,9 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClient } from 'urql';
 import { MedicationSearch, Button, Card } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
-import { ordersApi } from '../api/orders';
+import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
 
 const MEDICATIONS_QUERY = graphql(`
@@ -24,6 +24,7 @@ const WARD_UNIT_ID = 'ward-1';
 export function NewOrderPage() {
   const navigate = useNavigate();
   const urql = useClient();
+  const ordersApi = useOrdersApi();
   const [lines, setLines] = useState<Line[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

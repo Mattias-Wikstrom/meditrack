@@ -10,6 +10,7 @@ import { PubSubEventBus } from './PubSubEventBus';
 import { createWiring } from './wiring';
 import { createOrdersRouter } from './rest/orders';
 import { createAuthRouter } from './rest/auth';
+import { createActorsRouter } from './rest/actors';
 import { requireAuth } from './middleware/requireAuth';
 import { verifyToken } from '../../domain/auth/jwt';
 
@@ -39,6 +40,7 @@ app.use('/graphql', yoga);
 
 const api = express.Router();
 api.use(express.json());
+api.use('/actors', createActorsRouter());
 api.use('/auth', createAuthRouter());
 api.use('/orders', requireAuth, createOrdersRouter(wiring));
 app.use('/api', api);

@@ -4,5 +4,8 @@ export { Card } from './Card';
 export { Badge } from './Badge';
 export { Spinner } from './Spinner';
 export { MedicationSearch } from './MedicationSearch';
+export type { MedicationOption } from './MedicationSearch';
 export { OrderCard } from './OrderCard';
 export type { OrderSummary, OrderLineSummary } from './OrderCard';
+export { LoginPage } from './LoginPage';
+export { ChangePasswordPage } from './ChangePasswordPage';

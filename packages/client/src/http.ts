@@ -1,10 +1,10 @@
 const API = 'http://localhost:4000/api';
 
-export function createApiClient(actorId: string) {
+export function createApiClient(token: string) {
   async function post<T>(path: string, body?: unknown): Promise<T> {
     const res = await fetch(`${API}${path}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Actor-Id': actorId },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
     const json = await res.json() as { data?: T; errors?: string[] };
