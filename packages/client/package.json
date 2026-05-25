@@ -1,0 +1,13 @@
+{
+  "name": "@meditrack/client",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "peerDependencies": {
+    "graphql": "^16",
+    "graphql-ws": "^6",
+    "urql": "^5"
+  }
+}

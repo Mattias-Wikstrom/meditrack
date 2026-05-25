@@ -1,0 +1,12 @@
+{
+  "name": "@meditrack/config",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "peerDependencies": {
+    "@vitejs/plugin-react": "^4",
+    "vite": "^6"
+  }
+}
