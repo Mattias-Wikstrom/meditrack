@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -105,8 +104,8 @@ export function UsersPage() {
           </thead>
           <tbody>
             {sorted.map(actor => (
-              <tr key={actor.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                <td className="py-3 px-4 font-medium text-slate-800"><Link to={`/users/${actor.id}`} className="text-accent hover:underline">{actor.id}</Link></td>
+              <tr key={actor.id} onClick={() => window.location.assign(`/users/${actor.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
+                <td className="py-3 px-4 font-medium text-slate-800">{actor.id}</td>
                 <td className="py-3 px-4"><RoleBadge role={actor.role} /></td>
                 <td className="py-3 px-4 text-slate-600">{actor.wardUnit?.name ?? <span className="text-slate-300">—</span>}</td>
               </tr>
