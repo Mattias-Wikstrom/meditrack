@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -32,6 +33,17 @@ function ActionBadge({ action }: { action: string }) {
     </span>
   );
 }
+
+const ENTITY_ROUTES: Record<string, string> = {
+  DraftOrderCreated: '/',
+  OrderSent:         '/',
+  OrderConfirmed:    '/',
+  OrderDelivered:    '/',
+  ActorLoggedIn:     '/users',
+  ActorLoginFailed:  '/users',
+  PasswordChanged:   '/users',
+  ProductRestocked:  '/medications',
+};
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-GB', {
@@ -100,7 +112,15 @@ export function AuditPage() {
                 <td className="px-4 py-3 text-slate-500 whitespace-nowrap tabular-nums">{formatDate(e.occurredAt)}</td>
                 <td className="px-4 py-3 font-medium text-slate-800">{e.actorId}</td>
                 <td className="px-4 py-3"><ActionBadge action={e.action} /></td>
-                <td className="px-4 py-3 text-slate-400 font-mono text-xs">{e.entityId}</td>
+                <td className="px-4 py-3 font-mono text-xs">
+                  {ENTITY_ROUTES[e.action] ? (
+                    <Link to={ENTITY_ROUTES[e.action]} className="text-accent hover:underline">
+                      {e.entityId}
+                    </Link>
+                  ) : (
+                    <span className="text-slate-400">{e.entityId}</span>
+                  )}
+                </td>
               </tr>
             ))}
             {filtered.length === 0 && (
