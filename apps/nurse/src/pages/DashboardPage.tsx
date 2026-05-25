@@ -104,12 +104,13 @@ function formatDate(iso: string) {
   });
 }
 
-function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick }: {
+function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick, sortable = true }: {
   orders: OrderRow[];
   sortKey: SortKey;
   sortDir: SortDir;
   onSort: (key: SortKey) => void;
   onRowClick: (id: string) => void;
+  sortable?: boolean;
 }) {
   const cols: { key: SortKey; label: string }[] = [
     { key: 'createdAt', label: 'Created' },
@@ -122,9 +123,11 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick }: {
       <thead>
         <tr className="border-b border-slate-200">
           {cols.map(c => (
-            <th key={c.key} onClick={() => onSort(c.key)}
-              className="text-left py-2 px-4 font-medium text-slate-500 cursor-pointer select-none whitespace-nowrap">
-              {c.label}<SortIcon active={sortKey === c.key} dir={sortDir} />
+            <th key={c.key}
+              onClick={sortable ? () => onSort(c.key) : undefined}
+              className={`text-left py-2 px-4 font-medium text-slate-500 select-none whitespace-nowrap ${sortable ? 'cursor-pointer' : ''}`}>
+              {c.label}
+              {sortable && <SortIcon active={sortKey === c.key} dir={sortDir} />}
             </th>
           ))}
         </tr>
@@ -166,7 +169,7 @@ export function DashboardPage() {
 
   const all = data?.orders ?? [];
   const active    = sortOrders(all.filter(o => o.status !== 'Delivered'), sortKey, sortDir);
-  const delivered = sortOrders(all.filter(o => o.status === 'Delivered'), sortKey, sortDir);
+  const delivered = sortOrders(all.filter(o => o.status === 'Delivered'), 'createdAt', 'desc');
 
   return (
     <div>
@@ -189,7 +192,7 @@ export function DashboardPage() {
             Delivered ({delivered.length})
           </summary>
           <div className="mt-2 bg-white rounded-lg border border-slate-200 overflow-hidden opacity-60">
-            <OrderTable orders={delivered} sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} onRowClick={id => navigate(`/orders/${id}`)} />
+            <OrderTable orders={delivered} sortKey='createdAt' sortDir='desc' onSort={() => {}} onRowClick={id => navigate(`/orders/${id}`)} sortable={false} />
           </div>
         </details>
       )}
