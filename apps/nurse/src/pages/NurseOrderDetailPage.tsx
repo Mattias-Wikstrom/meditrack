@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useClient } from 'urql';
-import { MedicationSearch, Button, Card, Spinner } from '@meditrack/ui';
+import { MedicationSearch, Button, Card, Spinner, BackButton } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
@@ -143,7 +143,7 @@ export function NurseOrderDetailPage() {
   return (
     <div className="max-w-xl">
       <div className="flex items-center gap-3 mb-2">
-        <button onClick={() => navigate('/')} className="text-slate-400 hover:text-slate-600 transition-colors text-sm">← Back</button>
+        <BackButton onClick={() => navigate('/')} />
         <h1 className="text-xl font-semibold text-slate-800">Order</h1>
         <StatusBadge status={order.status} />
         {saving && <span className="ml-auto text-xs text-slate-400">Saving…</span>}
