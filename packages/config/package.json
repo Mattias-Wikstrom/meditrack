@@ -7,6 +7,6 @@
   "types": "./src/index.ts",
   "peerDependencies": {
     "@vitejs/plugin-react": "^4",
-    "vite": "^6"
+    "vite": "^5 || ^6"
   }
 }

@@ -79,8 +79,9 @@ model WardUnit {
 }
 
 model Actor {
-  id   String    @id
-  role ActorRole
+  id           String    @id
+  role         ActorRole
+  passwordHash String?
 }
 
 model AuditLog {

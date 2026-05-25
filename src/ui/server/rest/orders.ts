@@ -2,10 +2,6 @@ import { Router, Request, Response } from 'express';
 import { ServerWiring } from '../wiring';
 import { MedicationId, MedicinalProductId, OrderId, WardUnitId } from '../../../domain/shared/IdTypes';
 
-function actorId(req: Request): string {
-  return (req.headers['x-actor-id'] as string | undefined) ?? '';
-}
-
 export function createOrdersRouter(wiring: ServerWiring): Router {
   const router = Router();
 
@@ -15,7 +11,7 @@ export function createOrdersRouter(wiring: ServerWiring): Router {
       lines: { medicationId: string; quantity: number }[];
     };
     const result = await wiring.createOrderUseCase.execute({
-      actorId: actorId(req),
+      actorId: res.locals.actorId as string,
       wardUnitId: wardUnitId as WardUnitId,
       lines: lines.map((l) => ({ medicationId: l.medicationId as MedicationId, quantity: l.quantity })),
     });
@@ -28,7 +24,7 @@ export function createOrdersRouter(wiring: ServerWiring): Router {
 
   router.post('/:id/send', async (req: Request, res: Response) => {
     const result = await wiring.sendOrderUseCase.execute({
-      actorId: actorId(req),
+      actorId: res.locals.actorId as string,
       orderId: req.params.id as OrderId,
     });
     if (result.successful) {
@@ -40,7 +36,7 @@ export function createOrdersRouter(wiring: ServerWiring): Router {
 
   router.post('/:id/confirm', async (req: Request, res: Response) => {
     const result = await wiring.confirmOrderUseCase.execute({
-      actorId: actorId(req),
+      actorId: res.locals.actorId as string,
       orderId: req.params.id as OrderId,
     });
     if (result.successful) {
@@ -55,7 +51,7 @@ export function createOrdersRouter(wiring: ServerWiring): Router {
       productSelections: { medicationId: string; medicinalProductId: string; quantity: number }[];
     };
     const result = await wiring.deliverOrderUseCase.execute({
-      actorId: actorId(req),
+      actorId: res.locals.actorId as string,
       orderId: req.params.id as OrderId,
       productSelections: productSelections.map((s) => ({
         medicationId: s.medicationId as MedicationId,

@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { ActorRole, MedicationForm, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -5,11 +6,13 @@ const prisma = new PrismaClient();
 async function main() {
   // ── Actors ────────────────────────────────────────────────────────────────
 
+  const passwordHash = await bcrypt.hash('password', 10);
+
   const actors = [
-    { id: 'nurse-anna',       role: ActorRole.Nurse       },
-    { id: 'nurse-erik',       role: ActorRole.Nurse       },
-    { id: 'pharmacist-sofia', role: ActorRole.Pharmacist  },
-    { id: 'pharmacist-lars',  role: ActorRole.Pharmacist  },
+    { id: 'nurse-anna',       role: ActorRole.Nurse,      passwordHash },
+    { id: 'nurse-erik',       role: ActorRole.Nurse,      passwordHash },
+    { id: 'pharmacist-sofia', role: ActorRole.Pharmacist, passwordHash },
+    { id: 'pharmacist-lars',  role: ActorRole.Pharmacist, passwordHash },
   ];
 
   for (const a of actors) {

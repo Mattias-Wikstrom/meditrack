@@ -12,9 +12,12 @@ import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateO
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
 import { ConfirmOrderUseCase } from '../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
+import { verifyToken } from '../../domain/auth/jwt';
+import { readToken } from './auth/tokenStore';
 import { ConsoleOutput } from './ConsoleOutput';
 import { listMedications, showMedication } from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
+import { login } from './commands/auth';
 import { runGraphQL } from './commands/graphql';
 import { GraphQLContext } from '../../api/graphql/context';
 
@@ -34,9 +37,31 @@ const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medici
 
 const output = new ConsoleOutput();
 
+async function requireActorId(): Promise<string> {
+  const token = readToken();
+  if (!token) {
+    output.error('Not logged in. Run: meditrack login --actor-id <id> --password <password>');
+    process.exit(1);
+  }
+  try {
+    const { actorId } = await verifyToken(token);
+    return actorId;
+  } catch {
+    output.error('Session expired. Run: meditrack login --actor-id <id> --password <password>');
+    process.exit(1);
+  }
+}
+
 // --- Commands ---
 const program = new Command();
 program.name('meditrack').description('Medication tracking CLI');
+
+program
+  .command('login')
+  .description('Log in and store a session token')
+  .requiredOption('--actor-id <id>', 'actor ID')
+  .requiredOption('--password <password>', 'password')
+  .action(async (opts) => login(prisma, output, opts.actorId, opts.password));
 
 const medications = program.command('medications');
 
@@ -61,28 +86,33 @@ orders
 orders
   .command('create')
   .description('Create a new order')
-  .requiredOption('--actor-id <id>', 'actor ID')
   .requiredOption('--ward-unit-id <id>', 'ward unit ID')
   .requiredOption('--medication-id <id>', 'medication ID')
   .requiredOption('--quantity <n>', 'quantity', parseInt)
-  .action(async (opts) => createOrder(createOrderUseCase, output, opts.actorId, opts.wardUnitId, opts.medicationId, opts.quantity));
+  .action(async (opts) => {
+    const actorId = await requireActorId();
+    return createOrder(createOrderUseCase, output, actorId, opts.wardUnitId, opts.medicationId, opts.quantity);
+  });
 
 orders
   .command('send <orderId>')
   .description('Send a draft order to the pharmacy')
-  .requiredOption('--actor-id <id>', 'actor ID')
-  .action(async (orderId, opts) => sendOrder(sendOrderUseCase, output, opts.actorId, orderId));
+  .action(async (orderId) => {
+    const actorId = await requireActorId();
+    return sendOrder(sendOrderUseCase, output, actorId, orderId);
+  });
 
 orders
   .command('confirm <orderId>')
   .description('Confirm receipt of a sent order')
-  .requiredOption('--actor-id <id>', 'actor ID')
-  .action(async (orderId, opts) => confirmOrder(confirmOrderUseCase, output, opts.actorId, orderId));
+  .action(async (orderId) => {
+    const actorId = await requireActorId();
+    return confirmOrder(confirmOrderUseCase, output, actorId, orderId);
+  });
 
 orders
   .command('deliver <orderId>')
   .description('Mark an order as delivered and update stock')
-  .requiredOption('--actor-id <id>', 'actor ID')
   .option(
     '--product <spec>',
     'medicationId:medicinalProductId:quantity — repeat once per product used',
@@ -90,6 +120,7 @@ orders
     [] as string[],
   )
   .action(async (orderId, opts) => {
+    const actorId = await requireActorId();
     const productSelections = (opts.product as string[]).map((spec) => {
       const [medicationId, medicinalProductId, quantityStr] = spec.split(':');
       return {
@@ -98,15 +129,15 @@ orders
         quantity: parseInt(quantityStr ?? '0', 10),
       };
     });
-    return deliverOrder(deliverOrderUseCase, output, opts.actorId, orderId, productSelections);
+    return deliverOrder(deliverOrderUseCase, output, actorId, orderId, productSelections);
   });
 
 program
   .command('graphql <query>')
   .description('Execute a GraphQL query or mutation in-process')
-  .option('--actor-id <id>', 'actor ID (required for mutations)', '')
   .option('--variables <json>', 'variables as a JSON object')
-  .action(async (query: string, opts: { actorId: string; variables?: string }) => {
+  .action(async (query: string, opts: { variables?: string }) => {
+    const actorId = await requireActorId();
     let variables: Record<string, unknown> | undefined;
     if (opts.variables) {
       try {
@@ -125,7 +156,7 @@ program
       sendOrderUseCase,
       confirmOrderUseCase,
       deliverOrderUseCase,
-      actorId: opts.actorId,
+      actorId,
     };
     await runGraphQL(context, output, query, variables);
   });

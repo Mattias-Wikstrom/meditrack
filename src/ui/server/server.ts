@@ -9,6 +9,9 @@ import { schema } from '../../api/graphql/schema';
 import { PubSubEventBus } from './PubSubEventBus';
 import { createWiring } from './wiring';
 import { createOrdersRouter } from './rest/orders';
+import { createAuthRouter } from './rest/auth';
+import { requireAuth } from './middleware/requireAuth';
+import { verifyToken } from '../../domain/auth/jwt';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 4000;
 
@@ -20,7 +23,13 @@ const buildContext = (actorId: string) => ({ ...wiring, actorId });
 // --- GraphQL over HTTP ---
 const yoga = createYoga({
   schema,
-  context: ({ request }) => buildContext(request.headers.get('x-actor-id') ?? ''),
+  context: async ({ request }) => {
+    const auth = request.headers.get('authorization');
+    const token = auth?.startsWith('Bearer ') ? auth.slice(7) : undefined;
+    if (!token) throw new Error('Unauthorized');
+    const { actorId } = await verifyToken(token);
+    return buildContext(actorId);
+  },
 });
 
 // --- REST ---
@@ -30,7 +39,8 @@ app.use('/graphql', yoga);
 
 const api = express.Router();
 api.use(express.json());
-api.use('/orders', createOrdersRouter(wiring));
+api.use('/auth', createAuthRouter());
+api.use('/orders', requireAuth, createOrdersRouter(wiring));
 app.use('/api', api);
 
 // --- HTTP + WebSocket server ---
@@ -40,7 +50,12 @@ const wsServer = new WebSocketServer({ server: httpServer, path: '/graphql' });
 useServer(
   {
     schema,
-    context: (ctx) => buildContext((ctx.connectionParams?.actorId as string | undefined) ?? ''),
+    context: async (ctx) => {
+      const token = ctx.connectionParams?.token as string | undefined;
+      if (!token) throw new Error('Unauthorized');
+      const { actorId } = await verifyToken(token);
+      return buildContext(actorId);
+    },
   },
   wsServer,
 );
