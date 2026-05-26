@@ -7,6 +7,9 @@ import { PrismaWardUnitRepository } from '../../storage/prisma/PrismaWardUnitRep
 import { PrismaActorRepository } from '../../storage/prisma/PrismaActorRepository';
 import { PrismaAuditRepository } from '../../storage/prisma/PrismaAuditRepository';
 import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
+import { CreateActorUseCase } from '../../domain/actor/useCases/CreateActorUseCase';
+import { UpdateActorUseCase } from '../../domain/actor/useCases/UpdateActorUseCase';
+import { DeleteActorUseCase } from '../../domain/actor/useCases/DeleteActorUseCase';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
 import { UpdateOrderLinesUseCase } from '../../domain/order/useCases/ordering/UpdateOrderLinesUseCase';
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
@@ -32,6 +35,9 @@ export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
     wardUnitRepo,
     actorRepo,
     auditRepo,
+    createActorUseCase: new CreateActorUseCase(actorRepo, credentialsRepo, transactor, eventBus),
+    updateActorUseCase: new UpdateActorUseCase(actorRepo, transactor, eventBus),
+    deleteActorUseCase: new DeleteActorUseCase(actorRepo, transactor, eventBus),
     createOrderUseCase: new CreateOrderUseCase(actorRepo, transactor, eventBus),
     updateOrderLinesUseCase: new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor, eventBus),
     sendOrderUseCase: new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
