@@ -45,7 +45,8 @@ export function UsersPage() {
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
-  const actors = data?.actors ?? [];
+  type Actor = { id: string; role: string; wardUnitId?: string | null; wardUnit?: { name: string } | null };
+  const actors: Actor[] = data?.actors ?? [];
   const filtered = roleFilter ? actors.filter(a => a.role === roleFilter) : actors;
   const sorted = [...filtered].sort((a, b) => {
     let av: string;

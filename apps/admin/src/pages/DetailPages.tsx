@@ -220,6 +220,7 @@ export function MedicationDetailsPage() {
     <InventoryProductDetail
       product={product}
       onBack={() => navigate('/inventory')}
+      getMedicationHref={id => `/medications/${id}`}
     />
   );
 }

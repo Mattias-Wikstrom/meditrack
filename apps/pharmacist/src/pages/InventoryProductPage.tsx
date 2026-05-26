@@ -58,6 +58,7 @@ export function InventoryProductPage() {
       product={product}
       onBack={() => navigate('/inventory')}
       onRestock={handleRestock}
+      getMedicationHref={id => `/medications/${id}`}
     />
   );
 }

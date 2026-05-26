@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { BackButton } from './BackButton';
 import { Button } from './Button';
 import { Card } from './Card';
@@ -10,6 +11,7 @@ export interface InventoryProduct {
   stockThreshold: number;
   isBelowThreshold: boolean;
   medication?: {
+    id: string;
     innName: string;
     atcCode: string;
     form: string;
@@ -26,6 +28,8 @@ export interface InventoryProductDetailProps {
    * success or an error message string on failure.
    */
   onRestock?: (quantity: number) => Promise<string | null>;
+  /** If provided, the INN name becomes a link to this href */
+  getMedicationHref?: (medicationId: string) => string;
 }
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
@@ -37,7 +41,7 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
   );
 }
 
-export function InventoryProductDetail({ product, onBack, onRestock }: InventoryProductDetailProps) {
+export function InventoryProductDetail({ product, onBack, onRestock, getMedicationHref }: InventoryProductDetailProps) {
   const [qty, setQty] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +68,13 @@ export function InventoryProductDetail({ product, onBack, onRestock }: Inventory
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
         <Card className="p-5">
           <h2 className="text-base font-semibold text-slate-700 mb-2">Medication</h2>
-          <InfoRow label="INN Name">{product.medication?.innName ?? '—'}</InfoRow>
+          <InfoRow label="INN Name">
+            {product.medication
+              ? getMedicationHref
+                ? <Link to={getMedicationHref(product.medication.id)} className="text-accent hover:underline">{product.medication.innName}</Link>
+                : product.medication.innName
+              : '—'}
+          </InfoRow>
           <InfoRow label="ATC Code">
             <span className="font-mono text-xs">{product.medication?.atcCode ?? '—'}</span>
           </InfoRow>
