@@ -64,6 +64,14 @@ describe('DeleteActorUseCase', () => {
     expect(result.errors[0]?.code).toBe('ActorNotFound');
   });
 
+  it('fails when an admin tries to delete their own account', async () => {
+    const result = await useCase.execute({ requestingActorId: 'admin-1', id: 'admin-1' });
+
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('CannotDeleteSelf');
+  });
+
   it('does not remove the actor or write an audit entry on failure', async () => {
     await useCase.execute({ requestingActorId: 'nurse-2', id: 'nurse-1' });
 

@@ -7,6 +7,7 @@ export const errorMessages: Record<ErrorCode, string> = {
   WardUnitAssignmentNotAllowed: 'Only nurses can be assigned to a ward unit.',
   NurseRequiresWardUnit: 'A nurse must be assigned to a ward unit.',
   ActorAlreadyExists: 'An actor with that ID already exists.',
+  CannotDeleteSelf: 'An admin cannot delete their own account.',
   OrderHasAtLeastOneLine: 'An order must have at least one line.',
   OrderLineQuantitiesPositive: 'All line quantities must be greater than zero.',
   OrderNotFound: 'Order not found. Check that the order ID is correct.',
