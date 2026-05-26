@@ -17,4 +17,7 @@ export const errorMessages: Record<ErrorCode, string> = {
   SelectionQuantityMismatch: 'The selected quantities do not match the ordered quantities.',
   InsufficientStock: 'Insufficient stock to fulfil this order.',
   InvalidQuantity: 'Quantity must be greater than zero.',
+  WardUnitNotFound: 'Ward unit not found. Check that the ward unit ID is correct.',
+  WardUnitAlreadyExists: 'A ward unit with that ID already exists.',
+  WardUnitHasAssignedNurses: 'Cannot delete a ward unit while nurses are assigned to it.',
 };

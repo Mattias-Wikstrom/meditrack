@@ -10,6 +10,9 @@ import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { CreateActorUseCase } from '../../domain/actor/useCases/CreateActorUseCase';
 import { UpdateActorUseCase } from '../../domain/actor/useCases/UpdateActorUseCase';
 import { DeleteActorUseCase } from '../../domain/actor/useCases/DeleteActorUseCase';
+import { CreateWardUnitUseCase } from '../../domain/wardUnit/useCases/CreateWardUnitUseCase';
+import { UpdateWardUnitUseCase } from '../../domain/wardUnit/useCases/UpdateWardUnitUseCase';
+import { DeleteWardUnitUseCase } from '../../domain/wardUnit/useCases/DeleteWardUnitUseCase';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
 import { UpdateOrderLinesUseCase } from '../../domain/order/useCases/ordering/UpdateOrderLinesUseCase';
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
@@ -38,6 +41,9 @@ export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
     createActorUseCase: new CreateActorUseCase(actorRepo, credentialsRepo, transactor, eventBus),
     updateActorUseCase: new UpdateActorUseCase(actorRepo, transactor, eventBus),
     deleteActorUseCase: new DeleteActorUseCase(actorRepo, transactor, eventBus),
+    createWardUnitUseCase: new CreateWardUnitUseCase(wardUnitRepo, actorRepo, transactor, eventBus),
+    updateWardUnitUseCase: new UpdateWardUnitUseCase(wardUnitRepo, actorRepo, transactor, eventBus),
+    deleteWardUnitUseCase: new DeleteWardUnitUseCase(wardUnitRepo, actorRepo, transactor, eventBus),
     createOrderUseCase: new CreateOrderUseCase(actorRepo, transactor, eventBus),
     updateOrderLinesUseCase: new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor, eventBus),
     sendOrderUseCase: new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus),

@@ -194,21 +194,10 @@ const WARD_UNIT_DETAIL_QUERY = `
   }
 `;
 
-const UPDATE_WARD_UNIT = `
-  mutation AdminUpdateWardUnit($id: ID!, $name: String!) {
-    updateWardUnit(id: $id, name: $name) { id name }
-  }
-`;
-
-const DELETE_WARD_UNIT = `
-  mutation AdminDeleteWardUnit($id: ID!) {
-    deleteWardUnit(id: $id)
-  }
-`;
-
 export function WardUnitDetailsPage() {
   const navigate = useNavigate();
   const { wardUnitId } = useParams();
+  const { token } = useAuth();
   const [modal, setModal] = useState<'edit' | 'confirmDelete' | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
 
@@ -216,8 +205,6 @@ export function WardUnitDetailsPage() {
     query: WARD_UNIT_DETAIL_QUERY,
     variables: { id: wardUnitId },
   });
-  const [, updateWardUnit] = useMutation(UPDATE_WARD_UNIT);
-  const [, deleteWardUnit] = useMutation(DELETE_WARD_UNIT);
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -235,17 +222,25 @@ export function WardUnitDetailsPage() {
   async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const result = await updateWardUnit({ id: wardUnitId, name: fd.get('name') as string });
-    if (result.error) { setModalError(result.error.message); return; }
-    setModal(null);
-    setModalError(null);
-    refetch({ requestPolicy: 'network-only' });
+    try {
+      await createApiClient(token!).patch(`/ward-units/${wardUnitId}`, {
+        name: fd.get('name') as string,
+      });
+      setModal(null);
+      setModalError(null);
+      refetch({ requestPolicy: 'network-only' });
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to update ward unit');
+    }
   }
 
   async function handleDelete() {
-    const result = await deleteWardUnit({ id: wardUnitId });
-    if (result.error) { setModalError(result.error.message); return; }
-    navigate('/ward-units');
+    try {
+      await createApiClient(token!).del(`/ward-units/${wardUnitId}`);
+      navigate('/ward-units');
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to delete ward unit');
+    }
   }
 
   return (

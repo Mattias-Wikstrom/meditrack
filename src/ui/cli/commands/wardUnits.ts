@@ -1,7 +1,9 @@
 import { WardUnitRepository } from '../../../domain/wardUnit/WardUnitRepository';
-import { WardUnit } from '../../../domain/wardUnit/WardUnit';
-import { WardUnitId } from '../../../domain/shared/IdTypes';
+import { CreateWardUnitUseCase } from '../../../domain/wardUnit/useCases/CreateWardUnitUseCase';
+import { UpdateWardUnitUseCase } from '../../../domain/wardUnit/useCases/UpdateWardUnitUseCase';
+import { DeleteWardUnitUseCase } from '../../../domain/wardUnit/useCases/DeleteWardUnitUseCase';
 import { CliOutput } from '../CliOutput';
+import { errorMessages } from '../errorMessages';
 
 export async function listWardUnits(repo: WardUnitRepository, output: CliOutput): Promise<void> {
   const wardUnits = await repo.findAll();
@@ -15,16 +17,48 @@ export async function listWardUnits(repo: WardUnitRepository, output: CliOutput)
 }
 
 export async function createWardUnit(
-  repo: WardUnitRepository,
+  useCase: CreateWardUnitUseCase,
   output: CliOutput,
+  requestingActorId: string,
   id: string,
   name: string,
 ): Promise<void> {
-  const existing = await repo.findById(id as WardUnitId);
-  if (existing) {
-    output.error(`Ward unit already exists: ${id}`);
-    process.exit(1);
+  const result = await useCase.execute({ requestingActorId, id, name });
+  if (result.successful) {
+    output.print(`Ward unit created: ${result.value.id}  name: ${result.value.name}`);
+  } else {
+    result.errors.forEach((e) => output.error(errorMessages[e.code] ?? e.code));
+    output.exit(1);
   }
-  await repo.save(new WardUnit(id as WardUnitId, name));
-  output.print(`Ward unit created: ${id}  name: ${name}`);
+}
+
+export async function updateWardUnit(
+  useCase: UpdateWardUnitUseCase,
+  output: CliOutput,
+  requestingActorId: string,
+  id: string,
+  name: string,
+): Promise<void> {
+  const result = await useCase.execute({ requestingActorId, id, name });
+  if (result.successful) {
+    output.print(`Ward unit updated: ${result.value.id}  name: ${result.value.name}`);
+  } else {
+    result.errors.forEach((e) => output.error(errorMessages[e.code] ?? e.code));
+    output.exit(1);
+  }
+}
+
+export async function deleteWardUnit(
+  useCase: DeleteWardUnitUseCase,
+  output: CliOutput,
+  requestingActorId: string,
+  id: string,
+): Promise<void> {
+  const result = await useCase.execute({ requestingActorId, id });
+  if (result.successful) {
+    output.print(`Ward unit deleted: ${id}`);
+  } else {
+    result.errors.forEach((e) => output.error(errorMessages[e.code] ?? e.code));
+    output.exit(1);
+  }
 }
