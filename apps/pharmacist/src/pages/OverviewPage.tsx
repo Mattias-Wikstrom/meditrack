@@ -1,3 +1,4 @@
+// Used for / (pharmacist)
 import { useQuery } from 'urql';
 import { OrderAndStockOverview, Spinner } from '@meditrack/ui';
 

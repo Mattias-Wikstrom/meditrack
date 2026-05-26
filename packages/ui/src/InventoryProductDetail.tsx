@@ -1,3 +1,4 @@
+// Used for a product like 'Alvedon' as opposed to something generic such as 'Paracetamol'
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DetailHeader } from './DetailHeader';

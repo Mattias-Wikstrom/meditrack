@@ -1,3 +1,4 @@
+// Used for generic things such as 'Paracetamol' as opposed to specific products such as 'Alvedon'
 import { Link } from 'react-router-dom';
 import { BackButton } from './BackButton';
 import { Card } from './Card';

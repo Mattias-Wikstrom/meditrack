@@ -1,3 +1,4 @@
+// Used in /orders/new (nurse) to search and add medications to an order
 import { useState, useEffect, useRef } from 'react';
 import { Spinner } from './Spinner';
 

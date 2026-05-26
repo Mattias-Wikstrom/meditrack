@@ -1,3 +1,4 @@
+// Used for /orders/:id (pharmacist)
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';

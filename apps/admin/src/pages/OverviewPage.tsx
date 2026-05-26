@@ -1,3 +1,4 @@
+// Used for / (admin)
 import { useQuery } from 'urql';
 import { OrderAndStockOverview, Spinner } from '@meditrack/ui';
 

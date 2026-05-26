@@ -1,3 +1,4 @@
+// Used for the top tab navigation in all the apps
 import { NavLink } from 'react-router-dom';
 
 export interface TabNavItem {

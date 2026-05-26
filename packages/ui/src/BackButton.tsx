@@ -1,3 +1,4 @@
+// Used for Back buttons in all the apps
 import { ButtonHTMLAttributes } from 'react';
 
 type BackButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

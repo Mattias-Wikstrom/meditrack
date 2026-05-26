@@ -1,3 +1,5 @@
+// Used on the Overview ('/') tab in the Admin and Pharmacist apps
+// These have in common that they show an overview for orders as well as medicines
 import { Link } from 'react-router-dom';
 import { Card } from './Card';
 

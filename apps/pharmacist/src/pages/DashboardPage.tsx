@@ -1,3 +1,4 @@
+// Used for /orders (pharmacist)
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
 import { Card, Badge, Button, Spinner, LineList, formatDate } from '@meditrack/ui';
