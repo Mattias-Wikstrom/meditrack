@@ -19,6 +19,7 @@ import { verifyToken } from '../../domain/auth/jwt';
 import { readToken } from './auth/tokenStore';
 import { ConsoleOutput } from './ConsoleOutput';
 import { listActors, createActor } from './commands/actors';
+import { listWardUnits, createWardUnit } from './commands/wardUnits';
 import { listAudit } from './commands/audit';
 import { listMedications, showMedication } from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
@@ -101,6 +102,20 @@ actors
   .requiredOption('--role <role>', 'role (Nurse, Pharmacist, Admin)')
   .option('--ward-unit-id <id>', 'ward unit ID (required for Nurse role)')
   .action(async (opts) => createActor(actorRepo, output, opts.actorId, opts.role, opts.wardUnitId));
+
+const wardUnits = program.command('ward-units');
+
+wardUnits
+  .command('list')
+  .description('List all ward units')
+  .action(async () => listWardUnits(wardUnitRepo, output));
+
+wardUnits
+  .command('create')
+  .description('Create a new ward unit')
+  .requiredOption('--ward-unit-id <id>', 'ward unit ID')
+  .requiredOption('--name <name>', 'display name')
+  .action(async (opts) => createWardUnit(wardUnitRepo, output, opts.wardUnitId, opts.name));
 
 const medications = program.command('medications');
 

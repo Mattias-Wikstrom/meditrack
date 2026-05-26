@@ -77,6 +77,18 @@ See the [CLI reference](cli.md#passwd) for details.
 
 ---
 
+## Adding ward units
+
+Use the `ward-units create` CLI command:
+
+```sh
+npm run cli -- ward-units create --ward-unit-id ward-ortopedi --name Ortopedavdelningen
+```
+
+See the [CLI reference](cli.md#create-1) for full details.
+
+---
+
 ## Adding actors
 
 Use the `actors create` CLI command:
