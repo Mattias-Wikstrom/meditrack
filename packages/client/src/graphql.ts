@@ -1,7 +1,7 @@
-import { createClient, cacheExchange, fetchExchange, subscriptionExchange } from 'urql';
+import { createClient, cacheExchange, fetchExchange, mapExchange, subscriptionExchange } from 'urql';
 import { createClient as createWsClient } from 'graphql-ws';
 
-export function createUrqlClient(token: string) {
+export function createUrqlClient(token: string, onUnauthenticated: () => void) {
   const wsClient = createWsClient({
     url: 'ws://localhost:4000/graphql',
     connectionParams: { token },
@@ -13,6 +13,14 @@ export function createUrqlClient(token: string) {
       headers: { Authorization: `Bearer ${token}` },
     }),
     exchanges: [
+      mapExchange({
+        onError(error) {
+          const isAuthError = error.graphQLErrors.some(
+            e => e.extensions?.code === 'UNAUTHENTICATED',
+          );
+          if (isAuthError) onUnauthenticated();
+        },
+      }),
       cacheExchange,
       fetchExchange,
       subscriptionExchange({

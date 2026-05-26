@@ -1,6 +1,7 @@
 import { createServer } from 'http';
 import express from 'express';
 import cors from 'cors';
+import { GraphQLError } from 'graphql';
 import { createYoga } from 'graphql-yoga';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/use/ws';
@@ -13,6 +14,10 @@ import { createAuthRouter } from './rest/auth';
 import { createActorsRouter } from './rest/actors';
 import { requireAuth } from './middleware/requireAuth';
 import { verifyToken } from '../../domain/auth/jwt';
+
+function unauthenticated(message = 'Unauthorized'): GraphQLError {
+  return new GraphQLError(message, { extensions: { code: 'UNAUTHENTICATED' } });
+}
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 4000;
 
@@ -27,9 +32,13 @@ const yoga = createYoga({
   context: async ({ request }) => {
     const auth = request.headers.get('authorization');
     const token = auth?.startsWith('Bearer ') ? auth.slice(7) : undefined;
-    if (!token) throw new Error('Unauthorized');
-    const { actorId } = await verifyToken(token);
-    return buildContext(actorId);
+    if (!token) throw unauthenticated();
+    try {
+      const { actorId } = await verifyToken(token);
+      return buildContext(actorId);
+    } catch {
+      throw unauthenticated('Session expired');
+    }
   },
 });
 
@@ -54,9 +63,13 @@ useServer(
     schema,
     context: async (ctx) => {
       const token = ctx.connectionParams?.token as string | undefined;
-      if (!token) throw new Error('Unauthorized');
-      const { actorId } = await verifyToken(token);
-      return buildContext(actorId);
+      if (!token) throw unauthenticated();
+      try {
+        const { actorId } = await verifyToken(token);
+        return buildContext(actorId);
+      } catch {
+        throw unauthenticated('Session expired');
+      }
     },
   },
   wsServer,

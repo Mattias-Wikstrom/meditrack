@@ -56,8 +56,8 @@ function NurseShell({ token, actorId, wardUnitId, role }: { token: string; actor
 }
 
 export function App() {
-  const { token, actorId, wardUnitId, role, login } = useAuth();
-  const urqlClient = useMemo(() => (token ? createUrqlClient(token) : null), [token]);
+  const { token, actorId, wardUnitId, role, login, logout } = useAuth();
+  const urqlClient = useMemo(() => (token ? createUrqlClient(token, logout) : null), [token, logout]);
 
   if (!token || !urqlClient) {
     return <LoginPage role="Nurse" appName="Nurse Station" onLogin={login} />;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 
 interface AuthState {
   token: string | null;
@@ -16,7 +16,9 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 const STORAGE_KEY = 'meditrack_token';
 
-function decodeTokenPayload(token: string): { actorId: string; role: string; wardUnitId: string | null } | null {
+const LOGGED_OUT: AuthState = { token: null, actorId: null, role: null, wardUnitId: null };
+
+function decodeTokenPayload(token: string): { actorId: string; role: string; wardUnitId: string | null; exp?: number } | null {
   try {
     const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
     const payload = JSON.parse(atob(base64)) as unknown;
@@ -33,6 +35,7 @@ function decodeTokenPayload(token: string): { actorId: string; role: string; war
       actorId: p.actorId as string,
       role: p.role as string,
       wardUnitId: typeof p.wardUnitId === 'string' ? p.wardUnitId : null,
+      exp: typeof p.exp === 'number' ? p.exp : undefined,
     };
   } catch {
     return null;
@@ -42,23 +45,28 @@ function decodeTokenPayload(token: string): { actorId: string; role: string; war
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>(() => {
     const token = localStorage.getItem(STORAGE_KEY);
-    if (!token) return { token: null, actorId: null, role: null, wardUnitId: null };
+    if (!token) return LOGGED_OUT;
     const decoded = decodeTokenPayload(token);
-    if (!decoded) return { token: null, actorId: null, role: null, wardUnitId: null };
-    return { token, ...decoded };
+    if (!decoded) return LOGGED_OUT;
+    // Discard token that already expired while the tab was closed.
+    if (decoded.exp !== undefined && Date.now() >= decoded.exp * 1000) {
+      localStorage.removeItem(STORAGE_KEY);
+      return LOGGED_OUT;
+    }
+    return { token, actorId: decoded.actorId, role: decoded.role, wardUnitId: decoded.wardUnitId };
   });
 
-  function login(token: string) {
+  const login = useCallback((token: string) => {
     const decoded = decodeTokenPayload(token);
     if (!decoded) return;
     localStorage.setItem(STORAGE_KEY, token);
-    setState({ token, ...decoded });
-  }
+    setState({ token, actorId: decoded.actorId, role: decoded.role, wardUnitId: decoded.wardUnitId });
+  }, []);
 
-  function logout() {
+  const logout = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
-    setState({ token: null, actorId: null, role: null, wardUnitId: null });
-  }
+    setState(LOGGED_OUT);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ ...state, login, logout }}>

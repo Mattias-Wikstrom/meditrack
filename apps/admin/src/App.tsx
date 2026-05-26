@@ -31,7 +31,7 @@ export function App() {
   const { token, actorId, role, login, logout } = useAuth();
   const navigate = useNavigate();
 
-  const urqlClient = useMemo(() => (token ? createUrqlClient(token) : null), [token]);
+  const urqlClient = useMemo(() => (token ? createUrqlClient(token, logout) : null), [token, logout]);
 
   if (!token || !urqlClient) {
     return <LoginPage role="Admin" appName="Admin" onLogin={login} />;
