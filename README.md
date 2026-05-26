@@ -60,3 +60,13 @@ including products that are running low.
 
 The admin app gives an overview of the whole system: all orders across all wards, the full
 actor list, ward units, the audit log, and the medication inventory.
+
+## Other ways to test the code
+
+The basic domain + business logic code that the whole system revolves around has been written so that it can be tested independently of a database or any other infrastructure. These tests can be run using 'npm test' or 'npx vitest run'.
+
+It is also possible to test the business logic and the domain classes with a database connected but with little or no infrastructure apart from that. This allows you to set things up in the database as desired, execute some use case, and verify that the changes are what you expected. The way to do this is via 'npm run cli'. See the documentation in cli.md.
+
+On the next higher level, you can start the NodeJS server that includes the business logic without using the web servers that serve the apps. This includes the possibility of running use cases via REST APIs as well as the possibility of querying the database using GraphQL queries. See the code in src/ui/server for details.
+
+See the docs folder for more information on the architecture of the system and on how things can be set up.
