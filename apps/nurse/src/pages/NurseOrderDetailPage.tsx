@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useClient } from 'urql';
-import { MedicationSearch, Button, Card, Spinner, BackButton, formatDateTime } from '@meditrack/ui';
+import { Badge, MedicationSearch, Button, Card, Spinner, BackButton, formatDateTime } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
@@ -26,21 +26,6 @@ interface Line {
   innName: string;
   strength: string;
   quantity: number;
-}
-
-const STATUS_STYLES: Record<string, string> = {
-  Draft:     'bg-slate-100 text-slate-600',
-  Sent:      'bg-blue-100 text-blue-700',
-  Confirmed: 'bg-amber-100 text-amber-700',
-  Delivered: 'bg-green-100 text-green-700',
-};
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600'}`}>
-      {status}
-    </span>
-  );
 }
 
 export function NurseOrderDetailPage() {
@@ -139,7 +124,7 @@ export function NurseOrderDetailPage() {
       <div className="flex items-center gap-3 mb-2">
         <BackButton onClick={() => navigate('/orders')} />
         <h1 className="text-xl font-semibold text-slate-800">Order</h1>
-        <StatusBadge status={order.status} />
+        <Badge status={order.status} />
         {saving && <span className="ml-auto text-xs text-slate-400">Saving…</span>}
       </div>
 

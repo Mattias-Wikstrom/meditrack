@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
-import { Button, Spinner, formatDate } from '@meditrack/ui';
+import { Badge, Button, Spinner, formatDate } from '@meditrack/ui';
 import { useAuth } from '@meditrack/client';
 import { graphql } from '../gql';
 
@@ -67,21 +67,6 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
   );
 }
 
-const STATUS_STYLES: Record<string, string> = {
-  Draft:     'bg-slate-100 text-slate-600',
-  Sent:      'bg-blue-100 text-blue-700',
-  Confirmed: 'bg-amber-100 text-amber-700',
-  Delivered: 'bg-green-100 text-green-700',
-};
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600'}`}>
-      {status}
-    </span>
-  );
-}
-
 const LINE_LIMIT = 3;
 
 function LineList({ lines }: { lines: OrderRow['lines'] }) {
@@ -132,7 +117,7 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick, sortable = t
           <tr key={order.id} onClick={() => onRowClick(order.id)}
             className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer transition-colors">
             <td className="py-2.5 px-4 align-top text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
-            <td className="py-2.5 px-4 align-top"><StatusBadge status={order.status} /></td>
+            <td className="py-2.5 px-4 align-top"><Badge status={order.status} /></td>
             <td className="py-2.5 px-4 align-top"><LineList lines={order.lines} /></td>
           </tr>
         ))}
