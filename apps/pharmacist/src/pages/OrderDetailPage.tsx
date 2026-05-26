@@ -101,9 +101,9 @@ function LineDeliverySection({
   });
 
   const products = data?.medicinalProducts ?? [];
-  const totalAllocated = splits.reduce((sum, s) => sum + s.quantity, 0);
+  const totalAllocated = splits.filter(s => s.medicinalProductId !== '').reduce((sum, s) => sum + s.quantity, 0);
   const remaining = line.quantity - totalAllocated;
-  const covered = totalAllocated === line.quantity;
+  const covered = totalAllocated === line.quantity && splits.every(s => s.medicinalProductId !== '');
 
   function updateSplit(index: number, patch: Partial<Split>) {
     onChange(splits.map((s, i) => (i === index ? { ...s, ...patch } : s)));
