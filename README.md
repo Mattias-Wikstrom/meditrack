@@ -70,3 +70,15 @@ It is also possible to test the business logic and the domain classes with a dat
 On the next higher level, you can start the NodeJS server that includes the business logic without using the web servers that serve the apps. This includes the possibility of running use cases via REST APIs as well as the possibility of querying the database using GraphQL queries. See the code in src/ui/server for details.
 
 See the docs folder for more information on the architecture of the system and on how things can be set up.
+
+## On the choice of technology stack
+
+It would be perfectly possible to create desktop apps or mobile apps in addition to the current web apps. But since web apps can run everywhere, starting with web apps was a natural choice.
+
+Using TypeScript is a simple way to get compilation-time types while running on a JavaScript platform. Using Node.JS on the backend allows you to use JavaScript/TypeScript everywhere. You do not need to switch back and forth between different syntaxes, different runtime models, etc.
+
+Using React allows you to operate within the React ecosystem. If a modern web browser is a bit like an operating system on top of the operating system, React is another important layer on top of that. There are alternatives, but React is something of a standard and works really well.
+
+The apps use a combination of GraphQL and REST APIs. GraphQL is used for retrieving information from the database in a flexible way. This eliminates the need to create lots and lots of REST APIs that do nothing more than ask the database for certain information that some client happens to be interested in. Clients can also retrieve information very quickly via Web Sockets and avoid the overhead of a traditional HTTPS call (which can slow down web UIs noticably; using modern versions of HTTP would be an alternative but that too requires configuration to work). On the other hand, REST APIs are used when the user has taken some action that needs to update the database (which is slow in any case). GraphQL is flexible way to express queries but loses its advantages when there is a non-trivial function that needs to be executed.
+
+
