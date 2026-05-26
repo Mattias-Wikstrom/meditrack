@@ -54,6 +54,8 @@ model MedicinalProduct {
   stockLevel     Int
   stockThreshold Int
   medication     Medication @relation(fields: [medicationId], references: [id])
+
+  @@index([medicationId])
 }
 
 model Order {
@@ -62,6 +64,9 @@ model Order {
   status     OrderStatus
   createdAt  DateTime
   lines      OrderLine[]
+
+  @@index([wardUnitId])
+  @@index([status])
 }
 
 /// OrderLine has no identity in the domain — the auto-increment id is
@@ -72,6 +77,9 @@ model OrderLine {
   medicationId String
   quantity     Int
   order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([medicationId])
 }
 
 model WardUnit {
@@ -86,6 +94,8 @@ model Actor {
   passwordHash String?
   wardUnitId   String?
   wardUnit     WardUnit? @relation(fields: [wardUnitId], references: [id])
+
+  @@index([wardUnitId])
 }
 
 model AuditLog {
@@ -94,4 +104,8 @@ model AuditLog {
   action     String
   entityId   String
   occurredAt DateTime
+
+  @@index([actorId])
+  @@index([entityId])
+  @@index([occurredAt])
 }
