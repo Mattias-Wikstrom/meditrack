@@ -11,6 +11,7 @@ import { PrismaCredentialsRepository } from '../../storage/prisma/PrismaCredenti
 import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
 import { CreateActorUseCase } from '../../domain/actor/useCases/CreateActorUseCase';
+import { DeleteActorUseCase } from '../../domain/actor/useCases/DeleteActorUseCase';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
 import { UpdateOrderLinesUseCase } from '../../domain/order/useCases/ordering/UpdateOrderLinesUseCase';
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
@@ -20,7 +21,7 @@ import { RestockUseCase } from '../../domain/medication/useCases/RestockUseCase'
 import { verifyToken } from '../../domain/auth/jwt';
 import { readToken } from './auth/tokenStore';
 import { ConsoleOutput } from './ConsoleOutput';
-import { listActors, createActor, bootstrapCreateActor } from './commands/actors';
+import { listActors, createActor, deleteActor, bootstrapCreateActor } from './commands/actors';
 import { listWardUnits, createWardUnit } from './commands/wardUnits';
 import { listAudit } from './commands/audit';
 import { listMedications, showMedication } from './commands/medications';
@@ -42,6 +43,7 @@ const transactor = new PrismaTransactor(prisma);
 const eventBus = new SimpleEventBus();
 
 const createActorUseCase = new CreateActorUseCase(actorRepo, credentialsRepo, transactor, eventBus);
+const deleteActorUseCase = new DeleteActorUseCase(actorRepo, transactor, eventBus);
 
 const createOrderUseCase = new CreateOrderUseCase(actorRepo, transactor, eventBus);
 const updateOrderLinesUseCase = new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor, eventBus);
@@ -99,6 +101,14 @@ actors
   .command('list')
   .description('List all actors and their roles')
   .action(async () => listActors(actorRepo, output));
+
+actors
+  .command('delete <actorId>')
+  .description('Delete an actor (admin only)')
+  .action(async (actorId) => {
+    const { actorId: requestingActorId } = await requireAuth();
+    return deleteActor(deleteActorUseCase, output, requestingActorId, actorId);
+  });
 
 actors
   .command('bootstrap-create')

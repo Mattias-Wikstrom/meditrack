@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { ActorRepository } from '../../../domain/actor/ActorRepository';
 import { CreateActorUseCase } from '../../../domain/actor/useCases/CreateActorUseCase';
+import { DeleteActorUseCase } from '../../../domain/actor/useCases/DeleteActorUseCase';
 import { CredentialsRepository } from '../../../domain/auth/CredentialsRepository';
 import { ActorRole } from '../../../domain/shared/ActorRole';
 import { CliOutput } from '../CliOutput';
@@ -53,6 +54,22 @@ export async function bootstrapCreateActor(
   const passwordHash = await bcrypt.hash(password, 10);
   await credentialsRepo.setPasswordHash(id, passwordHash);
   output.print(`Actor created: ${id}  role: ${actorRole}${wardUnitId ? `  ward: ${wardUnitId}` : ''}`);
+}
+
+export async function deleteActor(
+  useCase: DeleteActorUseCase,
+  output: CliOutput,
+  requestingActorId: string,
+  id: string,
+): Promise<void> {
+  const result = await useCase.execute({ requestingActorId, id });
+
+  if (result.successful) {
+    output.print(`Actor deleted: ${id}`);
+  } else {
+    output.error(`Failed: ${result.errors.map((e) => errorMessages[e.code]).join(' ')}`);
+    output.exit(1);
+  }
 }
 
 export async function createActor(
