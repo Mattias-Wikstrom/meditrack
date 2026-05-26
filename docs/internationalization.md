@@ -10,7 +10,7 @@ involved in adding support for additional languages (e.g. Swedish).
 Business logic errors are returned from the server as `ErrorCode` strings (e.g.
 `InsufficientStock`, `InvalidStatusTransition`). The apps need to turn these into
 human-readable messages. A lookup table per language — one file shared across all three apps —
-is sufficient. See [error_handling.md](error_handling.md) for the full list of codes.
+is sufficient. See [error_handling.md](error_handling.md) for more on error codes.
 
 ### UI strings
 
