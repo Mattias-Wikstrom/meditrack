@@ -128,7 +128,7 @@ export function NurseOrderDetailPage() {
     setError(null);
     try {
       await ordersApi.send(orderId);
-      navigate('/');
+      navigate('/orders');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to send order');
       setSending(false);
@@ -143,7 +143,7 @@ export function NurseOrderDetailPage() {
   return (
     <div className="max-w-xl">
       <div className="flex items-center gap-3 mb-2">
-        <BackButton onClick={() => navigate('/')} />
+        <BackButton onClick={() => navigate('/orders')} />
         <h1 className="text-xl font-semibold text-slate-800">Order</h1>
         <StatusBadge status={order.status} />
         {saving && <span className="ml-auto text-xs text-slate-400">Saving…</span>}

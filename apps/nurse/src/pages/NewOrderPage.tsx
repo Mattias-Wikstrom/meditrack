@@ -83,7 +83,7 @@ export function NewOrderPage() {
     setError(null);
     try {
       await ordersApi.send(draftIdRef.current);
-      navigate('/');
+      navigate('/orders');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to send order');
       setSending(false);
@@ -95,7 +95,7 @@ export function NewOrderPage() {
   return (
     <div className="max-w-xl">
       <div className="flex items-center gap-3 mb-6">
-        <BackButton onClick={() => navigate('/')} />
+        <BackButton onClick={() => navigate('/orders')} />
         <h1 className="text-xl font-semibold text-slate-800">New Order</h1>
         {saving && <span className="ml-auto text-xs text-slate-400">Saving…</span>}
       </div>

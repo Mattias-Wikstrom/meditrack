@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Provider, useQuery } from 'urql';
 import { AppShell, LoginPage, ChangePasswordPage, TabNav } from '@meditrack/ui';
 import { useAuth, createUrqlClient } from '@meditrack/client';
+import { OverviewPage } from './pages/OverviewPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { NewOrderPage } from './pages/NewOrderPage';
 import { NurseOrderDetailPage } from './pages/NurseOrderDetailPage';
@@ -29,10 +30,11 @@ function NurseShell({ token, actorId, wardUnitId, role }: { token: string; actor
       onHome={() => navigate('/')}
       onProfile={() => navigate('/me')}
       onLogout={logout}
-      nav={<TabNav items={[{ to: '/', label: 'Overview', end: true }, { to: '/orders/new', label: 'Orders' }]} />}
+      nav={<TabNav items={[{ to: '/', label: 'Overview', end: true }, { to: '/orders', label: 'Orders' }]} />}
     >
       <Routes>
-        <Route path="/" element={<DashboardPage />} />
+        <Route path="/" element={<OverviewPage />} />
+        <Route path="/orders" element={<DashboardPage />} />
         <Route path="/orders/new" element={<NewOrderPage />} />
         <Route path="/orders/:orderId" element={<NurseOrderDetailPage />} />
         <Route
