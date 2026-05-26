@@ -95,4 +95,4 @@ It has been assumed that the system will be used on reasonably big screens rathe
 
 ## A possible AI function
 
-Given that the ward units currently use manual lists along with emails, one possible function is to let an AI agent read such email and enter the information into the system. This should not be used instead of the new system, but it could potentially be a complement in some situations.
+Given that the ward units currently use manual lists along with emails, one possible function is to let an AI agent read such emails and enter the information into the system. This should not be used in place of the new system, but it could potentially be a complement in certain situations.
