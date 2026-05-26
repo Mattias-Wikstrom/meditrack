@@ -21,7 +21,7 @@ export function OverviewPage() {
     <OrderAndStockOverview
       products={data?.medicinalProducts ?? []}
       orders={data?.orders ?? []}
-      getProductHref={() => '/inventory'}
+      getProductHref={id => `/inventory/${id}`}
     />
   );
 }
