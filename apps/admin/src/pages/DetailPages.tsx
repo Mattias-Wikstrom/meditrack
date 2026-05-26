@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from 'urql';
-import { BackButton, Badge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
+import { Badge, Button, Card, DetailHeader, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
 
 const dialogInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
@@ -94,13 +94,10 @@ export function UserDetailsPage() {
 
   return (
     <>
-      <div className="flex items-center gap-3 mb-4">
-        <BackButton onClick={() => navigate('/users')} />
-        <div className="ml-auto flex gap-2">
-          <Button variant="ghost" size="sm" onClick={openEdit}>Edit</Button>
-          <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
-        </div>
-      </div>
+      <DetailHeader onBack={() => navigate('/users')}>
+        <Button variant="ghost" size="sm" onClick={openEdit}>Edit</Button>
+        <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
+      </DetailHeader>
       <h1 className="text-xl font-semibold text-slate-800 mb-6">{actor.id}</h1>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
@@ -254,13 +251,10 @@ export function WardUnitDetailsPage() {
 
   return (
     <>
-      <div className="flex items-center gap-3 mb-4">
-        <BackButton onClick={() => navigate('/ward-units')} />
-        <div className="ml-auto flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => { setModalError(null); setModal('edit'); }}>Edit</Button>
-          <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
-        </div>
-      </div>
+      <DetailHeader onBack={() => navigate('/ward-units')}>
+        <Button variant="ghost" size="sm" onClick={() => { setModalError(null); setModal('edit'); }}>Edit</Button>
+        <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
+      </DetailHeader>
       <h1 className="text-xl font-semibold text-slate-800 mb-1">{unit.name}</h1>
       <p className="text-xs text-slate-400 font-mono mb-6">{unit.id}</p>
 
@@ -421,15 +415,14 @@ export function MedicationDetailsPage() {
 
   return (
     <>
-      <div className="flex justify-end gap-2 mb-2">
-        <Button variant="ghost" size="sm" onClick={() => { setModalError(null); setModal('edit'); }}>Edit</Button>
-        <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
-      </div>
-
       <InventoryProductDetail
         product={product}
         onBack={() => navigate('/inventory')}
         getMedicationHref={id => `/medications/${id}`}
+        actions={<>
+          <Button variant="ghost" size="sm" onClick={() => { setModalError(null); setModal('edit'); }}>Edit</Button>
+          <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
+        </>}
       />
 
       {modal === 'edit' && (

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from 'urql';
-import { BackButton, Button, Card, Spinner, InfoRow } from '@meditrack/ui';
+import { Button, Card, DetailHeader, Spinner, InfoRow } from '@meditrack/ui';
 
 const MEDICATION_DETAIL_QUERY = `
   query AdminMedicationDetail($id: ID!) {
@@ -177,21 +177,14 @@ export function MedicationDetailPage() {
 
   return (
     <div>
-      <BackButton onClick={() => navigate('/inventory')} className="mb-4" />
+      <DetailHeader onBack={() => navigate('/inventory')}>
+        <Button variant="ghost" size="sm" onClick={() => { setFormError(null); setModal({ type: 'editMedication' }); }}>Edit</Button>
+        <Button variant="danger" size="sm" onClick={() => { setFormError(null); setModal({ type: 'confirmDeleteMedication' }); }}>Delete</Button>
+      </DetailHeader>
 
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-800">{medication.innName}</h1>
-          <p className="text-xs text-slate-400 font-mono mt-0.5">{medication.atcCode}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => { setFormError(null); setModal({ type: 'editMedication' }); }}>
-            Edit
-          </Button>
-          <Button variant="danger" size="sm" onClick={() => { setFormError(null); setModal({ type: 'confirmDeleteMedication' }); }}>
-            Delete
-          </Button>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold text-slate-800">{medication.innName}</h1>
+        <p className="text-xs text-slate-400 font-mono mt-0.5">{medication.atcCode}</p>
       </div>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 mb-6">

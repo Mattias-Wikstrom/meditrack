@@ -12,6 +12,7 @@ export { ChangePasswordPage } from './ChangePasswordPage';
 export { TabNav } from './TabNav';
 export type { TabNavItem } from './TabNav';
 export { BackButton } from './BackButton';
+export { DetailHeader } from './DetailHeader';
 export { OrderAndStockOverview } from './OrderAndStockOverview';
 export type { OrderAndStockOverviewProps, OverviewProduct, OverviewOrder } from './OrderAndStockOverview';
 export { InventoryProductDetail } from './InventoryProductDetail';

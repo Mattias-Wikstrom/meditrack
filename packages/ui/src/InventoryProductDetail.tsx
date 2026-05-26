@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BackButton } from './BackButton';
+import { DetailHeader } from './DetailHeader';
 import { Button } from './Button';
 import { Card } from './Card';
 import { InfoRow } from './utils';
@@ -23,6 +23,8 @@ export interface InventoryProduct {
 export interface InventoryProductDetailProps {
   product: InventoryProduct;
   onBack: () => void;
+  /** Buttons rendered to the right of the back button in the header row */
+  actions?: React.ReactNode;
   /**
    * If provided, a Restock section is rendered inside the Stock card.
    * The callback receives the quantity to add and should return null on
@@ -34,7 +36,7 @@ export interface InventoryProductDetailProps {
 }
 
 
-export function InventoryProductDetail({ product, onBack, onRestock, getMedicationHref }: InventoryProductDetailProps) {
+export function InventoryProductDetail({ product, onBack, actions, onRestock, getMedicationHref }: InventoryProductDetailProps) {
   const [qty, setQty] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +56,7 @@ export function InventoryProductDetail({ product, onBack, onRestock, getMedicati
 
   return (
     <div>
-      <BackButton onClick={onBack} className="mb-4" />
+      <DetailHeader onBack={onBack}>{actions}</DetailHeader>
       <h1 className="text-xl font-semibold text-slate-800 mb-1">{product.productName}</h1>
       <p className="text-xs text-slate-400 font-mono mb-6">{product.id}</p>
 
