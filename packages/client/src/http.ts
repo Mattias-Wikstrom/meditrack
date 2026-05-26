@@ -1,3 +1,5 @@
+import { errorMessages } from './errorMessages';
+
 const API = 'http://localhost:4000/api';
 
 export function createApiClient(token: string) {
@@ -9,7 +11,12 @@ export function createApiClient(token: string) {
     });
     if (res.status === 204) return undefined as T;
     const json = await res.json() as { data?: T; errors?: string[] };
-    if (!res.ok) throw new Error(json.errors?.join(', ') ?? 'Request failed');
+    if (!res.ok) {
+      const message = (json.errors ?? [])
+        .map((code) => errorMessages[code] ?? code)
+        .join(', ') || 'Request failed';
+      throw new Error(message);
+    }
     return json.data as T;
   }
 

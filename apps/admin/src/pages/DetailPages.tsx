@@ -38,7 +38,7 @@ export function UserDetailsPage() {
   const [modalError, setModalError] = useState<string | null>(null);
   const [editRole, setEditRole] = useState('');
 
-  const { token } = useAuth();
+  const { token, actorId: currentActorId } = useAuth();
   const [{ data, fetching, error }, refetch] = useQuery({ query: ACTORS_QUERY });
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
@@ -92,7 +92,9 @@ export function UserDetailsPage() {
         <BackButton onClick={() => navigate('/users')} />
         <div className="ml-auto flex gap-2">
           <Button variant="ghost" size="sm" onClick={openEdit}>Edit</Button>
-          <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
+          {userId !== currentActorId && (
+            <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
+          )}
         </div>
       </div>
       <h1 className="text-xl font-semibold text-slate-800 mb-6">{actor.id}</h1>
