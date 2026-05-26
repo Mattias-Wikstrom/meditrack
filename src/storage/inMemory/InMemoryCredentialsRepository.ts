@@ -1,16 +1,19 @@
 import { Credentials, CredentialsRepository } from '../../domain/auth/CredentialsRepository';
+import { InMemoryActorRepository } from './InMemoryActorRepository';
 
 export class InMemoryCredentialsRepository implements CredentialsRepository {
-  private readonly store = new Map<string, Credentials>();
+  private readonly passwordHashes = new Map<string, string>();
+
+  constructor(private readonly actorRepository: InMemoryActorRepository) {}
 
   async findByActorId(id: string): Promise<Credentials | undefined> {
-    return this.store.get(id);
+    const hash = this.passwordHashes.get(id);
+    const actor = await this.actorRepository.findById(id);
+    if (hash === undefined || actor === undefined) return undefined;
+    return { actorId: id, passwordHash: hash, role: actor.role, wardUnitId: actor.wardUnitId };
   }
 
   async setPasswordHash(actorId: string, passwordHash: string): Promise<void> {
-    const existing = this.store.get(actorId);
-    if (existing) {
-      this.store.set(actorId, { ...existing, passwordHash });
-    }
+    this.passwordHashes.set(actorId, passwordHash);
   }
 }

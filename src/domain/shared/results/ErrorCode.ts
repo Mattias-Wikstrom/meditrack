@@ -2,6 +2,7 @@ export type ErrorCode =
   | 'ActorNotFound'
   | 'UnauthorizedRole'
   | 'ActorNotAssignedToWardUnit'
+  | 'WardUnitAssignmentNotAllowed'
   | 'OrderHasAtLeastOneLine'
   | 'OrderLineQuantitiesPositive'
   | 'OrderNotFound'

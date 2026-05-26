@@ -3,6 +3,7 @@ import { Transactor, WriteTransaction } from '../../domain/shared/Transactor';
 import { PrismaOrderRepository } from './PrismaOrderRepository';
 import { PrismaMedicinalProductRepository } from './PrismaMedicinalProductRepository';
 import { PrismaAuditRepository } from './PrismaAuditRepository';
+import { PrismaActorRepository } from './PrismaActorRepository';
 
 export class PrismaTransactor implements Transactor {
   constructor(private readonly prisma: PrismaClient) {}
@@ -18,6 +19,7 @@ export class PrismaTransactor implements Transactor {
           orderRepository: new PrismaOrderRepository(txClient),
           medicinalProductRepository: new PrismaMedicinalProductRepository(txClient),
           auditRepository: new PrismaAuditRepository(txClient),
+          actorRepository: new PrismaActorRepository(txClient),
         });
       },
       { timeout: 30_000 },

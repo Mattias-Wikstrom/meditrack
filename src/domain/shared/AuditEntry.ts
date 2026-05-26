@@ -2,7 +2,8 @@ export type AuditAction =
   | 'DraftOrderCreated' | 'OrderSent' | 'OrderConfirmed' | 'OrderDelivered'
   | 'ActorLoggedIn' | 'ActorLoginFailed'
   | 'PasswordChanged'
-  | 'ProductRestocked';
+  | 'ProductRestocked'
+  | 'ActorCreated' | 'ActorUpdated' | 'ActorDeleted';
 
 export interface AuditEntry {
   actorId: string;
