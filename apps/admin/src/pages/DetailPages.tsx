@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { BackButton, Badge, Card, Spinner, InventoryProductDetail, formatDate } from '@meditrack/ui';
+import { BackButton, Badge, Card, Spinner, InventoryProductDetail, InfoRow, formatDate } from '@meditrack/ui';
 
 // ── shared helpers ────────────────────────────────────────────────────────────
 
@@ -10,15 +10,6 @@ function NotFound({ kind, to }: { kind: string; to: string }) {
       No {kind} found.{' '}
       <a className="text-accent hover:underline" href={to}>Back to list</a>.
     </p>
-  );
-}
-
-function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex justify-between items-start py-2.5 border-b border-slate-100 last:border-0 text-sm">
-      <span className="text-slate-500 shrink-0 mr-4">{label}</span>
-      <span className="text-slate-800 text-right">{children}</span>
-    </div>
   );
 }
 
