@@ -288,6 +288,25 @@ export function OrderDetailPage() {
 
       {order.status === 'Sent' ? (
         <ConfirmView order={order} onConfirmed={() => navigate('/orders')} />
+      ) : order.status === 'Delivered' ? (
+        <Card className="overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50 text-left">
+                <th className="py-3 px-5 font-medium text-slate-600">Medication</th>
+                <th className="py-3 px-5 font-medium text-slate-600 text-right">Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.lines.map(line => (
+                <tr key={line.medicationId} className="border-b border-slate-100 last:border-0">
+                  <td className="py-3 px-5 text-slate-800">{line.medication?.innName ?? line.medicationId}</td>
+                  <td className="py-3 px-5 text-right font-medium tabular-nums text-slate-700">{line.quantity}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
       ) : (
         <>
           <Card className="mb-6 overflow-hidden">

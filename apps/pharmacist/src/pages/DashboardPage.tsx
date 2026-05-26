@@ -14,6 +14,10 @@ const ORDERS_QUERY = graphql(`
       id wardUnitId status createdAt
       lines { medicationId quantity medication { innName } }
     }
+    delivered: orders(status: Delivered) {
+      id wardUnitId status createdAt
+      lines { medicationId quantity medication { innName } }
+    }
   }
 `);
 
@@ -77,6 +81,7 @@ export function DashboardPage() {
 
   const sent = data?.sent ?? [];
   const confirmed = data?.confirmed ?? [];
+  const delivered = [...(data?.delivered ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return (
     <div className="space-y-8">
@@ -153,6 +158,39 @@ export function DashboardPage() {
           </table>
         </Card>
       </section>
+
+      {delivered.length > 0 && (
+        <details className="group">
+          <summary className="cursor-pointer select-none text-sm text-slate-400 hover:text-slate-600 transition-colors list-none flex items-center gap-1">
+            <span className="group-open:rotate-90 transition-transform inline-block">›</span>
+            Delivered ({delivered.length})
+          </summary>
+          <div className="mt-3 opacity-60">
+            <Card className="overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-left">
+                    <th className="py-3 px-4 font-medium text-slate-600 whitespace-nowrap">Created</th>
+                    <th className="py-3 px-4 font-medium text-slate-600">Ward Unit</th>
+                    <th className="py-3 px-4 font-medium text-slate-600">Medications</th>
+                    <th className="py-3 px-4 font-medium text-slate-600">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {delivered.map(order => (
+                    <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
+                      <td className="py-3 px-4 text-slate-500 whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
+                      <td className="py-3 px-4 text-slate-600 font-mono text-xs align-top">{order.wardUnitId}</td>
+                      <td className="py-3 px-4 align-top"><LineList lines={order.lines} /></td>
+                      <td className="py-3 px-4 align-top"><Badge status={order.status} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Card>
+          </div>
+        </details>
+      )}
     </div>
   );
 }
