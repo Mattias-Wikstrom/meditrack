@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { BackButton, Badge, Card, Spinner } from '@meditrack/ui';
+import { BackButton, Badge, Card, Spinner, InventoryProductDetail } from '@meditrack/ui';
 
 // ── shared helpers ────────────────────────────────────────────────────────────
 
@@ -217,31 +217,10 @@ export function MedicationDetailsPage() {
   if (!product) return <NotFound kind="medication product" to="/inventory" />;
 
   return (
-    <div>
-      <BackButton onClick={() => navigate('/inventory')} className="mb-4" />
-      <h1 className="text-xl font-semibold text-slate-800 mb-6">{product.productName}</h1>
-
-      <Card className="p-5 max-w-lg">
-        <InfoRow label="INN Name">{product.medication?.innName ?? '—'}</InfoRow>
-        <InfoRow label="ATC Code"><span className="font-mono text-xs">{product.medication?.atcCode ?? '—'}</span></InfoRow>
-        <InfoRow label="Form">{product.medication?.form ?? '—'}</InfoRow>
-        <InfoRow label="Strength">{product.medication?.strength ?? '—'}</InfoRow>
-        <InfoRow label="Product ID"><span className="font-mono text-xs text-slate-400">{product.id}</span></InfoRow>
-        <InfoRow label="Stock Level">
-          <span className={`font-semibold tabular-nums ${product.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
-            {product.stockLevel}
-            {product.isBelowThreshold && ' ⚠'}
-          </span>
-        </InfoRow>
-        <InfoRow label="Minimum">{product.stockThreshold}</InfoRow>
-        <InfoRow label="Status">
-          {product.isBelowThreshold
-            ? <span className="text-red-600 font-medium">Below threshold</span>
-            : <span className="text-green-600 font-medium">Adequate</span>
-          }
-        </InfoRow>
-      </Card>
-    </div>
+    <InventoryProductDetail
+      product={product}
+      onBack={() => navigate('/inventory')}
+    />
   );
 }
 

@@ -14,3 +14,5 @@ export type { TabNavItem } from './TabNav';
 export { BackButton } from './BackButton';
 export { OrderAndStockOverview } from './OrderAndStockOverview';
 export type { OrderAndStockOverviewProps, OverviewProduct, OverviewOrder } from './OrderAndStockOverview';
+export { InventoryProductDetail } from './InventoryProductDetail';
+export type { InventoryProductDetailProps, InventoryProduct } from './InventoryProductDetail';
