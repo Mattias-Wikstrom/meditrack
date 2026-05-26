@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Card, Spinner } from '@meditrack/ui';
+import { Card, Spinner, RoleBadge } from '@meditrack/ui';
 
 const ACTORS_QUERY = /* GraphQL */ `
   query AdminActors {
@@ -14,19 +14,6 @@ const ACTORS_QUERY = /* GraphQL */ `
   }
 `;
 
-const ROLE_STYLES: Record<string, string> = {
-  Nurse:       'bg-blue-100 text-blue-700',
-  Pharmacist:  'bg-purple-100 text-purple-700',
-  Admin:       'bg-amber-100 text-amber-700',
-};
-
-function RoleBadge({ role }: { role: string }) {
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ROLE_STYLES[role] ?? 'bg-slate-100 text-slate-600'}`}>
-      {role}
-    </span>
-  );
-}
 
 type SortKey = 'id' | 'role' | 'wardUnit';
 type SortDir = 'asc' | 'desc';
