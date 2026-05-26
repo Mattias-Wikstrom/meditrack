@@ -74,8 +74,8 @@ export function OrderAndStockOverview({ products, orders, getProductHref }: Orde
               const inner = (
                 <>
                   <div>
-                    <div className="text-sm font-medium text-slate-900">{product.medication?.innName ?? product.productName}</div>
-                    <div className="text-xs text-slate-500">{product.medication?.atcCode ?? '—'} · {product.medication?.strength ?? '—'}</div>
+                    <div className="text-sm font-medium text-slate-900">{product.productName}</div>
+                    <div className="text-xs text-slate-500">{product.medication?.innName ?? '—'} · {product.medication?.atcCode ?? '—'} · {product.medication?.strength ?? '—'}</div>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-medium tabular-nums">
                     <span className="rounded-full bg-red-600 text-white px-2 py-0.5">{product.stockLevel}</span>
