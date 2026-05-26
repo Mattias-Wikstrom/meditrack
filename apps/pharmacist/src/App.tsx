@@ -7,6 +7,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { OrderDetailPage } from './pages/OrderDetailPage';
 import { OverviewPage } from './pages/OverviewPage';
+import { InventoryProductPage } from './pages/InventoryProductPage';
 
 function PharmacistNav() {
   return (
@@ -45,6 +46,7 @@ export function App() {
           <Route path="/orders" element={<DashboardPage />} />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/inventory" element={<InventoryPage />} />
+          <Route path="/inventory/:productId" element={<InventoryProductPage />} />
           <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} role={role!} onSuccess={() => navigate('/')} onCancel={() => navigate('/')} />} />
         </Routes>
       </AppShell>

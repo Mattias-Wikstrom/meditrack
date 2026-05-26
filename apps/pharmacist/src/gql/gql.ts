@@ -19,6 +19,8 @@ type Documents = {
     "\n  query PharmacistInventory {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": typeof types.PharmacistInventoryDocument,
     "\n  subscription PharmacistStockAlert {\n    stockBelowThreshold {\n      medicinalProductId productName stockLevel stockThreshold\n    }\n  }\n": typeof types.PharmacistStockAlertDocument,
     "\n  mutation RestockProduct($medicinalProductId: ID!, $quantity: Int!) {\n    restockProduct(medicinalProductId: $medicinalProductId, quantity: $quantity) {\n      successful\n      product { id stockLevel isBelowThreshold }\n      errors\n    }\n  }\n": typeof types.RestockProductDocument,
+    "\n  query PharmacistProductDetail($id: ID!) {\n    medicinalProduct(id: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": typeof types.PharmacistProductDetailDocument,
+    "\n  mutation RestockProductDetail($medicinalProductId: ID!, $quantity: Int!) {\n    restockProduct(medicinalProductId: $medicinalProductId, quantity: $quantity) {\n      successful\n      product { id stockLevel isBelowThreshold }\n      errors\n    }\n  }\n": typeof types.RestockProductDetailDocument,
     "\n  query GetOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId status createdAt\n      lines {\n        medicationId quantity\n        medication { id innName }\n      }\n    }\n  }\n": typeof types.GetOrderDocument,
     "\n  query GetProducts($medicationId: ID) {\n    medicinalProducts(medicationId: $medicationId) {\n      id productName stockLevel isBelowThreshold\n    }\n  }\n": typeof types.GetProductsDocument,
 };
@@ -28,6 +30,8 @@ const documents: Documents = {
     "\n  query PharmacistInventory {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": types.PharmacistInventoryDocument,
     "\n  subscription PharmacistStockAlert {\n    stockBelowThreshold {\n      medicinalProductId productName stockLevel stockThreshold\n    }\n  }\n": types.PharmacistStockAlertDocument,
     "\n  mutation RestockProduct($medicinalProductId: ID!, $quantity: Int!) {\n    restockProduct(medicinalProductId: $medicinalProductId, quantity: $quantity) {\n      successful\n      product { id stockLevel isBelowThreshold }\n      errors\n    }\n  }\n": types.RestockProductDocument,
+    "\n  query PharmacistProductDetail($id: ID!) {\n    medicinalProduct(id: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": types.PharmacistProductDetailDocument,
+    "\n  mutation RestockProductDetail($medicinalProductId: ID!, $quantity: Int!) {\n    restockProduct(medicinalProductId: $medicinalProductId, quantity: $quantity) {\n      successful\n      product { id stockLevel isBelowThreshold }\n      errors\n    }\n  }\n": types.RestockProductDetailDocument,
     "\n  query GetOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId status createdAt\n      lines {\n        medicationId quantity\n        medication { id innName }\n      }\n    }\n  }\n": types.GetOrderDocument,
     "\n  query GetProducts($medicationId: ID) {\n    medicinalProducts(medicationId: $medicationId) {\n      id productName stockLevel isBelowThreshold\n    }\n  }\n": types.GetProductsDocument,
 };
@@ -66,6 +70,14 @@ export function graphql(source: "\n  subscription PharmacistStockAlert {\n    st
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation RestockProduct($medicinalProductId: ID!, $quantity: Int!) {\n    restockProduct(medicinalProductId: $medicinalProductId, quantity: $quantity) {\n      successful\n      product { id stockLevel isBelowThreshold }\n      errors\n    }\n  }\n"): (typeof documents)["\n  mutation RestockProduct($medicinalProductId: ID!, $quantity: Int!) {\n    restockProduct(medicinalProductId: $medicinalProductId, quantity: $quantity) {\n      successful\n      product { id stockLevel isBelowThreshold }\n      errors\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query PharmacistProductDetail($id: ID!) {\n    medicinalProduct(id: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n"): (typeof documents)["\n  query PharmacistProductDetail($id: ID!) {\n    medicinalProduct(id: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation RestockProductDetail($medicinalProductId: ID!, $quantity: Int!) {\n    restockProduct(medicinalProductId: $medicinalProductId, quantity: $quantity) {\n      successful\n      product { id stockLevel isBelowThreshold }\n      errors\n    }\n  }\n"): (typeof documents)["\n  mutation RestockProductDetail($medicinalProductId: ID!, $quantity: Int!) {\n    restockProduct(medicinalProductId: $medicinalProductId, quantity: $quantity) {\n      successful\n      product { id stockLevel isBelowThreshold }\n      errors\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

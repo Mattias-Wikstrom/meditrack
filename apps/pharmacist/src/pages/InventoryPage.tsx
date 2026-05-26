@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useSubscription, useMutation } from 'urql';
 import { Card, Button, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -212,6 +213,7 @@ export function InventoryPage() {
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-left">
               {th('Medication', 'medication')}
+              <th className="px-4 py-3 font-medium text-slate-600">ATC Code</th>
               <th className="px-4 py-3 font-medium text-slate-600">Form</th>
               <th className="px-4 py-3 font-medium text-slate-600">Strength</th>
               {th('Product', 'product')}
@@ -224,9 +226,12 @@ export function InventoryPage() {
             {sorted.map(p => (
               <tr key={p.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                 <td className="px-4 py-3 font-medium text-slate-800">{p.medication?.innName ?? '—'}</td>
+                <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.atcCode ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-600">{p.medication?.form ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.strength ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-600">{p.productName}</td>
+                <td className="px-4 py-3 text-slate-600">
+                  <Link to={`/inventory/${p.id}`} className="text-accent hover:underline">{p.productName}</Link>
+                </td>
                 <td className={`px-4 py-3 text-right font-medium tabular-nums ${p.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
                   {p.stockLevel}
                   {p.isBelowThreshold && <span className="ml-1 text-xs">⚠</span>}
@@ -248,7 +253,7 @@ export function InventoryPage() {
             ))}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-slate-400">
+                <td colSpan={8} className="px-4 py-12 text-center text-slate-400">
                   {q ? 'No results.' : 'No products in inventory.'}
                 </td>
               </tr>
