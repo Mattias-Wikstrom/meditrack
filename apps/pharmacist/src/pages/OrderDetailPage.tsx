@@ -7,6 +7,57 @@ import type { ProductSelection } from '../api/orders';
 import { graphql } from '../gql';
 import type { GetOrderQuery } from '../gql/graphql';
 
+// ── Confirm view (order is Sent, awaiting pharmacist confirmation) ─────────────
+
+function ConfirmView({ order, onConfirmed }: {
+  order: NonNullable<GetOrderQuery['order']>;
+  onConfirmed: () => void;
+}) {
+  const ordersApi = useOrdersApi();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleConfirm() {
+    setSubmitting(true);
+    setError(null);
+    try {
+      await ordersApi.confirm(order.id);
+      onConfirmed();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to confirm order');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Card className="mb-6 overflow-hidden">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-slate-200 bg-slate-50 text-left">
+            <th className="py-3 px-5 font-medium text-slate-600">Medication</th>
+            <th className="py-3 px-5 font-medium text-slate-600 text-right">Quantity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {order.lines.map(line => (
+            <tr key={line.medicationId} className="border-b border-slate-100 last:border-0">
+              <td className="py-3 px-5 text-slate-800">{line.medication?.innName ?? line.medicationId}</td>
+              <td className="py-3 px-5 text-right font-medium tabular-nums text-slate-700">{line.quantity}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {error && <p className="px-5 pb-4 text-xs text-red-600">{error}</p>}
+      <div className="px-5 py-4 border-t border-slate-100">
+        <Button onClick={handleConfirm} disabled={submitting} className="w-full">
+          {submitting ? 'Confirming…' : 'Confirm Order'}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 const ORDER_QUERY = graphql(`
   query GetOrder($id: ID!) {
     order(id: $id) {
@@ -206,27 +257,33 @@ export function OrderDetailPage() {
   return (
     <div className="max-w-xl">
       <div className="flex items-center gap-3 mb-6">
-        <BackButton onClick={() => navigate('/')} />
+        <BackButton onClick={() => navigate('/orders')} />
         <h1 className="text-xl font-semibold text-slate-800">Order <span className="font-mono">{shortId}…</span></h1>
         <Badge status={order.status} />
       </div>
 
-      <Card className="mb-6 overflow-hidden">
-        {order.lines.map((line) => (
-          <LineDeliverySection
-            key={line.medicationId}
-            line={line}
-            splits={getSplits(line.medicationId, line.quantity)}
-            onChange={(splits) => updateSplits(line.medicationId, splits)}
-          />
-        ))}
-      </Card>
+      {order.status === 'Sent' ? (
+        <ConfirmView order={order} onConfirmed={() => navigate('/orders')} />
+      ) : (
+        <>
+          <Card className="mb-6 overflow-hidden">
+            {order.lines.map((line) => (
+              <LineDeliverySection
+                key={line.medicationId}
+                line={line}
+                splits={getSplits(line.medicationId, line.quantity)}
+                onChange={(splits) => updateSplits(line.medicationId, splits)}
+              />
+            ))}
+          </Card>
 
-      {submitError && <p className="text-red-600 text-sm mb-4">{submitError}</p>}
+          {submitError && <p className="text-red-600 text-sm mb-4">{submitError}</p>}
 
-      <Button onClick={handleDeliver} disabled={submitting} className="w-full">
-        {submitting ? 'Delivering…' : 'Deliver Order'}
-      </Button>
+          <Button onClick={handleDeliver} disabled={submitting} className="w-full">
+            {submitting ? 'Delivering…' : 'Deliver Order'}
+          </Button>
+        </>
+      )}
     </div>
   );
 }

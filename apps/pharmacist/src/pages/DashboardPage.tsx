@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
 import { Card, Badge, Button, Spinner } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
@@ -31,20 +31,15 @@ function formatDate(iso: string) {
 
 type OrderLine = { medicationId: string; quantity: number; medication?: { innName: string } | null };
 
-const LINE_LIMIT = 3;
-
 function LineList({ lines }: { lines: OrderLine[] }) {
-  const shown = lines.slice(0, LINE_LIMIT);
-  const extra = lines.length - LINE_LIMIT;
   return (
     <div className="space-y-0.5">
-      {shown.map(l => (
+      {lines.map(l => (
         <div key={l.medicationId} className="flex items-baseline gap-1.5">
           <span className="text-slate-700">{l.medication?.innName ?? l.medicationId}</span>
           <span className="text-slate-400 text-xs">×{l.quantity}</span>
         </div>
       ))}
-      {extra > 0 && <div className="text-slate-400 text-xs">+{extra} more</div>}
     </div>
   );
 }
@@ -59,6 +54,7 @@ function CountBadge({ n }: { n: number }) {
 }
 
 export function DashboardPage() {
+  const navigate = useNavigate();
   const ordersApi = useOrdersApi();
   const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
 
@@ -101,13 +97,13 @@ export function DashboardPage() {
             </thead>
             <tbody>
               {sent.map(order => (
-                <tr key={order.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                  <td className="py-3 px-4 text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
-                  <td className="py-3 px-4 text-slate-600 font-mono text-xs">{order.wardUnitId}</td>
-                  <td className="py-3 px-4"><LineList lines={order.lines} /></td>
-                  <td className="py-3 px-4"><Badge status={order.status} /></td>
-                  <td className="py-3 px-4 text-right">
-                    <Button size="sm" onClick={() => handleConfirm(order.id)}>Confirm →</Button>
+                <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
+                  <td className="py-3 px-4 text-slate-500 whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
+                  <td className="py-3 px-4 text-slate-600 font-mono text-xs align-top">{order.wardUnitId}</td>
+                  <td className="py-3 px-4 align-top"><LineList lines={order.lines} /></td>
+                  <td className="py-3 px-4 align-top"><Badge status={order.status} /></td>
+                  <td className="py-3 px-4 text-right align-top">
+                    <Button size="sm" onClick={e => { e.stopPropagation(); handleConfirm(order.id); }}>Confirm →</Button>
                   </td>
                 </tr>
               ))}
@@ -138,15 +134,13 @@ export function DashboardPage() {
             </thead>
             <tbody>
               {confirmed.map(order => (
-                <tr key={order.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                  <td className="py-3 px-4 text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
-                  <td className="py-3 px-4 text-slate-600 font-mono text-xs">{order.wardUnitId}</td>
-                  <td className="py-3 px-4"><LineList lines={order.lines} /></td>
-                  <td className="py-3 px-4"><Badge status={order.status} /></td>
-                  <td className="py-3 px-4 text-right">
-                    <Link to={`/orders/${order.id}`}>
-                      <Button size="sm" variant="ghost">Deliver →</Button>
-                    </Link>
+                <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
+                  <td className="py-3 px-4 text-slate-500 whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
+                  <td className="py-3 px-4 text-slate-600 font-mono text-xs align-top">{order.wardUnitId}</td>
+                  <td className="py-3 px-4 align-top"><LineList lines={order.lines} /></td>
+                  <td className="py-3 px-4 align-top"><Badge status={order.status} /></td>
+                  <td className="py-3 px-4 text-right align-top">
+                    <Button size="sm" variant="ghost" onClick={e => { e.stopPropagation(); navigate(`/orders/${order.id}`); }}>Deliver →</Button>
                   </td>
                 </tr>
               ))}
