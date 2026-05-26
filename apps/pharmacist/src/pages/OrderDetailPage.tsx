@@ -101,9 +101,13 @@ function LineDeliverySection({
   });
 
   const products = data?.medicinalProducts ?? [];
-  const totalAllocated = splits.filter(s => s.medicinalProductId !== '').reduce((sum, s) => sum + s.quantity, 0);
+  const selectedSplits = splits.filter(s => s.medicinalProductId !== '');
+  const totalAllocated = selectedSplits.reduce((sum, s) => sum + s.quantity, 0);
   const remaining = line.quantity - totalAllocated;
-  const covered = totalAllocated === line.quantity && splits.every(s => s.medicinalProductId !== '');
+  const overAllocated = totalAllocated > line.quantity;
+  const covered = totalAllocated === line.quantity && selectedSplits.length === splits.length;
+  const selectedIds = selectedSplits.map(s => s.medicinalProductId);
+  const hasDuplicates = new Set(selectedIds).size < selectedIds.length;
 
   function updateSplit(index: number, patch: Partial<Split>) {
     onChange(splits.map((s, i) => (i === index ? { ...s, ...patch } : s)));
@@ -127,8 +131,8 @@ function LineDeliverySection({
           {line.medication?.innName ?? line.medicationId}
           <span className="ml-2 text-slate-400 font-normal">× {line.quantity} ordered</span>
         </p>
-        <span className={`text-xs font-medium tabular-nums ${covered ? 'text-green-600' : 'text-slate-400'}`}>
-          {totalAllocated} / {line.quantity}{covered ? ' ✓' : ''}
+        <span className={`text-xs font-medium tabular-nums ${covered ? 'text-green-600' : overAllocated ? 'text-red-600' : 'text-slate-400'}`}>
+          {totalAllocated} / {line.quantity}{covered ? ' ✓' : overAllocated ? ' ✕' : ''}
         </span>
       </div>
 
@@ -178,8 +182,12 @@ function LineDeliverySection({
         ))}
       </div>
 
+      {hasDuplicates && (
+        <p className="mt-2 text-xs text-red-600">Each product can only be selected once per line.</p>
+      )}
+
       {/* Split button — only when there is remaining quantity to allocate */}
-      {remaining > 0 && (
+      {remaining > 0 && !overAllocated && (
         <button
           onClick={addSplit}
           className="mt-3 text-xs text-accent hover:text-accent/80 transition-colors"
@@ -212,10 +220,21 @@ export function OrderDetailPage() {
     setAllSplits((prev) => ({ ...prev, [medicationId]: splits }));
   }
 
-  async function handleDeliver() {
-    if (!order) return;
+  function lineIsValid(medicationId: string, orderedQty: number): boolean {
+    const splits = getSplits(medicationId, orderedQty);
+    if (splits.some(s => !s.medicinalProductId)) return false;
+    const total = splits.reduce((sum, s) => sum + s.quantity, 0);
+    if (total !== orderedQty) return false;
+    const ids = splits.map(s => s.medicinalProductId);
+    return new Set(ids).size === ids.length;
+  }
 
-    // Validate: every split must have a product selected and totals must match.
+  const canDeliver = !!order && order.lines.every(l => lineIsValid(l.medicationId, l.quantity));
+
+  async function handleDeliver() {
+    if (!order || !canDeliver) return;
+
+    // Validate: every split must have a product selected, totals must match, no duplicates.
     for (const line of order.lines) {
       const splits = getSplits(line.medicationId, line.quantity);
       if (splits.some((s) => !s.medicinalProductId)) {
@@ -225,6 +244,11 @@ export function OrderDetailPage() {
       const total = splits.reduce((sum, s) => sum + s.quantity, 0);
       if (total !== line.quantity) {
         setSubmitError(`Quantities for ${line.medication?.innName ?? line.medicationId} must add up to ${line.quantity}.`);
+        return;
+      }
+      const ids = splits.map(s => s.medicinalProductId);
+      if (new Set(ids).size !== ids.length) {
+        setSubmitError(`Each product can only be selected once per line.`);
         return;
       }
     }
@@ -279,7 +303,7 @@ export function OrderDetailPage() {
 
           {submitError && <p className="text-red-600 text-sm mb-4">{submitError}</p>}
 
-          <Button onClick={handleDeliver} disabled={submitting} className="w-full">
+          <Button onClick={handleDeliver} disabled={submitting || !canDeliver} className="w-full">
             {submitting ? 'Delivering…' : 'Deliver Order'}
           </Button>
         </>
