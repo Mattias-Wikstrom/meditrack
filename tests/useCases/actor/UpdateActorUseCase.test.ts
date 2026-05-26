@@ -68,16 +68,16 @@ describe('UpdateActorUseCase', () => {
     expect(result.value.wardUnitId).toBe('ward-1');
   });
 
-  it('clears ward unit when null is explicitly passed', async () => {
+  it('fails when a nurse ward unit is explicitly cleared', async () => {
     const result = await useCase.execute({
       requestingActorId: 'admin-1',
       id: 'nurse-1',
       wardUnitId: null,
     });
 
-    expect(result.successful).toBe(true);
-    if (!result.successful) return;
-    expect(result.value.wardUnitId).toBeUndefined();
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('NurseRequiresWardUnit');
   });
 
   it('assigns a ward unit to a nurse', async () => {

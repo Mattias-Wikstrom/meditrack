@@ -56,6 +56,7 @@ describe('CreateActorUseCase', () => {
       requestingActorId: 'admin-1',
       id: 'nurse-1',
       role: ActorRole.Nurse,
+      wardUnitId: 'ward-1',
       password: 'secret',
     });
 
@@ -88,6 +89,19 @@ describe('CreateActorUseCase', () => {
     expect(result.successful).toBe(false);
     if (result.successful) return;
     expect(result.errors[0]?.code).toBe('UnauthorizedRole');
+  });
+
+  it('fails when a nurse is not assigned a ward unit', async () => {
+    const result = await useCase.execute({
+      requestingActorId: 'admin-1',
+      id: 'nurse-1',
+      role: ActorRole.Nurse,
+      password: 'secret',
+    });
+
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('NurseRequiresWardUnit');
   });
 
   it('fails when a non-nurse is assigned a ward unit', async () => {

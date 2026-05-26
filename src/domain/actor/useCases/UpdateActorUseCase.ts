@@ -3,7 +3,11 @@ import { ActorRole } from '../../shared/ActorRole';
 import { ActorRepository } from '../ActorRepository';
 import { Transactor } from '../../shared/Transactor';
 import { EventBus } from '../../shared/eventContracts/EventBus';
-import { UseCaseResult, success, failure } from '../../shared/results/UseCaseResult';
+import { UseCaseResult, success, failure, failures } from '../../shared/results/UseCaseResult';
+import { ErrorInfo } from '../../shared/results/ErrorInfo';
+import { ActorRule } from '../rules/ActorRule';
+import { NurseRequiresWardUnit } from '../rules/NurseRequiresWardUnit';
+import { NonNurseCannotHaveWardUnit } from '../rules/NonNurseCannotHaveWardUnit';
 import { ActorUpdated } from '../events/ActorUpdated';
 
 export interface UpdateActorInput {
@@ -14,6 +18,12 @@ export interface UpdateActorInput {
 }
 
 export class UpdateActorUseCase {
+  // Business rules checked against the resulting actor before the update is saved
+  private readonly rules: ActorRule[] = [
+    new NurseRequiresWardUnit(),
+    new NonNurseCannotHaveWardUnit(),
+  ];
+
   constructor(
     private readonly actorRepository: ActorRepository,
     private readonly transactor: Transactor,
@@ -29,28 +39,32 @@ export class UpdateActorUseCase {
     if (!existing) return failure('ActorNotFound');
 
     const newRole = input.role ?? existing.role;
-    if (newRole !== ActorRole.Nurse && input.wardUnitId != null) {
-      return failure('WardUnitAssignmentNotAllowed');
-    }
 
-    // If role stays Nurse and wardUnitId is omitted, preserve existing ward unit.
-    // If wardUnitId is explicitly null, clear it.
-    // If role changes away from Nurse, always clear ward unit.
+    // If wardUnitId is explicitly provided (including null to clear), honour it.
+    // If omitted and the role is changing away from Nurse, auto-clear.
+    // If omitted and the role stays Nurse (or becomes Nurse), preserve existing.
     const newWardUnitId: string | undefined =
-      newRole !== ActorRole.Nurse
-        ? undefined
-        : input.wardUnitId !== undefined
-          ? (input.wardUnitId ?? undefined)
+      input.wardUnitId !== undefined
+        ? (input.wardUnitId ?? undefined)
+        : newRole !== ActorRole.Nurse
+          ? undefined
           : existing.wardUnitId;
 
-    const updated: Actor = {
+    const candidate: Actor = {
       id: existing.id,
       role: newRole,
       ...(newWardUnitId != null && { wardUnitId: newWardUnitId }),
     };
 
+    const errors: ErrorInfo[] = [];
+    for (const rule of this.rules) {
+      const error = rule.check(candidate);
+      if (error !== null) errors.push(error);
+    }
+    if (errors.length > 0) return failures(errors);
+
     await this.transactor.run(async (tx) => {
-      await tx.actorRepository.save(updated);
+      await tx.actorRepository.save(candidate);
       await tx.auditRepository.record({
         actorId: input.requestingActorId,
         action: 'ActorUpdated',
@@ -59,7 +73,7 @@ export class UpdateActorUseCase {
       });
     });
 
-    await this.eventBus.publish(new ActorUpdated(input.requestingActorId, updated));
-    return success(updated);
+    await this.eventBus.publish(new ActorUpdated(input.requestingActorId, candidate));
+    return success(candidate);
   }
 }
