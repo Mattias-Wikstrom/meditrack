@@ -153,6 +153,51 @@ Set a password with: meditrack passwd --actor-id pharmacist-eva
 
 ---
 
+## ward-units
+
+### list
+
+List all ward units.
+
+```
+npm run cli -- ward-units list
+```
+
+**Example**
+
+```
+$ npm run cli -- ward-units list
+ward-akuten               Akuten
+ward-medicin              Medicinavdelningen
+ward-kirurgi              Kirurgavdelningen
+```
+
+---
+
+### create
+
+Create a new ward unit.
+
+```
+npm run cli -- ward-units create --ward-unit-id <id> --name <name>
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--ward-unit-id <id>` | A unique identifier for the ward unit (e.g. `ward-ortopedi`) |
+| `--name <name>` | Display name (e.g. `Ortopedavdelningen`) |
+
+**Example**
+
+```
+$ npm run cli -- ward-units create --ward-unit-id ward-ortopedi --name Ortopedavdelningen
+Ward unit created: ward-ortopedi  name: Ortopedavdelningen
+```
+
+---
+
 ## medications
 
 ### list
