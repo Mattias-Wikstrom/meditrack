@@ -1,7 +1,7 @@
 // Used for /orders (pharmacist)
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
-import { Card, Badge, Button, Spinner, LineList, formatDate } from '@meditrack/ui';
+import { Card, OrderStatusBadge, Button, Spinner, LineList, formatDate } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
 
@@ -28,7 +28,7 @@ const ORDER_STATUS_SUB = graphql(`
   }
 `);
 
-function CountBadge({ n }: { n: number }) {
+function CountOrderStatusBadge({ n }: { n: number }) {
   if (n === 0) return null;
   return (
     <span className="ml-2 text-xs font-medium bg-accent-light text-accent px-2 py-0.5 rounded-full">
@@ -67,7 +67,7 @@ export function DashboardPage() {
     <div className="space-y-8">
       <section>
         <h2 className="text-base font-semibold text-slate-700 mb-3">
-          Pending Confirmation <CountBadge n={sent.length} />
+          Pending Confirmation <CountOrderStatusBadge n={sent.length} />
         </h2>
         <Card className="overflow-hidden">
           <table className="w-full text-sm">
@@ -86,7 +86,7 @@ export function DashboardPage() {
                   <td className="py-3 px-4 text-slate-500 whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
                   <td className="py-3 px-4 text-slate-600 font-mono text-xs align-top">{order.wardUnitId}</td>
                   <td className="py-3 px-4 align-top"><LineList lines={order.lines} /></td>
-                  <td className="py-3 px-4 align-top"><Badge status={order.status} /></td>
+                  <td className="py-3 px-4 align-top"><OrderStatusBadge status={order.status} /></td>
                   <td className="py-3 px-4 text-right align-top">
                     <Button size="sm" onClick={e => { e.stopPropagation(); handleConfirm(order.id); }}>Confirm →</Button>
                   </td>
@@ -104,7 +104,7 @@ export function DashboardPage() {
 
       <section>
         <h2 className="text-base font-semibold text-slate-700 mb-3">
-          Ready to Deliver <CountBadge n={confirmed.length} />
+          Ready to Deliver <CountOrderStatusBadge n={confirmed.length} />
         </h2>
         <Card className="overflow-hidden">
           <table className="w-full text-sm">
@@ -123,7 +123,7 @@ export function DashboardPage() {
                   <td className="py-3 px-4 text-slate-500 whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
                   <td className="py-3 px-4 text-slate-600 font-mono text-xs align-top">{order.wardUnitId}</td>
                   <td className="py-3 px-4 align-top"><LineList lines={order.lines} /></td>
-                  <td className="py-3 px-4 align-top"><Badge status={order.status} /></td>
+                  <td className="py-3 px-4 align-top"><OrderStatusBadge status={order.status} /></td>
                   <td className="py-3 px-4 text-right align-top">
                     <Button size="sm" variant="ghost" onClick={e => { e.stopPropagation(); navigate(`/orders/${order.id}`); }}>Deliver →</Button>
                   </td>
@@ -162,7 +162,7 @@ export function DashboardPage() {
                       <td className="py-3 px-4 text-slate-500 whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
                       <td className="py-3 px-4 text-slate-600 font-mono text-xs align-top">{order.wardUnitId}</td>
                       <td className="py-3 px-4 align-top"><LineList lines={order.lines} /></td>
-                      <td className="py-3 px-4 align-top"><Badge status={order.status} /></td>
+                      <td className="py-3 px-4 align-top"><OrderStatusBadge status={order.status} /></td>
                     </tr>
                   ))}
                 </tbody>

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from 'urql';
-import { BackButton, Badge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
+import { BackButton, OrderStatusBadge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleOrderStatusBadge, formatDate } from '@meditrack/ui';
 
 const dialogInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
@@ -107,7 +107,7 @@ export function UserDetailsPage() {
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
         <Card className="p-5">
           <h2 className="text-base font-semibold text-slate-700 mb-2">Account</h2>
-          <InfoRow label="Role"><RoleBadge role={actor.role} /></InfoRow>
+          <InfoRow label="Role"><RoleOrderStatusBadge role={actor.role} /></InfoRow>
           <InfoRow label="Ward Unit">
             {actor.wardUnit
               ? <Link to={`/ward-units/${actor.wardUnitId}`} className="text-accent hover:underline">{actor.wardUnit.name}</Link>
@@ -301,7 +301,7 @@ export function WardUnitDetailsPage() {
                   {orders.map((o: { id: string; status: string; createdAt: string; lines: { medicationId: string; medication?: { innName: string } | null; quantity: number }[] }) => (
                     <tr key={o.id} onClick={() => navigate(`/orders/${o.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
                       <td className="py-2 pr-4 text-slate-500 whitespace-nowrap">{formatDate(o.createdAt)}</td>
-                      <td className="py-2 pr-4"><Badge status={o.status} /></td>
+                      <td className="py-2 pr-4"><OrderStatusBadge status={o.status} /></td>
                       <td className="py-2 text-slate-600">
                         {o.lines.map(l => l.medication?.innName ?? l.medicationId).join(', ')}
                       </td>

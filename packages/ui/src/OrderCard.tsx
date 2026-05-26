@@ -1,7 +1,7 @@
 // No longer used
 import React from 'react';
 import { Card } from './Card';
-import { Badge } from './Badge';
+import { OrderStatusBadge } from './OrderStatusBadge';
 
 export interface OrderLineSummary {
   medicationId: string;
@@ -33,7 +33,7 @@ export function OrderCard({ order, children }: OrderCardProps) {
           <p className="font-mono text-xs text-slate-400 mb-0.5">{shortId}…</p>
           <p className="text-sm text-slate-500">Ward <span className="font-medium text-slate-700">{order.wardUnitId}</span> · {date}</p>
         </div>
-        <Badge status={order.status} />
+        <OrderStatusBadge status={order.status} />
       </div>
       <ul className="space-y-1 mb-4">
         {order.lines.map((line, i) => (

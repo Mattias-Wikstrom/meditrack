@@ -6,7 +6,7 @@ import { BackButton } from './BackButton';
 
 const API = 'http://localhost:4000/api';
 
-interface ChangePasswordPageProps {
+interface MyAccountPageProps {
   token: string;
   actorId: string;
   role: string;
@@ -15,7 +15,7 @@ interface ChangePasswordPageProps {
   onCancel?: () => void;
 }
 
-export function ChangePasswordPage({ token, actorId, role, wardUnitName, onSuccess, onCancel }: ChangePasswordPageProps) {
+export function MyAccountPage({ token, actorId, role, wardUnitName, onSuccess, onCancel }: MyAccountPageProps) {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

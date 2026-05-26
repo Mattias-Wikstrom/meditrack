@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Provider, useQuery } from 'urql';
-import { AppShell, LoginPage, ChangePasswordPage, TabNav } from '@meditrack/ui';
+import { AppShell, LoginPage, MyAccountPage, TabNav } from '@meditrack/ui';
 import { useAuth, createUrqlClient } from '@meditrack/client';
 import { OverviewPage } from './pages/OverviewPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -40,7 +40,7 @@ function NurseShell({ token, actorId, wardUnitId, role }: { token: string; actor
         <Route
           path="/me"
           element={
-            <ChangePasswordPage
+            <MyAccountPage
               token={token}
               actorId={actorId}
               role={role}
