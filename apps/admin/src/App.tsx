@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Provider } from 'urql';
-import { AppShell, LoginPage, ChangePasswordPage, TabNav } from '@meditrack/ui';
+import { AppShell, LoginPage, MyAccountPage, TabNav } from '@meditrack/ui';
 import { useAuth, createUrqlClient } from '@meditrack/client';
 import { OrdersPage } from './pages/OrdersPage';
 import { InventoryPage } from './pages/InventoryPage';
@@ -60,7 +60,7 @@ export function App() {
           <Route path="/inventory/:productId" element={<MedicationDetailsPage />} />
           <Route path="/medications/:medicationId" element={<MedicationDetailPage />} />
           <Route path="/orders/:orderId" element={<AdminOrderDetailPage />} />
-          <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} role={role!} onSuccess={() => navigate('/')} onCancel={() => navigate('/')} />} />
+          <Route path="/me" element={<MyAccountPage token={token} actorId={actorId!} role={role!} onSuccess={() => navigate('/')} onCancel={() => navigate('/')} />} />
         </Routes>
       </AppShell>
     </Provider>

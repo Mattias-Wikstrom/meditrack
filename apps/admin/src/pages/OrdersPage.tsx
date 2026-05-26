@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Card, Badge, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
+import { Card, OrderStatusBadge, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
 import { graphql } from '../gql';
 
 const ORDERS_QUERY = graphql(`
@@ -103,7 +103,7 @@ export function OrdersPage() {
             {sorted.map(order => (
               <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
                 <td className="py-3 px-4 text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
-                <td className="py-3 px-4"><Badge status={order.status} /></td>
+                <td className="py-3 px-4"><OrderStatusBadge status={order.status} /></td>
                 <td className="py-3 px-4">
                   <Link to={`/ward-units/${order.wardUnitId}`} onClick={e => e.stopPropagation()} className="text-accent hover:underline">
                     {order.wardUnit?.name ?? order.wardUnitId}

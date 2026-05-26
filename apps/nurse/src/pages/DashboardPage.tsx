@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
-import { Badge, Button, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
+import { OrderStatusBadge, Button, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
 import { useAuth } from '@meditrack/client';
 import { graphql } from '../gql';
 
@@ -90,7 +90,7 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick, sortable = t
           <tr key={order.id} onClick={() => onRowClick(order.id)}
             className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer transition-colors">
             <td className="py-2.5 px-4 align-top text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
-            <td className="py-2.5 px-4 align-top"><Badge status={order.status} /></td>
+            <td className="py-2.5 px-4 align-top"><OrderStatusBadge status={order.status} /></td>
             <td className="py-2.5 px-4 align-top"><LineList lines={order.lines} limit={3} /></td>
           </tr>
         ))}
