@@ -18,4 +18,4 @@ export { InventoryProductDetail } from './InventoryProductDetail';
 export type { InventoryProductDetailProps, InventoryProduct } from './InventoryProductDetail';
 export { MedicationDetail } from './MedicationDetail';
 export type { MedicationDetailProps, MedicationDetailData, MedicationDetailProduct } from './MedicationDetail';
-export { RoleBadge, InfoRow, SortIcon, LineList, STATUS_RANK, formatDate, formatDateTime, formatDateTimePrecise } from './utils';
+export { RoleBadge, InfoRow, SortIcon, LineList, STATUS_RANK, sortProducts, formatDate, formatDateTime, formatDateTimePrecise } from './utils';

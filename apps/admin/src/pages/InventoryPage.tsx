@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Card, Spinner, SortIcon } from '@meditrack/ui';
+import { Card, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
 import { graphql } from '../gql';
 
 const MEDICATIONS_QUERY = graphql(`
@@ -15,30 +15,6 @@ const MEDICATIONS_QUERY = graphql(`
 
 type SortKey = 'medication' | 'product' | 'stock';
 type SortDir = 'asc' | 'desc';
-
-type Product = {
-  id: string;
-  productName: string;
-  stockLevel: number;
-  stockThreshold: number;
-  isBelowThreshold: boolean;
-  medication?: { id: string; innName: string; atcCode: string; form: string; strength: string } | null;
-};
-
-function sortProducts(products: Product[], key: SortKey, dir: SortDir): Product[] {
-  const sorted = [...products].sort((a, b) => {
-    let av: string | number, bv: string | number;
-    switch (key) {
-      case 'medication': av = a.medication?.innName ?? ''; bv = b.medication?.innName ?? ''; break;
-      case 'product':    av = a.productName; bv = b.productName; break;
-      case 'stock':      av = a.stockLevel; bv = b.stockLevel; break;
-    }
-    if (av < bv) return -1;
-    if (av > bv) return 1;
-    return 0;
-  });
-  return dir === 'asc' ? sorted : sorted.reverse();
-}
 
 export function InventoryPage() {
   const [searchParams] = useSearchParams();

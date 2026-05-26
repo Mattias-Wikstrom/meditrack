@@ -22,6 +22,26 @@ export function InfoRow({ label, children }: { label: string; children: React.Re
 }
 
 import type { OrderLineSummary } from './OrderCard';
+import type { InventoryProduct } from './InventoryProductDetail';
+
+export function sortProducts(
+  products: InventoryProduct[],
+  key: 'medication' | 'product' | 'stock',
+  dir: 'asc' | 'desc',
+): InventoryProduct[] {
+  const sorted = [...products].sort((a, b) => {
+    let av: string | number, bv: string | number;
+    switch (key) {
+      case 'medication': av = a.medication?.innName ?? ''; bv = b.medication?.innName ?? ''; break;
+      case 'product':    av = a.productName; bv = b.productName; break;
+      case 'stock':      av = a.stockLevel; bv = b.stockLevel; break;
+    }
+    if (av < bv) return -1;
+    if (av > bv) return 1;
+    return 0;
+  });
+  return dir === 'asc' ? sorted : sorted.reverse();
+}
 
 export const STATUS_RANK: Record<string, number> = { Draft: 0, Sent: 1, Confirmed: 2, Delivered: 3 };
 
