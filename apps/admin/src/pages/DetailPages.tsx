@@ -147,8 +147,8 @@ export function UserDetailsPage() {
               {editRole === 'Nurse' && (
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">Ward Unit</label>
-                  <select name="wardUnitId" defaultValue={actor.wardUnitId ?? ''} className={dialogInputCls}>
-                    <option value="">— None —</option>
+                  <select name="wardUnitId" required defaultValue={actor.wardUnitId ?? ''} className={dialogInputCls}>
+                    <option value="" disabled>— Select ward unit —</option>
                     {wardUnits.map((u: WardUnit) => <option key={u.id} value={u.id}>{u.name}</option>)}
                   </select>
                 </div>
