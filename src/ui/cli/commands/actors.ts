@@ -30,6 +30,10 @@ export async function createActor(
     output.error('--ward-unit-id is required for Nurse role.');
     process.exit(1);
   }
+  if (actorRole !== ActorRole.Nurse && wardUnitId) {
+    output.error('--ward-unit-id is only valid for the Nurse role.');
+    process.exit(1);
+  }
   const existing = await repo.findById(id);
   if (existing) {
     output.error(`Actor already exists: ${id}`);

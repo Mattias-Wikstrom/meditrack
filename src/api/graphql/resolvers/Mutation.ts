@@ -207,6 +207,9 @@ export const Mutation = {
     args: { id: string; role: string; wardUnitId?: string | null; password: string },
     ctx: GraphQLContext,
   ) => {
+    if (args.role !== ActorRole.Nurse && args.wardUnitId != null) {
+      throw new Error('Only Nurses can be assigned to a ward unit');
+    }
     const actor: Actor = {
       id: args.id,
       role: args.role as ActorRole,
@@ -225,10 +228,17 @@ export const Mutation = {
   ) => {
     const existing = await ctx.actorRepo.findById(args.id);
     if (!existing) throw new Error('Actor not found');
-    const newWardUnitId = args.wardUnitId !== undefined ? args.wardUnitId : existing.wardUnitId;
+    const newRole = (args.role != null ? args.role : existing.role) as ActorRole;
+    if (newRole !== ActorRole.Nurse && args.wardUnitId != null) {
+      throw new Error('Only Nurses can be assigned to a ward unit');
+    }
+    // If the role changes away from Nurse, clear the ward unit assignment.
+    const newWardUnitId = newRole === ActorRole.Nurse
+      ? (args.wardUnitId !== undefined ? args.wardUnitId : existing.wardUnitId)
+      : undefined;
     const updated: Actor = {
       id: existing.id,
-      role: (args.role != null ? args.role : existing.role) as ActorRole,
+      role: newRole,
       ...(newWardUnitId != null && { wardUnitId: newWardUnitId }),
     };
     await ctx.actorRepo.save(updated);
