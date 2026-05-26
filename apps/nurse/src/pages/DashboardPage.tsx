@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
-import { Badge, Button, Spinner, SortIcon, LineList, formatDate } from '@meditrack/ui';
+import { Badge, Button, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
 import { useAuth } from '@meditrack/client';
 import { graphql } from '../gql';
 
@@ -37,8 +37,6 @@ const ORDER_STATUS_SUB = graphql(`
 
 type SortKey = 'status' | 'lines' | 'createdAt';
 type SortDir = 'asc' | 'desc';
-
-const STATUS_RANK: Record<string, number> = { Draft: 0, Sent: 1, Confirmed: 2, Delivered: 3 };
 
 type OrderRow = {
   id: string;

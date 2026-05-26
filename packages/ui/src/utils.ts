@@ -23,6 +23,8 @@ export function InfoRow({ label, children }: { label: string; children: React.Re
 
 import type { OrderLineSummary } from './OrderCard';
 
+export const STATUS_RANK: Record<string, number> = { Draft: 0, Sent: 1, Confirmed: 2, Delivered: 3 };
+
 export function LineList({ lines, limit }: { lines: OrderLineSummary[]; limit?: number }) {
   const shown = limit !== undefined ? lines.slice(0, limit) : lines;
   const extra = limit !== undefined ? Math.max(0, lines.length - limit) : 0;
