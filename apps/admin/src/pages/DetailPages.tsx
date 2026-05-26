@@ -421,12 +421,9 @@ export function MedicationDetailsPage() {
 
   return (
     <>
-      <div className="flex items-center gap-3 mb-4">
-        <BackButton onClick={() => navigate('/inventory')} />
-        <div className="ml-auto flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => { setModalError(null); setModal('edit'); }}>Edit</Button>
-          <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
-        </div>
+      <div className="flex justify-end gap-2 mb-2">
+        <Button variant="ghost" size="sm" onClick={() => { setModalError(null); setModal('edit'); }}>Edit</Button>
+        <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
       </div>
 
       <InventoryProductDetail
