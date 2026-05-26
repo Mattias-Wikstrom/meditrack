@@ -21,4 +21,8 @@ export class InMemoryActorRepository implements ActorRepository {
   async save(actor: Actor): Promise<void> {
     this.store.set(actor.id, actor);
   }
+
+  async delete(id: string): Promise<void> {
+    this.store.delete(id);
+  }
 }

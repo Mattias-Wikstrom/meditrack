@@ -13,6 +13,7 @@ import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOr
 import { ConfirmOrderUseCase } from '../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { RestockUseCase } from '../../domain/medication/useCases/RestockUseCase';
+import { PrismaCredentialsRepository } from '../../storage/prisma/PrismaCredentialsRepository';
 
 export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
   const medicationRepo = new PrismaMedicationRepository(prisma);
@@ -22,6 +23,7 @@ export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
   const actorRepo = new PrismaActorRepository(prisma);
   const auditRepo = new PrismaAuditRepository(prisma);
   const transactor = new PrismaTransactor(prisma);
+  const credentialsRepo = new PrismaCredentialsRepository(prisma);
 
   return {
     medicationRepo,
@@ -36,6 +38,7 @@ export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
     confirmOrderUseCase: new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
     deliverOrderUseCase: new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus),
     restockUseCase: new RestockUseCase(actorRepo, medicinalProductRepo, transactor),
+    credentialsRepo,
   };
 }
 

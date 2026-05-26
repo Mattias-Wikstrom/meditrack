@@ -24,4 +24,8 @@ export class PrismaActorRepository implements ActorRepository {
       update: { role: actor.role, wardUnitId: actor.wardUnitId },
     });
   }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.actor.delete({ where: { id } });
+  }
 }
