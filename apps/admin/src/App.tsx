@@ -8,8 +8,9 @@ import { InventoryPage } from './pages/InventoryPage';
 import { UsersPage } from './pages/UsersPage';
 import { AuditPage } from './pages/AuditPage';
 import { WardUnitsPage } from './pages/WardUnitsPage';
-import { UserDetailsPage, WardUnitDetailsPage, MedicationDetailsPage, WardOrdersPage } from './pages/DetailPages';
+import { UserDetailsPage, WardUnitDetailsPage, MedicationDetailsPage } from './pages/DetailPages';
 import { MedicationDetailPage } from './pages/MedicationDetailPage';
+import { AdminOrderDetailPage } from './pages/AdminOrderDetailPage';
 import { OverviewPage } from './pages/OverviewPage';
 
 function AdminNav() {
@@ -58,7 +59,7 @@ export function App() {
           <Route path="/users/:userId" element={<UserDetailsPage />} />
           <Route path="/inventory/:productId" element={<MedicationDetailsPage />} />
           <Route path="/medications/:medicationId" element={<MedicationDetailPage />} />
-          <Route path="/orders/:wardUnitId" element={<WardOrdersPage />} />
+          <Route path="/orders/:orderId" element={<AdminOrderDetailPage />} />
           <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} role={role!} onSuccess={() => navigate('/')} onCancel={() => navigate('/')} />} />
         </Routes>
       </AppShell>

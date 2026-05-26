@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Badge, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -72,6 +72,7 @@ function LineList({ lines }: { lines: OrderRow['lines'] }) {
 }
 
 export function OrdersPage() {
+  const navigate = useNavigate();
   const [sortKey, setSortKey] = useState<SortKey>('createdAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [statusFilter, setStatusFilter] = useState('');
@@ -132,11 +133,11 @@ export function OrdersPage() {
           </thead>
           <tbody>
             {sorted.map(order => (
-              <tr key={order.id} onClick={() => window.location.assign(`/orders/${order.wardUnitId}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
+              <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
                 <td className="py-3 px-4 text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
                 <td className="py-3 px-4"><Badge status={order.status} /></td>
                 <td className="py-3 px-4">
-                  <Link to={`/orders/${order.wardUnitId}`} className="text-accent hover:underline">
+                  <Link to={`/ward-units/${order.wardUnitId}`} onClick={e => e.stopPropagation()} className="font-mono text-xs text-accent hover:underline">
                     {order.wardUnitId}
                   </Link>
                 </td>

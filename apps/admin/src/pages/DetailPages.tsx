@@ -175,7 +175,7 @@ export function WardUnitDetailsPage() {
                 </thead>
                 <tbody>
                   {orders.map((o: { id: string; status: string; createdAt: string; lines: { medicationId: string; medication?: { innName: string } | null; quantity: number }[] }) => (
-                    <tr key={o.id} className="border-b border-slate-100 last:border-0">
+                    <tr key={o.id} onClick={() => navigate(`/orders/${o.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
                       <td className="py-2 pr-4 text-slate-500 whitespace-nowrap">{formatDate(o.createdAt)}</td>
                       <td className="py-2 pr-4"><Badge status={o.status} /></td>
                       <td className="py-2 text-slate-600">
@@ -224,79 +224,5 @@ export function MedicationDetailsPage() {
       onBack={() => navigate('/inventory')}
       getMedicationHref={id => `/medications/${id}`}
     />
-  );
-}
-
-// ── WardOrdersPage (/orders/:wardUnitId) ──────────────────────────────────────
-
-const WARD_ORDERS_QUERY = `
-  query AdminWardOrders($id: ID!) {
-    wardUnit(id: $id) {
-      id name
-      orders {
-        id status createdAt
-        lines { medicationId quantity medication { innName } }
-      }
-    }
-  }
-`;
-
-export function WardOrdersPage() {
-  const navigate = useNavigate();
-  const { wardUnitId } = useParams();
-  const [{ data, fetching, error }] = useQuery({
-    query: WARD_ORDERS_QUERY,
-    variables: { id: wardUnitId },
-  });
-
-  if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
-
-  const unit = data?.wardUnit;
-  if (!unit) return <NotFound kind="ward unit" to="/orders" />;
-
-  const orders = [...(unit.orders ?? [])].sort(
-    (a: { createdAt: string }, b: { createdAt: string }) => b.createdAt.localeCompare(a.createdAt)
-  );
-
-  return (
-    <div>
-      <BackButton onClick={() => navigate('/orders')} className="mb-4" />
-      <h1 className="text-xl font-semibold text-slate-800 mb-1">
-        Orders — {unit.name}
-        <span className="ml-2 text-sm font-normal text-slate-400">{orders.length}</span>
-      </h1>
-      <p className="text-xs text-slate-400 font-mono mb-6">{unit.id}</p>
-
-      <Card className="overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left">
-              <th className="px-4 py-3 font-medium text-slate-600 whitespace-nowrap">Created</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Status</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Medications</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Order ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((o: { id: string; status: string; createdAt: string; lines: { medicationId: string; quantity: number; medication?: { innName: string } | null }[] }) => (
-              <tr key={o.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{formatDate(o.createdAt)}</td>
-                <td className="px-4 py-3"><Badge status={o.status} /></td>
-                <td className="px-4 py-3 text-slate-600">
-                  {o.lines.map(l => `${l.medication?.innName ?? l.medicationId} ×${l.quantity}`).join(', ')}
-                </td>
-                <td className="px-4 py-3 text-slate-400 font-mono text-xs">{o.id}</td>
-              </tr>
-            ))}
-            {orders.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-12 text-center text-slate-400">No orders for this ward unit.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </Card>
-    </div>
   );
 }
