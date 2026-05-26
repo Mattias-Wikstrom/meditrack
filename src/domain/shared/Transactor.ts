@@ -2,6 +2,7 @@ import { OrderRepository } from '../order/OrderRepository';
 import { MedicinalProductRepository } from '../medication/MedicinalProductRepository';
 import { AuditRepository } from '../audit/AuditRepository';
 import { ActorRepository } from '../actor/ActorRepository';
+import { WardUnitRepository } from '../wardUnit/WardUnitRepository';
 
 // The set of write-capable repositories scoped to one atomic operation.
 // Reads that happen before the transaction starts use the regular injected repositories;
@@ -11,6 +12,7 @@ export interface WriteTransaction {
   medicinalProductRepository: MedicinalProductRepository;
   auditRepository: AuditRepository;
   actorRepository: ActorRepository;
+  wardUnitRepository: WardUnitRepository;
 }
 
 export interface Transactor {

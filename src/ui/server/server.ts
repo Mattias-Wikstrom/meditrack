@@ -12,6 +12,7 @@ import { createWiring } from './wiring';
 import { createOrdersRouter } from './rest/orders';
 import { createAuthRouter } from './rest/auth';
 import { createActorsRouter } from './rest/actors';
+import { createWardUnitsRouter } from './rest/wardUnits';
 import { requireAuth } from './middleware/requireAuth';
 import { verifyToken } from '../../domain/auth/jwt';
 
@@ -52,6 +53,7 @@ api.use(express.json());
 api.use('/actors', createActorsRouter(wiring));
 api.use('/auth', createAuthRouter());
 api.use('/orders', requireAuth, createOrdersRouter(wiring));
+api.use('/ward-units', createWardUnitsRouter(wiring));
 app.use('/api', api);
 
 // --- HTTP + WebSocket server ---

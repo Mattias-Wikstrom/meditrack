@@ -14,4 +14,7 @@ export type ErrorCode =
   | 'ProductMedicationMismatch'
   | 'SelectionQuantityMismatch'
   | 'InsufficientStock'
-  | 'InvalidQuantity';
+  | 'InvalidQuantity'
+  | 'WardUnitNotFound'
+  | 'WardUnitAlreadyExists'
+  | 'WardUnitHasAssignedNurses';

@@ -3,6 +3,7 @@ import { InMemoryOrderRepository } from './InMemoryOrderRepository';
 import { InMemoryMedicinalProductRepository } from './InMemoryMedicinalProductRepository';
 import { InMemoryAuditRepository } from './InMemoryAuditRepository';
 import { InMemoryActorRepository } from './InMemoryActorRepository';
+import { InMemoryWardUnitRepository } from './InMemoryWardUnitRepository';
 
 export class InMemoryTransactor implements Transactor {
   constructor(
@@ -10,6 +11,7 @@ export class InMemoryTransactor implements Transactor {
     private readonly medicinalProductRepository: InMemoryMedicinalProductRepository,
     readonly auditRepository: InMemoryAuditRepository,
     private readonly actorRepository: InMemoryActorRepository = new InMemoryActorRepository(),
+    private readonly wardUnitRepository: InMemoryWardUnitRepository = new InMemoryWardUnitRepository(),
   ) {}
 
   async run<T>(work: (tx: WriteTransaction) => Promise<T>): Promise<T> {
@@ -18,6 +20,7 @@ export class InMemoryTransactor implements Transactor {
       medicinalProductRepository: this.medicinalProductRepository,
       auditRepository: this.auditRepository,
       actorRepository: this.actorRepository,
+      wardUnitRepository: this.wardUnitRepository,
     });
   }
 }

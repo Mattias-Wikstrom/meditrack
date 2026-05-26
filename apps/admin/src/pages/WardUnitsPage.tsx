@@ -1,8 +1,9 @@
 // Used for /ward-units (admin)
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from 'urql';
+import { useQuery } from 'urql';
 import { Button, Card, Spinner } from '@meditrack/ui';
+import { useAuth, createApiClient } from '@meditrack/client';
 import { graphql } from '../gql';
 
 const WARD_UNITS_QUERY = graphql(`
@@ -14,12 +15,6 @@ const WARD_UNITS_QUERY = graphql(`
   }
 `);
 
-const CREATE_WARD_UNIT = `
-  mutation AdminCreateWardUnit($id: ID!, $name: String!) {
-    createWardUnit(id: $id, name: $name) { id }
-  }
-`;
-
 const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
 function slugify(name: string): string {
@@ -28,12 +23,12 @@ function slugify(name: string): string {
 
 export function WardUnitsPage() {
   const navigate = useNavigate();
+  const { token } = useAuth();
   const [showCreate, setShowCreate] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [idValue, setIdValue] = useState('');
   const [idTouched, setIdTouched] = useState(false);
-  const [{ data, fetching, error }] = useQuery({ query: WARD_UNITS_QUERY });
-  const [, createWardUnit] = useMutation(CREATE_WARD_UNIT);
+  const [{ data, fetching, error }, refetch] = useQuery({ query: WARD_UNITS_QUERY });
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -54,15 +49,18 @@ export function WardUnitsPage() {
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const result = await createWardUnit({
-      id: fd.get('id') as string,
-      name: fd.get('name') as string,
-    });
-    if (result.error) { setCreateError(result.error.message); return; }
-    setShowCreate(false);
-    setCreateError(null);
-    const id = result.data?.createWardUnit?.id;
-    if (id) navigate(`/ward-units/${id}`);
+    try {
+      const unit = await createApiClient(token!).post<{ id: string }>('/ward-units', {
+        id: fd.get('id') as string,
+        name: fd.get('name') as string,
+      });
+      setShowCreate(false);
+      setCreateError(null);
+      refetch({ requestPolicy: 'network-only' });
+      navigate(`/ward-units/${unit.id}`);
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Failed to create ward unit');
+    }
   }
 
   return (

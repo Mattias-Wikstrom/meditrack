@@ -12,6 +12,9 @@ import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
 import { CreateActorUseCase } from '../../domain/actor/useCases/CreateActorUseCase';
 import { DeleteActorUseCase } from '../../domain/actor/useCases/DeleteActorUseCase';
+import { CreateWardUnitUseCase } from '../../domain/wardUnit/useCases/CreateWardUnitUseCase';
+import { UpdateWardUnitUseCase } from '../../domain/wardUnit/useCases/UpdateWardUnitUseCase';
+import { DeleteWardUnitUseCase } from '../../domain/wardUnit/useCases/DeleteWardUnitUseCase';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
 import { UpdateOrderLinesUseCase } from '../../domain/order/useCases/ordering/UpdateOrderLinesUseCase';
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
@@ -22,7 +25,7 @@ import { verifyToken } from '../../domain/auth/jwt';
 import { readToken } from './auth/tokenStore';
 import { ConsoleOutput } from './ConsoleOutput';
 import { listActors, createActor, deleteActor, bootstrapCreateActor } from './commands/actors';
-import { listWardUnits, createWardUnit } from './commands/wardUnits';
+import { listWardUnits, createWardUnit, updateWardUnit, deleteWardUnit } from './commands/wardUnits';
 import { listAudit } from './commands/audit';
 import { listMedications, showMedication } from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
@@ -44,6 +47,9 @@ const eventBus = new SimpleEventBus();
 
 const createActorUseCase = new CreateActorUseCase(actorRepo, credentialsRepo, transactor, eventBus);
 const deleteActorUseCase = new DeleteActorUseCase(actorRepo, transactor, eventBus);
+const createWardUnitUseCase = new CreateWardUnitUseCase(wardUnitRepo, actorRepo, transactor, eventBus);
+const updateWardUnitUseCase = new UpdateWardUnitUseCase(wardUnitRepo, actorRepo, transactor, eventBus);
+const deleteWardUnitUseCase = new DeleteWardUnitUseCase(wardUnitRepo, actorRepo, transactor, eventBus);
 
 const createOrderUseCase = new CreateOrderUseCase(actorRepo, transactor, eventBus);
 const updateOrderLinesUseCase = new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor, eventBus);
@@ -142,10 +148,30 @@ wardUnits
 
 wardUnits
   .command('create')
-  .description('Create a new ward unit')
+  .description('Create a new ward unit (admin only)')
   .requiredOption('--ward-unit-id <id>', 'ward unit ID')
   .requiredOption('--name <name>', 'display name')
-  .action(async (opts) => createWardUnit(wardUnitRepo, output, opts.wardUnitId, opts.name));
+  .action(async (opts) => {
+    const { actorId } = await requireAuth();
+    return createWardUnit(createWardUnitUseCase, output, actorId, opts.wardUnitId, opts.name);
+  });
+
+wardUnits
+  .command('update <wardUnitId>')
+  .description('Update a ward unit name (admin only)')
+  .requiredOption('--name <name>', 'new display name')
+  .action(async (wardUnitId, opts) => {
+    const { actorId } = await requireAuth();
+    return updateWardUnit(updateWardUnitUseCase, output, actorId, wardUnitId, opts.name);
+  });
+
+wardUnits
+  .command('delete <wardUnitId>')
+  .description('Delete a ward unit (admin only)')
+  .action(async (wardUnitId) => {
+    const { actorId } = await requireAuth();
+    return deleteWardUnit(deleteWardUnitUseCase, output, actorId, wardUnitId);
+  });
 
 const medications = program.command('medications');
 
