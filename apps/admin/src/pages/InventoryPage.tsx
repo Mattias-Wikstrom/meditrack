@@ -121,7 +121,11 @@ export function InventoryPage() {
           <tbody>
             {sorted.map(p => (
               <tr key={p.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-slate-800">{p.medication?.innName ?? '—'}</td>
+                <td className="px-4 py-3 font-medium text-slate-800">
+                  {p.medication
+                    ? <Link to={`/medications/${p.medication.id}`} className="text-accent hover:underline">{p.medication.innName}</Link>
+                    : '—'}
+                </td>
                 <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.atcCode ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-600">{p.medication?.form ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.strength ?? '—'}</td>
