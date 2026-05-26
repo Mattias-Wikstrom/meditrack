@@ -179,8 +179,8 @@ export const Mutation = {
 
   // ── Ward Units ───────────────────────────────────────────────────────────────
 
-  createWardUnit: async (_: unknown, { name }: { name: string }, ctx: GraphQLContext) => {
-    const wardUnit = new WardUnit(randomUUID() as WardUnitId, name);
+  createWardUnit: async (_: unknown, { id, name }: { id: string; name: string }, ctx: GraphQLContext) => {
+    const wardUnit = new WardUnit(id as WardUnitId, name);
     await ctx.wardUnitRepo.save(wardUnit);
     return wardUnit;
   },

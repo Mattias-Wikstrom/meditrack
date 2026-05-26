@@ -61,7 +61,7 @@ export const typeDefs = /* GraphQL */ `
     updateMedicinalProduct(id: ID!, productName: String, stockThreshold: Int): MedicinalProduct!
     deleteMedicinalProduct(id: ID!): Boolean!
 
-    createWardUnit(name: String!): WardUnit!
+    createWardUnit(id: ID!, name: String!): WardUnit!
     updateWardUnit(id: ID!, name: String!): WardUnit!
     deleteWardUnit(id: ID!): Boolean!
 

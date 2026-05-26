@@ -14,17 +14,23 @@ const WARD_UNITS_QUERY = graphql(`
 `);
 
 const CREATE_WARD_UNIT = `
-  mutation AdminCreateWardUnit($name: String!) {
-    createWardUnit(name: $name) { id }
+  mutation AdminCreateWardUnit($id: ID!, $name: String!) {
+    createWardUnit(id: $id, name: $name) { id }
   }
 `;
 
 const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
+function slugify(name: string): string {
+  return name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+}
+
 export function WardUnitsPage() {
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [idValue, setIdValue] = useState('');
+  const [idTouched, setIdTouched] = useState(false);
   const [{ data, fetching, error }] = useQuery({ query: WARD_UNITS_QUERY });
   const [, createWardUnit] = useMutation(CREATE_WARD_UNIT);
 
@@ -33,10 +39,24 @@ export function WardUnitsPage() {
 
   const units = data?.wardUnits ?? [];
 
+  function openCreate() {
+    setIdValue('');
+    setIdTouched(false);
+    setCreateError(null);
+    setShowCreate(true);
+  }
+
+  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!idTouched) setIdValue(slugify(e.target.value));
+  }
+
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const result = await createWardUnit({ name: fd.get('name') as string });
+    const result = await createWardUnit({
+      id: fd.get('id') as string,
+      name: fd.get('name') as string,
+    });
     if (result.error) { setCreateError(result.error.message); return; }
     setShowCreate(false);
     setCreateError(null);
@@ -48,17 +68,27 @@ export function WardUnitsPage() {
     <div>
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => { setShowCreate(false); setCreateError(null); }} />
+          <div className="absolute inset-0 bg-black/30" onClick={() => setShowCreate(false)} />
           <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
             <h2 className="text-base font-semibold text-slate-800 mb-4">New Ward Unit</h2>
             <form onSubmit={handleCreate} className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Name</label>
-                <input name="name" required placeholder="e.g. Ward 4B" className={inputCls} />
+                <input name="name" required placeholder="e.g. Ward 4B" onChange={handleNameChange} className={inputCls} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">ID</label>
+                <input
+                  name="id"
+                  required
+                  value={idValue}
+                  onChange={e => { setIdTouched(true); setIdValue(e.target.value); }}
+                  className={inputCls}
+                />
               </div>
               {createError && <p className="text-xs text-red-600">{createError}</p>}
               <div className="flex gap-2 justify-end pt-1">
-                <Button type="button" variant="ghost" onClick={() => { setShowCreate(false); setCreateError(null); }}>Cancel</Button>
+                <Button type="button" variant="ghost" onClick={() => setShowCreate(false)}>Cancel</Button>
                 <Button type="submit">Create</Button>
               </div>
             </form>
@@ -71,7 +101,7 @@ export function WardUnitsPage() {
           Ward Units
           <span className="ml-2 text-sm font-normal text-slate-400">{units.length}</span>
         </h1>
-        <Button onClick={() => { setShowCreate(true); setCreateError(null); }}>+ New Ward Unit</Button>
+        <Button onClick={openCreate}>+ New Ward Unit</Button>
       </div>
 
       <Card className="overflow-hidden">
