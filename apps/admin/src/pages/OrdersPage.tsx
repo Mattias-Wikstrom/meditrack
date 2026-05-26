@@ -132,7 +132,7 @@ export function OrdersPage() {
           </thead>
           <tbody>
             {sorted.map(order => (
-              <tr key={order.id} onClick={() => window.location.assign(`/orders/${order.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
+              <tr key={order.id} onClick={() => window.location.assign(`/orders/${order.wardUnitId}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
                 <td className="py-3 px-4 text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
                 <td className="py-3 px-4"><Badge status={order.status} /></td>
                 <td className="py-3 px-4">
