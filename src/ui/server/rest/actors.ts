@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { ActorRole } from '../../../domain/shared/ActorRole';
 import { ServerWiring } from '../wiring';
+import { requireAuth } from '../middleware/requireAuth';
 
 export function createActorsRouter(wiring: ServerWiring): Router {
   const router = Router();
@@ -16,7 +17,7 @@ export function createActorsRouter(wiring: ServerWiring): Router {
     }
   });
 
-  router.post('/', async (req: Request, res: Response) => {
+  router.post('/', requireAuth, async (req: Request, res: Response) => {
     const { id, role, wardUnitId, password } = req.body as {
       id: string;
       role: string;
@@ -37,7 +38,7 @@ export function createActorsRouter(wiring: ServerWiring): Router {
     }
   });
 
-  router.patch('/:id', async (req: Request, res: Response) => {
+  router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
     const { role, wardUnitId } = req.body as { role?: string; wardUnitId?: string | null };
     const result = await wiring.updateActorUseCase.execute({
       requestingActorId: res.locals.actorId as string,
@@ -52,7 +53,7 @@ export function createActorsRouter(wiring: ServerWiring): Router {
     }
   });
 
-  router.delete('/:id', async (req: Request, res: Response) => {
+  router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
     const result = await wiring.deleteActorUseCase.execute({
       requestingActorId: res.locals.actorId as string,
       id: req.params.id as string,

@@ -49,7 +49,7 @@ app.use('/graphql', yoga);
 
 const api = express.Router();
 api.use(express.json());
-api.use('/actors', requireAuth, createActorsRouter(wiring));
+api.use('/actors', createActorsRouter(wiring));
 api.use('/auth', createAuthRouter());
 api.use('/orders', requireAuth, createOrdersRouter(wiring));
 app.use('/api', api);
