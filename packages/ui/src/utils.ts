@@ -21,6 +21,14 @@ export function InfoRow({ label, children }: { label: string; children: React.Re
   );
 }
 
+export function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
+  return (
+    <span className={`ml-1 text-xs ${active ? 'text-slate-700' : 'invisible'}`}>
+      {dir === 'asc' ? '↑' : '↓'}
+    </span>
+  );
+}
+
 /** "1 Jan, 13:05" — day/month/time, no year */
 export function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-GB', {

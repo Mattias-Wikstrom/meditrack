@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Card, Badge, Spinner, formatDate } from '@meditrack/ui';
+import { Card, Badge, Spinner, SortIcon, formatDate } from '@meditrack/ui';
 import { graphql } from '../gql';
 
 const ORDERS_QUERY = graphql(`
@@ -38,14 +38,6 @@ function sortOrders(orders: OrderRow[], key: SortKey, dir: SortDir): OrderRow[] 
     }
     return dir === 'asc' ? cmp : -cmp;
   });
-}
-
-function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
-  return (
-    <span className={`ml-1 text-xs ${active ? 'text-slate-700' : 'invisible'}`}>
-      {dir === 'asc' ? '↑' : '↓'}
-    </span>
-  );
 }
 
 const LINE_LIMIT = 3;

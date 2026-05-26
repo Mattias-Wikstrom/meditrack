@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Card, Spinner } from '@meditrack/ui';
+import { Card, Spinner, SortIcon } from '@meditrack/ui';
 import { graphql } from '../gql';
 
 const MEDICATIONS_QUERY = graphql(`
@@ -38,14 +38,6 @@ function sortProducts(products: Product[], key: SortKey, dir: SortDir): Product[
     return 0;
   });
   return dir === 'asc' ? sorted : sorted.reverse();
-}
-
-function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
-  return (
-    <span className={`ml-1 ${active ? 'text-accent' : 'invisible'}`}>
-      {dir === 'asc' ? '↑' : '↓'}
-    </span>
-  );
 }
 
 export function InventoryPage() {

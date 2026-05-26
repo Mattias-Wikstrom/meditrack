@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Card, Spinner, RoleBadge } from '@meditrack/ui';
+import { Card, Spinner, RoleBadge, SortIcon } from '@meditrack/ui';
 
 const ACTORS_QUERY = /* GraphQL */ `
   query AdminActors {
@@ -46,14 +46,6 @@ export function UsersPage() {
     const cmp = av.localeCompare(bv);
     return sortDir === 'asc' ? cmp : -cmp;
   });
-
-  function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
-    return (
-      <span className={`ml-1 text-xs ${active ? 'text-slate-700' : 'invisible'}`}>
-        {dir === 'asc' ? '↑' : '↓'}
-      </span>
-    );
-  }
 
   const th = (label: string, key: SortKey) => (
     <th
