@@ -33,6 +33,9 @@ export class CreateActorUseCase {
       return failure('WardUnitAssignmentNotAllowed');
     }
 
+    const existing = await this.actorRepository.findById(input.id);
+    if (existing) return failure('ActorAlreadyExists');
+
     const actor: Actor = {
       id: input.id,
       role: input.role,

@@ -104,6 +104,19 @@ describe('CreateActorUseCase', () => {
     expect(result.errors[0]?.code).toBe('WardUnitAssignmentNotAllowed');
   });
 
+  it('fails when an actor with that ID already exists', async () => {
+    const result = await useCase.execute({
+      requestingActorId: 'admin-1',
+      id: 'nurse-existing',
+      role: ActorRole.Nurse,
+      password: 'secret',
+    });
+
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('ActorAlreadyExists');
+  });
+
   it('does not persist the actor or audit entry on failure', async () => {
     await useCase.execute({
       requestingActorId: 'admin-1',

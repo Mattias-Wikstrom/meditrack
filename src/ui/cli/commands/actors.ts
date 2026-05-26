@@ -1,6 +1,8 @@
 import { ActorRepository } from '../../../domain/actor/ActorRepository';
+import { CreateActorUseCase } from '../../../domain/actor/useCases/CreateActorUseCase';
 import { ActorRole } from '../../../domain/shared/ActorRole';
 import { CliOutput } from '../CliOutput';
+import { errorMessages } from '../errorMessages';
 
 export async function listActors(repo: ActorRepository, output: CliOutput): Promise<void> {
   const actors = await repo.findAll();
@@ -14,32 +16,33 @@ export async function listActors(repo: ActorRepository, output: CliOutput): Prom
 }
 
 export async function createActor(
-  repo: ActorRepository,
+  useCase: CreateActorUseCase,
   output: CliOutput,
+  requestingActorId: string,
   id: string,
   role: string,
   wardUnitId: string | undefined,
+  password: string,
 ): Promise<void> {
   const validRoles = Object.values(ActorRole);
   if (!validRoles.includes(role as ActorRole)) {
     output.error(`Invalid role: ${role}. Must be one of: ${validRoles.join(', ')}`);
-    process.exit(1);
+    output.exit(1);
+    return;
   }
-  const actorRole = role as ActorRole;
-  if (actorRole === ActorRole.Nurse && !wardUnitId) {
-    output.error('--ward-unit-id is required for Nurse role.');
-    process.exit(1);
+
+  const result = await useCase.execute({
+    requestingActorId,
+    id,
+    role: role as ActorRole,
+    wardUnitId,
+    password,
+  });
+
+  if (result.successful) {
+    output.print(`Actor created: ${id}  role: ${role}${wardUnitId ? `  ward: ${wardUnitId}` : ''}`);
+  } else {
+    output.error(`Failed: ${result.errors.map((e) => errorMessages[e.code]).join(' ')}`);
+    output.exit(1);
   }
-  if (actorRole !== ActorRole.Nurse && wardUnitId) {
-    output.error('--ward-unit-id is only valid for the Nurse role.');
-    process.exit(1);
-  }
-  const existing = await repo.findById(id);
-  if (existing) {
-    output.error(`Actor already exists: ${id}`);
-    process.exit(1);
-  }
-  await repo.save({ id, role: actorRole, wardUnitId });
-  output.print(`Actor created: ${id}  role: ${actorRole}${wardUnitId ? `  ward: ${wardUnitId}` : ''}`);
-  output.print(`Set a password with: meditrack passwd --actor-id ${id}`);
 }
