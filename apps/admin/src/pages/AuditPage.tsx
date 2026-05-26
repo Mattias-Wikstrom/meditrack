@@ -119,7 +119,9 @@ export function AuditPage() {
               return (
               <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                 <td className="px-4 py-3 text-slate-500 whitespace-nowrap tabular-nums">{formatDate(e.occurredAt)}</td>
-                <td className="px-4 py-3 font-medium text-slate-800">{e.actorId}</td>
+                <td className="px-4 py-3 font-medium">
+                  <Link to={`/users/${e.actorId}`} className="text-slate-800 hover:text-accent hover:underline">{e.actorId}</Link>
+                </td>
                 <td className="px-4 py-3"><ActionBadge action={e.action} /></td>
                 <td className="px-4 py-3 font-mono text-xs">
                   {detailsRoute ? (

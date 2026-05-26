@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Spinner } from '@meditrack/ui';
 
@@ -31,6 +32,7 @@ type SortKey = 'id' | 'role' | 'wardUnit';
 type SortDir = 'asc' | 'desc';
 
 export function UsersPage() {
+  const navigate = useNavigate();
   const [sortKey, setSortKey] = useState<SortKey>('id');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [roleFilter, setRoleFilter] = useState('');
@@ -105,7 +107,7 @@ export function UsersPage() {
           </thead>
           <tbody>
             {sorted.map(actor => (
-              <tr key={actor.id} onClick={() => window.location.assign(`/users/${actor.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
+              <tr key={actor.id} onClick={() => navigate(`/users/${actor.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
                 <td className="py-3 px-4 font-medium text-slate-800">{actor.id}</td>
                 <td className="py-3 px-4"><RoleBadge role={actor.role} /></td>
                 <td className="py-3 px-4 text-slate-600">{actor.wardUnit?.name ?? actor.wardUnitId ?? <span className="text-slate-300">—</span>}</td>

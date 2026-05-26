@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { BackButton, Badge, Card, Spinner, InventoryProductDetail } from '@meditrack/ui';
 
@@ -150,7 +150,9 @@ export function WardUnitDetailsPage() {
           {nurses.length === 0
             ? <p className="text-sm text-slate-400">No nurses assigned.</p>
             : nurses.map((n: { id: string }) => (
-                <div key={n.id} className="py-1.5 border-b border-slate-100 last:border-0 text-sm text-slate-700">{n.id}</div>
+                <Link key={n.id} to={`/users/${n.id}`} className="block py-1.5 border-b border-slate-100 last:border-0 text-sm text-accent hover:underline">
+                  {n.id}
+                </Link>
               ))
           }
         </Card>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -13,6 +13,7 @@ const WARD_UNITS_QUERY = graphql(`
 `);
 
 export function WardUnitsPage() {
+  const navigate = useNavigate();
   const [{ data, fetching, error }] = useQuery({ query: WARD_UNITS_QUERY });
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
@@ -40,15 +41,11 @@ export function WardUnitsPage() {
           </thead>
           <tbody>
             {units.map(unit => (
-              <tr key={unit.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium">
-                  <Link to={`/ward-units/${unit.id}`} className="text-accent hover:underline">
-                    {unit.name}
-                  </Link>
-                </td>
+              <tr key={unit.id} onClick={() => navigate(`/ward-units/${unit.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
+                <td className="px-4 py-3 font-medium text-slate-800">{unit.name}</td>
                 <td className="px-4 py-3 text-slate-400 font-mono text-xs">{unit.id}</td>
                 <td className="px-4 py-3 text-right">
-                  <Link to={`/orders/${unit.id}`} className="text-slate-400 hover:text-accent text-xs">
+                  <Link to={`/orders/${unit.id}`} onClick={e => e.stopPropagation()} className="text-slate-400 hover:text-accent text-xs">
                     Orders →
                   </Link>
                 </td>
