@@ -123,6 +123,36 @@ pharmacist-sofia         Pharmacist
 
 ---
 
+### create
+
+Create a new actor. Does not set a password — run `passwd` afterwards to allow the actor to log in.
+
+```
+npm run cli -- actors create --actor-id <id> --role <role> [--ward-unit-id <id>]
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--actor-id <id>` | A unique identifier for the actor (e.g. `nurse-maja`) |
+| `--role <role>` | `Nurse`, `Pharmacist`, or `Admin` |
+| `--ward-unit-id <id>` | Ward unit the actor belongs to (required for `Nurse` role) |
+
+**Examples**
+
+```
+$ npm run cli -- actors create --actor-id nurse-maja --role Nurse --ward-unit-id ward-akuten
+Actor created: nurse-maja  role: Nurse  ward: ward-akuten
+Set a password with: meditrack passwd --actor-id nurse-maja
+
+$ npm run cli -- actors create --actor-id pharmacist-eva --role Pharmacist
+Actor created: pharmacist-eva  role: Pharmacist
+Set a password with: meditrack passwd --actor-id pharmacist-eva
+```
+
+---
+
 ## medications
 
 ### list

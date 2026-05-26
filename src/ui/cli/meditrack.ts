@@ -18,7 +18,7 @@ import { RestockUseCase } from '../../domain/medication/useCases/RestockUseCase'
 import { verifyToken } from '../../domain/auth/jwt';
 import { readToken } from './auth/tokenStore';
 import { ConsoleOutput } from './ConsoleOutput';
-import { listActors } from './commands/actors';
+import { listActors, createActor } from './commands/actors';
 import { listAudit } from './commands/audit';
 import { listMedications, showMedication } from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
@@ -93,6 +93,14 @@ actors
   .command('list')
   .description('List all actors and their roles')
   .action(async () => listActors(actorRepo, output));
+
+actors
+  .command('create')
+  .description('Create a new actor')
+  .requiredOption('--actor-id <id>', 'actor ID')
+  .requiredOption('--role <role>', 'role (Nurse, Pharmacist, Admin)')
+  .option('--ward-unit-id <id>', 'ward unit ID (required for Nurse role)')
+  .action(async (opts) => createActor(actorRepo, output, opts.actorId, opts.role, opts.wardUnitId));
 
 const medications = program.command('medications');
 
