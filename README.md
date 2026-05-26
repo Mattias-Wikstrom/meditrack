@@ -81,4 +81,14 @@ Using React allows you to operate within the React ecosystem. If a modern web br
 
 The apps use a combination of GraphQL and REST APIs. GraphQL is used for retrieving information from the database in a flexible way. This eliminates the need to create lots and lots of REST APIs that do nothing more than ask the database for certain information that some client happens to be interested in. Clients can also retrieve information very quickly via Web Sockets and avoid the overhead of a traditional HTTPS call (which can slow down web UIs noticably; using modern versions of HTTP would be an alternative but that too requires configuration to work). On the other hand, REST APIs are used when the user has taken some action that needs to update the database (which is slow in any case). GraphQL is flexible way to express queries but loses its advantages when there is a non-trivial function that needs to be executed.
 
+## On what has been implemented and what has not
+
+Role-based authentication and auditing been viewed as priorities and therefore implemented. These are basic things and maybe something that is better thought about from the start.
+
+An event system has also been implemented but sending out email notifications in response to events has not. The latter could be viewed as less fundamental. The focus has been on the basic architecture, not on extra features.
+
+The business domain, business rules, and business logic have been prioritized. This is the core of the system and you want for it to be well-structured and supported with tests or other things that allow you to have confidence that things are working well.
+
+The React-based UI has been implemented almost exclusively by AIs, but with clear instructions to keep the code DRY by putting things in reusable React components whenever reasonable. Making the UI responsive has been another priority. You should have the feeling that you are using an 'app,' not that you are using a web page. Making things simple, logical, and consistent has also been a priority.
+
 
