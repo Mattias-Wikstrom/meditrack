@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery, useSubscription, useMutation } from 'urql';
 import { Card, Button, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -78,7 +78,7 @@ function RestockDialog({ productName, currentStock, onConfirm, onCancel, submitt
   );
 }
 
-type SortKey = 'medication' | 'product';
+type SortKey = 'medication' | 'product' | 'stock';
 type SortDir = 'asc' | 'desc';
 
 type Product = {
@@ -92,8 +92,12 @@ type Product = {
 
 function sortProducts(products: Product[], key: SortKey, dir: SortDir): Product[] {
   const sorted = [...products].sort((a, b) => {
-    const av = key === 'medication' ? (a.medication?.innName ?? '') : a.productName;
-    const bv = key === 'medication' ? (b.medication?.innName ?? '') : b.productName;
+    let av: string | number, bv: string | number;
+    switch (key) {
+      case 'medication': av = a.medication?.innName ?? ''; bv = b.medication?.innName ?? ''; break;
+      case 'product':    av = a.productName; bv = b.productName; break;
+      case 'stock':      av = a.stockLevel; bv = b.stockLevel; break;
+    }
     if (av < bv) return -1;
     if (av > bv) return  1;
     return 0;
@@ -110,9 +114,15 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
 }
 
 export function InventoryPage() {
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState('');
-  const [sortKey, setSortKey] = useState<SortKey>('medication');
-  const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [sortKey, setSortKey] = useState<SortKey>(() => {
+    const s = searchParams.get('sort');
+    return s === 'medication' || s === 'product' || s === 'stock' ? s : 'medication';
+  });
+  const [sortDir, setSortDir] = useState<SortDir>(() =>
+    searchParams.get('dir') === 'desc' ? 'desc' : 'asc'
+  );
   const [restocking, setRestocking] = useState<{ id: string; name: string; stock: number } | null>(null);
   const [restockError, setRestockError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -217,7 +227,7 @@ export function InventoryPage() {
               <th className="px-4 py-3 font-medium text-slate-600">Form</th>
               <th className="px-4 py-3 font-medium text-slate-600">Strength</th>
               {th('Product', 'product')}
-              <th className="px-4 py-3 font-medium text-slate-600 text-right">Stock</th>
+              {th('Stock', 'stock', 'right')}
               <th className="px-4 py-3 font-medium text-slate-600 text-right">Min</th>
               <th className="px-4 py-3"></th>
             </tr>

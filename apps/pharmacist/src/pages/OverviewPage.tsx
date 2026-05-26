@@ -22,6 +22,9 @@ export function OverviewPage() {
       products={data?.medicinalProducts ?? []}
       orders={data?.orders ?? []}
       getProductHref={id => `/inventory/${id}`}
+      inventoryHref="/inventory"
+      lowStockHref="/inventory?sort=stock&dir=asc"
+      ordersHref="/orders"
     />
   );
 }

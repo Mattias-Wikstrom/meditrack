@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -49,9 +49,15 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
 }
 
 export function InventoryPage() {
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState('');
-  const [sortKey, setSortKey] = useState<SortKey>('medication');
-  const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [sortKey, setSortKey] = useState<SortKey>(() => {
+    const s = searchParams.get('sort');
+    return s === 'medication' || s === 'product' || s === 'stock' ? s : 'medication';
+  });
+  const [sortDir, setSortDir] = useState<SortDir>(() =>
+    searchParams.get('dir') === 'desc' ? 'desc' : 'asc'
+  );
 
   const [{ data, fetching, error }] = useQuery({ query: MEDICATIONS_QUERY });
 

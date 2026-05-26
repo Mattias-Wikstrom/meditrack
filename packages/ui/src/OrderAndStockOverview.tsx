@@ -20,6 +20,12 @@ export interface OrderAndStockOverviewProps {
   orders: OverviewOrder[];
   /** If provided, low-stock items become links to this href */
   getProductHref?: (productId: string) => string;
+  /** href for the "Total Medications" stat card */
+  inventoryHref?: string;
+  /** href for the "Low Stock Alerts" stat card (inventory sorted so low-stock items appear first) */
+  lowStockHref?: string;
+  /** href for the "Total Orders" stat card */
+  ordersHref?: string;
 }
 
 const ORDER_STATUSES = ['Draft', 'Sent', 'Confirmed', 'Delivered'] as const;
@@ -31,11 +37,11 @@ const ORDER_STATUS_LABELS: Record<string, string> = {
   Delivered: 'Delivered Orders',
 };
 
-function StatCard({ title, value, subtitle, danger = false }: {
-  title: string; value: number; subtitle: string; danger?: boolean;
+function StatCard({ title, value, subtitle, danger = false, href }: {
+  title: string; value: number; subtitle: string; danger?: boolean; href?: string;
 }) {
-  return (
-    <Card className={`p-3 ${danger ? 'border-red-300' : ''}`}>
+  const card = (
+    <Card className={`p-3 ${danger ? 'border-red-300' : ''}${href ? ' hover:bg-slate-50 transition-colors' : ''}`}>
       <div className="flex items-baseline justify-between">
         <span className={`text-2xl font-bold tabular-nums ${danger ? 'text-red-600' : 'text-slate-900'}`}>{value}</span>
         {danger && <span className="text-red-400 text-sm">⚠</span>}
@@ -44,9 +50,10 @@ function StatCard({ title, value, subtitle, danger = false }: {
       <p className="text-xs text-slate-400">{subtitle}</p>
     </Card>
   );
+  return href ? <Link to={href} className="block">{card}</Link> : card;
 }
 
-export function OrderAndStockOverview({ products, orders, getProductHref }: OrderAndStockOverviewProps) {
+export function OrderAndStockOverview({ products, orders, getProductHref, inventoryHref, lowStockHref, ordersHref }: OrderAndStockOverviewProps) {
   const lowStock = products.filter(p => p.isBelowThreshold);
   const pendingOrders = orders.filter(o => o.status !== 'Delivered').length;
   const byStatus = (s: string) => orders.filter(o => o.status === s).length;
@@ -54,9 +61,9 @@ export function OrderAndStockOverview({ products, orders, getProductHref }: Orde
   return (
     <div className="space-y-3">
       <div className="grid gap-3 grid-cols-4">
-        <StatCard title="Total Medications" value={products.length} subtitle="In drug registry" />
-        <StatCard title="Low Stock Alerts" value={lowStock.length} subtitle="Below minimum threshold" danger={lowStock.length > 0} />
-        <StatCard title="Total Orders" value={orders.length} subtitle="All time orders" />
+        <StatCard title="Total Medications" value={products.length} subtitle="In drug registry" href={inventoryHref} />
+        <StatCard title="Low Stock Alerts" value={lowStock.length} subtitle="Below minimum threshold" danger={lowStock.length > 0} href={lowStockHref} />
+        <StatCard title="Total Orders" value={orders.length} subtitle="All time orders" href={ordersHref} />
         <StatCard title="Pending Orders" value={pendingOrders} subtitle="Awaiting completion" />
       </div>
 
