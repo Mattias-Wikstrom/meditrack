@@ -1,3 +1,4 @@
+// Used for buttons in all the apps
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

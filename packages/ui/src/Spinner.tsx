@@ -1,3 +1,4 @@
+// Used in all the apps when fetching data
 export function Spinner({ className = '' }: { className?: string }) {
   return (
     <svg className={`animate-spin text-accent ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

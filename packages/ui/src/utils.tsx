@@ -1,3 +1,4 @@
+// Shared utility components (RoleBadge, InfoRow, LineList, SortIcon) and date/time formatting helpers
 const ROLE_STYLES: Record<string, string> = {
   Nurse:      'bg-blue-100 text-blue-700',
   Pharmacist: 'bg-purple-100 text-purple-700',

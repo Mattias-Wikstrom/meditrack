@@ -1,3 +1,4 @@
+// Used for / (nurse)
 import { Link } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
 import { Card, Button, Spinner } from '@meditrack/ui';

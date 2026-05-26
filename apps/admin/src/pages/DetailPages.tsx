@@ -1,3 +1,4 @@
+// Used for /ward-units/:wardUnitId, /users/:userId, /inventory/:productId (admin)
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from 'urql';

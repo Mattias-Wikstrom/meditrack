@@ -1,3 +1,4 @@
+// Used to display order status
 const styles: Record<string, string> = {
   Draft:     'bg-slate-100 text-slate-600',
   Sent:      'bg-blue-100 text-blue-700',

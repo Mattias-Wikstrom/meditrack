@@ -1,3 +1,4 @@
+// Used for /medications/:medicationId (pharmacist)
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { MedicationDetail, Spinner } from '@meditrack/ui';

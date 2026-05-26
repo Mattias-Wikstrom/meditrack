@@ -1,3 +1,4 @@
+// Used as a container panel throughout all the apps
 import React from 'react';
 
 interface CardProps {

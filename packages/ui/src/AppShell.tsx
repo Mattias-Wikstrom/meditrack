@@ -1,3 +1,4 @@
+// Used in App.tsx in all the apps
 import React from 'react';
 
 interface AppShellProps {

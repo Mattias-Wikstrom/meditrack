@@ -1,3 +1,4 @@
+// Login page that can be used to get a common login UI in all the apps
 import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
 

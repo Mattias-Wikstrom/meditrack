@@ -1,3 +1,4 @@
+// Used for /inventory/:productId (pharmacist)
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from 'urql';
 import { InventoryProductDetail, Spinner } from '@meditrack/ui';

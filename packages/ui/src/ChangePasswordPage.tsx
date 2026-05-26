@@ -1,3 +1,4 @@
+// Can be used as a '/me' page in all the apps
 import React, { useState } from 'react';
 import { Button } from './Button';
 import { Card } from './Card';
