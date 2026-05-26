@@ -183,7 +183,7 @@ function LineDeliverySection({
       </div>
 
       {hasDuplicates && (
-        <p className="mt-2 text-xs text-red-600">Each product can only be selected once per line.</p>
+        <p className="mt-2 text-xs text-red-600">Each product can only be selected once per order line.</p>
       )}
 
       {/* Split button — only when there is remaining quantity to allocate */}
@@ -248,7 +248,7 @@ export function OrderDetailPage() {
       }
       const ids = splits.map(s => s.medicinalProductId);
       if (new Set(ids).size !== ids.length) {
-        setSubmitError(`Each product can only be selected once per line.`);
+        setSubmitError(`Each product can only be selected once per order line.`);
         return;
       }
     }
