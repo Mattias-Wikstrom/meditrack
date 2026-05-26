@@ -1,0 +1,20 @@
+// Human-readable messages for domain error codes returned by the REST API.
+// Keys match the ErrorCode union in src/domain/shared/results/ErrorCode.ts.
+export const errorMessages: Record<string, string> = {
+  ActorNotFound: 'Actor not found.',
+  UnauthorizedRole: 'Your role does not permit this action.',
+  ActorNotAssignedToWardUnit: 'Your account is not assigned to a ward unit.',
+  WardUnitAssignmentNotAllowed: 'Only nurses can be assigned to a ward unit.',
+  NurseRequiresWardUnit: 'A nurse must be assigned to a ward unit.',
+  ActorAlreadyExists: 'An actor with that ID already exists.',
+  CannotDeleteSelf: 'An admin cannot delete their own account.',
+  OrderHasAtLeastOneLine: 'An order must have at least one line.',
+  OrderLineQuantitiesPositive: 'All line quantities must be greater than zero.',
+  OrderNotFound: 'Order not found.',
+  InvalidStatusTransition: 'The order is not in the right status for this action.',
+  MedicinalProductNotFound: 'One or more medicinal products were not found.',
+  ProductMedicationMismatch: 'A selected product does not match the medication on the order line.',
+  SelectionQuantityMismatch: 'The selected quantities do not match the ordered quantities.',
+  InsufficientStock: 'Insufficient stock to fulfil this order.',
+  InvalidQuantity: 'Quantity must be greater than zero.',
+};
