@@ -50,14 +50,13 @@ export function WardUnitsPage() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     try {
-      const unit = await createApiClient(token!).post<{ id: string }>('/ward-units', {
+      await createApiClient(token!).post<{ id: string }>('/ward-units', {
         id: fd.get('id') as string,
         name: fd.get('name') as string,
       });
       setShowCreate(false);
       setCreateError(null);
       refetch({ requestPolicy: 'network-only' });
-      navigate(`/ward-units/${unit.id}`);
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : 'Failed to create ward unit');
     }
