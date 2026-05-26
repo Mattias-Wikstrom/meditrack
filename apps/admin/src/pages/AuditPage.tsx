@@ -25,6 +25,9 @@ const ACTION_STYLES: Record<string, string> = {
   ActorLoginFailed:   'bg-red-100 text-red-700',
   PasswordChanged:    'bg-purple-100 text-purple-700',
   ProductRestocked:   'bg-indigo-100 text-indigo-700',
+  ActorCreated:       'bg-teal-100 text-teal-700',
+  ActorUpdated:       'bg-blue-100 text-blue-700',
+  ActorDeleted:       'bg-red-100 text-red-700',
 };
 
 function ActionBadge({ action }: { action: string }) {
@@ -37,6 +40,8 @@ function ActionBadge({ action }: { action: string }) {
 
 function toEntityDetailsRoute(action: string, entityId: string): string | null {
   switch (action) {
+    case 'ActorCreated':
+    case 'ActorUpdated':
     case 'ActorLoggedIn':
     case 'ActorLoginFailed':
     case 'PasswordChanged':
