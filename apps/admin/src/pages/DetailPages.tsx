@@ -214,11 +214,11 @@ export function MedicationDetailsPage() {
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
   const product = data?.medicinalProduct;
-  if (!product) return <NotFound kind="medication product" to="/medications" />;
+  if (!product) return <NotFound kind="medication product" to="/inventory" />;
 
   return (
     <div>
-      <BackButton onClick={() => navigate('/medications')} className="mb-4" />
+      <BackButton onClick={() => navigate('/inventory')} className="mb-4" />
       <h1 className="text-xl font-semibold text-slate-800 mb-6">{product.productName}</h1>
 
       <Card className="p-5 max-w-lg">

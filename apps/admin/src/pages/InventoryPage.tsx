@@ -48,7 +48,7 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
   );
 }
 
-export function MedicationsPage() {
+export function InventoryPage() {
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('medication');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
@@ -90,7 +90,7 @@ export function MedicationsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-slate-800">
-          Medications
+          Inventory
           {lowStockCount > 0 && (
             <span className="ml-3 text-sm font-normal text-red-600">
               ⚠ {lowStockCount} below threshold
@@ -125,7 +125,7 @@ export function MedicationsPage() {
                 <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.atcCode ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-600">{p.medication?.form ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.strength ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-600"><Link to={`/medications/${p.id}`} className="text-accent hover:underline">{p.productName}</Link></td>
+                <td className="px-4 py-3 text-slate-600"><Link to={`/inventory/${p.id}`} className="text-accent hover:underline">{p.productName}</Link></td>
                 <td className={`px-4 py-3 text-right font-medium tabular-nums ${p.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
                   {p.stockLevel}
                   {p.isBelowThreshold && <span className="ml-1 text-xs">⚠</span>}

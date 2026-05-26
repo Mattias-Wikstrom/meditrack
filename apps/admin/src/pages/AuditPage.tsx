@@ -41,7 +41,7 @@ function toEntityDetailsRoute(action: string, entityId: string): string | null {
     case 'PasswordChanged':
       return `/users/${entityId}`;
     case 'ProductRestocked':
-      return `/medications/${entityId}`;
+      return `/inventory/${entityId}`;
     case 'DraftOrderCreated':
     case 'OrderSent':
     case 'OrderConfirmed':

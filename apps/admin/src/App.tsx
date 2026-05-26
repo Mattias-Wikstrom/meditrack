@@ -4,7 +4,7 @@ import { Provider } from 'urql';
 import { AppShell, LoginPage, ChangePasswordPage, TabNav } from '@meditrack/ui';
 import { useAuth, createUrqlClient } from '@meditrack/client';
 import { OrdersPage } from './pages/OrdersPage';
-import { MedicationsPage } from './pages/MedicationsPage';
+import { InventoryPage } from './pages/InventoryPage';
 import { UsersPage } from './pages/UsersPage';
 import { AuditPage } from './pages/AuditPage';
 import { WardUnitsPage } from './pages/WardUnitsPage';
@@ -17,7 +17,7 @@ function AdminNav() {
       items={[
         { to: '/', label: 'Overview', end: true },
         { to: '/orders', label: 'Orders' },
-        { to: '/medications', label: 'Medications' },
+        { to: '/inventory', label: 'Inventory' },
         { to: '/users', label: 'Users' },
         { to: '/audit', label: 'Audit' },
         { to: '/ward-units', label: 'Ward Units' },
@@ -49,13 +49,13 @@ export function App() {
         <Routes>
           <Route path="/" element={<OverviewPage />} />
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/medications" element={<MedicationsPage />} />
+          <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/audit" element={<AuditPage />} />
           <Route path="/ward-units" element={<WardUnitsPage />} />
           <Route path="/ward-units/:wardUnitId" element={<WardUnitDetailsPage />} />
           <Route path="/users/:userId" element={<UserDetailsPage />} />
-          <Route path="/medications/:productId" element={<MedicationDetailsPage />} />
+          <Route path="/inventory/:productId" element={<MedicationDetailsPage />} />
           <Route path="/orders/:wardUnitId" element={<WardOrdersPage />} />
           <Route path="/me" element={<ChangePasswordPage token={token} actorId={actorId!} role={role!} onSuccess={() => navigate('/')} onCancel={() => navigate('/')} />} />
         </Routes>
