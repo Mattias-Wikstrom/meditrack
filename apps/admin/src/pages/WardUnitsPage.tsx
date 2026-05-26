@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
@@ -36,7 +36,6 @@ export function WardUnitsPage() {
             <tr className="border-b border-slate-200 bg-slate-50 text-left">
               <th className="px-4 py-3 font-medium text-slate-600">Name</th>
               <th className="px-4 py-3 font-medium text-slate-600">ID</th>
-              <th className="px-4 py-3 font-medium text-slate-600"></th>
             </tr>
           </thead>
           <tbody>
@@ -44,16 +43,11 @@ export function WardUnitsPage() {
               <tr key={unit.id} onClick={() => navigate(`/ward-units/${unit.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
                 <td className="px-4 py-3 font-medium text-slate-800">{unit.name}</td>
                 <td className="px-4 py-3 text-slate-400 font-mono text-xs">{unit.id}</td>
-                <td className="px-4 py-3 text-right">
-                  <Link to={`/orders/${unit.id}`} onClick={e => e.stopPropagation()} className="text-slate-400 hover:text-accent text-xs">
-                    Orders →
-                  </Link>
-                </td>
               </tr>
             ))}
             {units.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-4 py-12 text-center text-slate-400">No ward units found.</td>
+                <td colSpan={2} className="px-4 py-12 text-center text-slate-400">No ward units found.</td>
               </tr>
             )}
           </tbody>
