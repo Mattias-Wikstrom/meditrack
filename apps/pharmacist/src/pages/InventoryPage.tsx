@@ -95,13 +95,20 @@ export function InventoryPage() {
   const [restocking, setRestocking] = useState<{ id: string; name: string; stock: number } | null>(null);
   const [restockError, setRestockError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [alerts, setAlerts] = useState<Array<{ id: string; message: string }>>([]);
 
   const [{ data, fetching, error }, refetch] = useQuery({ query: INVENTORY_QUERY });
   const [, restock] = useMutation(RESTOCK_MUTATION);
 
-  useSubscription({ query: STOCK_ALERT_SUB }, () => {
+  useSubscription({ query: STOCK_ALERT_SUB }, (prev, response) => {
+    const event = response.stockBelowThreshold;
+    if (event) {
+      const alertId = `${event.medicinalProductId}-${Date.now()}`;
+      const message = `${event.productName} is below threshold (${event.stockLevel}/${event.stockThreshold})`;
+      setAlerts(current => [{ id: alertId, message }, ...current].slice(0, 5));
+    }
     refetch({ requestPolicy: 'network-only' });
-    return undefined;
+    return prev;
   });
 
   function handleSort(key: SortKey) {
@@ -186,6 +193,23 @@ export function InventoryPage() {
           className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
         />
       </div>
+
+      {alerts.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {alerts.map(alert => (
+            <div key={alert.id} className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 flex items-center justify-between">
+              <span>{alert.message}</span>
+              <button
+                className="ml-3 text-red-500 hover:text-red-700"
+                onClick={() => setAlerts(current => current.filter(a => a.id !== alert.id))}
+                aria-label="Dismiss alert"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <Card className="overflow-hidden">
         <table className="w-full text-sm">
