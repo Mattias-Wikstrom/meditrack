@@ -1,8 +1,12 @@
+import { Actor } from '../../shared/Actor';
 import { ActorRole } from '../../shared/ActorRole';
 import { ActorRepository } from '../ActorRepository';
 import { Transactor } from '../../shared/Transactor';
 import { EventBus } from '../../shared/eventContracts/EventBus';
-import { UseCaseResult, success, failure } from '../../shared/results/UseCaseResult';
+import { UseCaseResult, success, failure, failures } from '../../shared/results/UseCaseResult';
+import { ErrorInfo } from '../../shared/results/ErrorInfo';
+import { DeleteActorRule } from '../rules/DeleteActorRule';
+import { CannotDeleteSelf } from '../rules/CannotDeleteSelf';
 import { ActorDeleted } from '../events/ActorDeleted';
 
 export interface DeleteActorInput {
@@ -11,6 +15,11 @@ export interface DeleteActorInput {
 }
 
 export class DeleteActorUseCase {
+  // Business rules checked against the requesting actor and the target before deletion
+  private readonly rules: DeleteActorRule[] = [
+    new CannotDeleteSelf(),
+  ];
+
   constructor(
     private readonly actorRepository: ActorRepository,
     private readonly transactor: Transactor,
@@ -22,8 +31,15 @@ export class DeleteActorUseCase {
     if (!requestingActor) return failure('ActorNotFound');
     if (requestingActor.role !== ActorRole.Admin) return failure('UnauthorizedRole');
 
-    const existing = await this.actorRepository.findById(input.id);
-    if (!existing) return failure('ActorNotFound');
+    const target = await this.actorRepository.findById(input.id);
+    if (!target) return failure('ActorNotFound');
+
+    const errors: ErrorInfo[] = [];
+    for (const rule of this.rules) {
+      const error = rule.check(requestingActor, target);
+      if (error !== null) errors.push(error);
+    }
+    if (errors.length > 0) return failures(errors);
 
     await this.transactor.run(async (tx) => {
       await tx.actorRepository.delete(input.id);

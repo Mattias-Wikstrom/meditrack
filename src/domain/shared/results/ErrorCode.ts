@@ -5,6 +5,7 @@ export type ErrorCode =
   | 'WardUnitAssignmentNotAllowed'
   | 'NurseRequiresWardUnit'
   | 'ActorAlreadyExists'
+  | 'CannotDeleteSelf'
   | 'OrderHasAtLeastOneLine'
   | 'OrderLineQuantitiesPositive'
   | 'OrderNotFound'
