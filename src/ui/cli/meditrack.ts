@@ -20,7 +20,7 @@ import { RestockUseCase } from '../../domain/medication/useCases/RestockUseCase'
 import { verifyToken } from '../../domain/auth/jwt';
 import { readToken } from './auth/tokenStore';
 import { ConsoleOutput } from './ConsoleOutput';
-import { listActors, createActor } from './commands/actors';
+import { listActors, createActor, bootstrapCreateActor } from './commands/actors';
 import { listWardUnits, createWardUnit } from './commands/wardUnits';
 import { listAudit } from './commands/audit';
 import { listMedications, showMedication } from './commands/medications';
@@ -99,6 +99,17 @@ actors
   .command('list')
   .description('List all actors and their roles')
   .action(async () => listActors(actorRepo, output));
+
+actors
+  .command('bootstrap-create')
+  .description('Create the first admin actor on a fresh database (blocked if any admin already exists)')
+  .requiredOption('--actor-id <id>', 'actor ID for the new actor')
+  .requiredOption('--role <role>', 'role (Nurse, Pharmacist, Admin)')
+  .option('--ward-unit-id <id>', 'ward unit ID (required for Nurse role)')
+  .requiredOption('--password <password>', 'initial password')
+  .action(async (opts) =>
+    bootstrapCreateActor(actorRepo, credentialsRepo, output, opts.actorId, opts.role, opts.wardUnitId, opts.password),
+  );
 
 actors
   .command('create')
