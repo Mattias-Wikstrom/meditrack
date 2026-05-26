@@ -93,3 +93,6 @@ The React-based UI has been implemented almost exclusively by AIs, but with clea
 
 It has been assumed that the system will be used on reasonably big screens rather than mobile screens. Tables with a handful of columns are used even though that is problematic on a mobile screen.
 
+## A possible AI function
+
+Given that the ward units currently use manual lists along with emails, one possible function is to let an AI agent read such email and enter the information into the system. This should not be used instead of the new system, but it could potentially be a complement in some situations.
