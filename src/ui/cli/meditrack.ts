@@ -10,6 +10,7 @@ import { PrismaAuditRepository } from '../../storage/prisma/PrismaAuditRepositor
 import { PrismaCredentialsRepository } from '../../storage/prisma/PrismaCredentialsRepository';
 import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
+import { CreateActorUseCase } from '../../domain/actor/useCases/CreateActorUseCase';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
 import { UpdateOrderLinesUseCase } from '../../domain/order/useCases/ordering/UpdateOrderLinesUseCase';
 import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOrderUseCase';
@@ -39,6 +40,8 @@ const auditRepo = new PrismaAuditRepository(prisma);
 const credentialsRepo = new PrismaCredentialsRepository(prisma);
 const transactor = new PrismaTransactor(prisma);
 const eventBus = new SimpleEventBus();
+
+const createActorUseCase = new CreateActorUseCase(actorRepo, credentialsRepo, transactor, eventBus);
 
 const createOrderUseCase = new CreateOrderUseCase(actorRepo, transactor, eventBus);
 const updateOrderLinesUseCase = new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor, eventBus);
@@ -99,11 +102,15 @@ actors
 
 actors
   .command('create')
-  .description('Create a new actor')
-  .requiredOption('--actor-id <id>', 'actor ID')
+  .description('Create a new actor (admin only)')
+  .requiredOption('--actor-id <id>', 'actor ID for the new actor')
   .requiredOption('--role <role>', 'role (Nurse, Pharmacist, Admin)')
   .option('--ward-unit-id <id>', 'ward unit ID (required for Nurse role)')
-  .action(async (opts) => createActor(actorRepo, output, opts.actorId, opts.role, opts.wardUnitId));
+  .requiredOption('--password <password>', 'initial password')
+  .action(async (opts) => {
+    const { actorId } = await requireAuth();
+    return createActor(createActorUseCase, output, actorId, opts.actorId, opts.role, opts.wardUnitId, opts.password);
+  });
 
 const wardUnits = program.command('ward-units');
 
