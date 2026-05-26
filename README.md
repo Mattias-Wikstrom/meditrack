@@ -18,7 +18,7 @@ web apps. The API server automatically runs any pending database migrations on s
 (actors, ward units, medications, and medicinal products):
 
 ```sh
-docker compose run --rm api npm run seed
+docker compose run --rm api npx prisma db seed
 ```
 
 ## Opening the apps

@@ -24,7 +24,7 @@ which also watches for schema changes and generates new migrations.
 ### 3. Seed reference data
 
 ```sh
-npm run seed
+npx prisma db seed
 ```
 
 This populates the database with development data: actors, ward units, medications, and medicinal

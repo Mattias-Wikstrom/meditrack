@@ -30,8 +30,8 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    # Runs migrations on every start; add '&& npm run seed' the first time
-    # to populate reference data.
+    # Runs migrations on every start. To seed reference data the first time,
+    # run: docker compose run --rm api npx prisma db seed
     command: sh -c "npx prisma migrate deploy && npm run server"
 
   nurse:
