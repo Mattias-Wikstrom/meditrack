@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
-import { Card, Badge, Button, Spinner } from '@meditrack/ui';
+import { Card, Badge, Button, Spinner, formatDate } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
 
@@ -26,12 +26,6 @@ const ORDER_STATUS_SUB = graphql(`
     orderStatusChanged { orderId from to }
   }
 `);
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('en-GB', {
-    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
-  });
-}
 
 type OrderLine = { medicationId: string; quantity: number; medication?: { innName: string } | null };
 

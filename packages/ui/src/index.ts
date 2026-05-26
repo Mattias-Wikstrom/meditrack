@@ -18,3 +18,4 @@ export { InventoryProductDetail } from './InventoryProductDetail';
 export type { InventoryProductDetailProps, InventoryProduct } from './InventoryProductDetail';
 export { MedicationDetail } from './MedicationDetail';
 export type { MedicationDetailProps, MedicationDetailData, MedicationDetailProduct } from './MedicationDetail';
+export { formatDate, formatDateTime, formatDateTimePrecise } from './utils';

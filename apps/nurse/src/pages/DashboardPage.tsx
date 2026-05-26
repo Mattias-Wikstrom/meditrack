@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
-import { Button, Spinner } from '@meditrack/ui';
+import { Button, Spinner, formatDate } from '@meditrack/ui';
 import { useAuth } from '@meditrack/client';
 import { graphql } from '../gql';
 
@@ -98,12 +98,6 @@ function LineList({ lines }: { lines: OrderRow['lines'] }) {
       {extra > 0 && <div className="text-slate-400 text-xs">+{extra} more</div>}
     </div>
   );
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('en-GB', {
-    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
-  });
 }
 
 function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick, sortable = true }: {

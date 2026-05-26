@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Card, Badge, Spinner } from '@meditrack/ui';
+import { Card, Badge, Spinner, formatDate } from '@meditrack/ui';
 import { graphql } from '../gql';
 
 const ORDERS_QUERY = graphql(`
@@ -46,12 +46,6 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
       {dir === 'asc' ? '↑' : '↓'}
     </span>
   );
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('en-GB', {
-    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
-  });
 }
 
 const LINE_LIMIT = 3;

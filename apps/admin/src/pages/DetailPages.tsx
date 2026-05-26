@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { BackButton, Badge, Card, Spinner, InventoryProductDetail } from '@meditrack/ui';
+import { BackButton, Badge, Card, Spinner, InventoryProductDetail, formatDate } from '@meditrack/ui';
 
 // ── shared helpers ────────────────────────────────────────────────────────────
 
@@ -11,12 +11,6 @@ function NotFound({ kind, to }: { kind: string; to: string }) {
       <a className="text-accent hover:underline" href={to}>Back to list</a>.
     </p>
   );
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('en-GB', {
-    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
-  });
 }
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Card, Spinner } from '@meditrack/ui';
+import { Card, Spinner, formatDateTimePrecise } from '@meditrack/ui';
 import { graphql } from '../gql';
 
 const AUDIT_QUERY = graphql(`
@@ -50,13 +50,6 @@ function toEntityDetailsRoute(action: string, entityId: string): string | null {
     default:
       return null;
   }
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('en-GB', {
-    day: 'numeric', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
-  });
 }
 
 export function AuditPage() {
@@ -118,7 +111,7 @@ export function AuditPage() {
               const detailsRoute = toEntityDetailsRoute(e.action, e.entityId);
               return (
               <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap tabular-nums">{formatDate(e.occurredAt)}</td>
+                <td className="px-4 py-3 text-slate-500 whitespace-nowrap tabular-nums">{formatDateTimePrecise(e.occurredAt)}</td>
                 <td className="px-4 py-3 font-medium">
                   <Link to={`/users/${e.actorId}`} className="text-slate-800 hover:text-accent hover:underline">{e.actorId}</Link>
                 </td>

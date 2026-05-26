@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { BackButton, Badge, Card, Spinner } from '@meditrack/ui';
+import { BackButton, Badge, Card, Spinner, formatDateTime } from '@meditrack/ui';
 
 const ORDER_DETAIL_QUERY = `
   query AdminOrderDetail($id: ID!) {
@@ -13,13 +13,6 @@ const ORDER_DETAIL_QUERY = `
     }
   }
 `;
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('en-GB', {
-    day: 'numeric', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', hour12: false,
-  });
-}
 
 export function AdminOrderDetailPage() {
   const { orderId } = useParams();
@@ -64,7 +57,7 @@ export function AdminOrderDetailPage() {
           </div>
           <div className="flex justify-between items-baseline py-2.5 border-b border-slate-100">
             <dt className="text-slate-500">Created</dt>
-            <dd className="text-slate-700">{formatDate(order.createdAt)}</dd>
+            <dd className="text-slate-700">{formatDateTime(order.createdAt)}</dd>
           </div>
           <div className="flex justify-between items-baseline py-2.5">
             <dt className="text-slate-500">Order ID</dt>

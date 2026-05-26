@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useClient } from 'urql';
-import { MedicationSearch, Button, Card, Spinner, BackButton } from '@meditrack/ui';
+import { MedicationSearch, Button, Card, Spinner, BackButton, formatDateTime } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
@@ -41,12 +41,6 @@ function StatusBadge({ status }: { status: string }) {
       {status}
     </span>
   );
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('en-GB', {
-    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
-  });
 }
 
 export function NurseOrderDetailPage() {
@@ -149,7 +143,7 @@ export function NurseOrderDetailPage() {
         {saving && <span className="ml-auto text-xs text-slate-400">Saving…</span>}
       </div>
 
-      <p className="text-xs text-slate-400 mb-6">{order.wardUnit?.name ?? order.wardUnitId} · {formatDate(order.createdAt)}</p>
+      <p className="text-xs text-slate-400 mb-6">{order.wardUnit?.name ?? order.wardUnitId} · {formatDateTime(order.createdAt)}</p>
 
       {lines.length > 0 ? (
         <Card className="mb-6 divide-y divide-slate-100">
