@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
-import { Card, Badge, Button, Spinner, formatDate } from '@meditrack/ui';
+import { Card, Badge, Button, Spinner, LineList, formatDate } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
 
@@ -26,21 +26,6 @@ const ORDER_STATUS_SUB = graphql(`
     orderStatusChanged { orderId from to }
   }
 `);
-
-type OrderLine = { medicationId: string; quantity: number; medication?: { innName: string } | null };
-
-function LineList({ lines }: { lines: OrderLine[] }) {
-  return (
-    <div className="space-y-0.5">
-      {lines.map(l => (
-        <div key={l.medicationId} className="flex items-baseline gap-1.5">
-          <span className="text-slate-700">{l.medication?.innName ?? l.medicationId}</span>
-          <span className="text-slate-400 text-xs">×{l.quantity}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function CountBadge({ n }: { n: number }) {
   if (n === 0) return null;

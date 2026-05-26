@@ -21,6 +21,24 @@ export function InfoRow({ label, children }: { label: string; children: React.Re
   );
 }
 
+import type { OrderLineSummary } from './OrderCard';
+
+export function LineList({ lines, limit }: { lines: OrderLineSummary[]; limit?: number }) {
+  const shown = limit !== undefined ? lines.slice(0, limit) : lines;
+  const extra = limit !== undefined ? Math.max(0, lines.length - limit) : 0;
+  return (
+    <div className="space-y-0.5">
+      {shown.map(l => (
+        <div key={l.medicationId} className="flex items-baseline gap-1.5">
+          <span className="text-slate-700">{l.medication?.innName ?? l.medicationId}</span>
+          <span className="text-slate-400 text-xs">×{l.quantity}</span>
+        </div>
+      ))}
+      {extra > 0 && <div className="text-slate-400 text-xs">+{extra} more</div>}
+    </div>
+  );
+}
+
 export function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   return (
     <span className={`ml-1 text-xs ${active ? 'text-slate-700' : 'invisible'}`}>

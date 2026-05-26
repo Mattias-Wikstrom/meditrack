@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Card, Badge, Spinner, SortIcon, formatDate } from '@meditrack/ui';
+import { Card, Badge, Spinner, SortIcon, LineList, formatDate } from '@meditrack/ui';
 import { graphql } from '../gql';
 
 const ORDERS_QUERY = graphql(`
@@ -38,24 +38,6 @@ function sortOrders(orders: OrderRow[], key: SortKey, dir: SortDir): OrderRow[] 
     }
     return dir === 'asc' ? cmp : -cmp;
   });
-}
-
-const LINE_LIMIT = 3;
-
-function LineList({ lines }: { lines: OrderRow['lines'] }) {
-  const shown = lines.slice(0, LINE_LIMIT);
-  const extra = lines.length - LINE_LIMIT;
-  return (
-    <div className="space-y-0.5">
-      {shown.map(l => (
-        <div key={l.medicationId} className="flex items-baseline gap-1.5">
-          <span className="text-slate-700">{l.medication?.innName ?? l.medicationId}</span>
-          <span className="text-slate-400 text-xs">×{l.quantity}</span>
-        </div>
-      ))}
-      {extra > 0 && <div className="text-slate-400 text-xs">+{extra} more</div>}
-    </div>
-  );
 }
 
 export function OrdersPage() {
@@ -128,7 +110,7 @@ export function OrdersPage() {
                     {order.wardUnit?.name ?? order.wardUnitId}
                   </Link>
                 </td>
-                <td className="py-3 px-4"><LineList lines={order.lines} /></td>
+                <td className="py-3 px-4"><LineList lines={order.lines} limit={3} /></td>
                 <td className="py-3 px-4 text-slate-400 font-mono text-xs">{order.id}</td>
               </tr>
             ))}

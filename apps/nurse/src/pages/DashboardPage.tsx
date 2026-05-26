@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
-import { Badge, Button, Spinner, SortIcon, formatDate } from '@meditrack/ui';
+import { Badge, Button, Spinner, SortIcon, LineList, formatDate } from '@meditrack/ui';
 import { useAuth } from '@meditrack/client';
 import { graphql } from '../gql';
 
@@ -59,24 +59,6 @@ function sortOrders(orders: OrderRow[], key: SortKey, dir: SortDir): OrderRow[] 
   });
 }
 
-const LINE_LIMIT = 3;
-
-function LineList({ lines }: { lines: OrderRow['lines'] }) {
-  const shown = lines.slice(0, LINE_LIMIT);
-  const extra = lines.length - LINE_LIMIT;
-  return (
-    <div className="space-y-0.5">
-      {shown.map(l => (
-        <div key={l.medicationId} className="flex items-baseline gap-1.5">
-          <span className="text-slate-700">{l.medication?.innName ?? l.medicationId}</span>
-          <span className="text-slate-400 text-xs">×{l.quantity}</span>
-        </div>
-      ))}
-      {extra > 0 && <div className="text-slate-400 text-xs">+{extra} more</div>}
-    </div>
-  );
-}
-
 function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick, sortable = true }: {
   orders: OrderRow[];
   sortKey: SortKey;
@@ -110,7 +92,7 @@ function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick, sortable = t
             className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer transition-colors">
             <td className="py-2.5 px-4 align-top text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
             <td className="py-2.5 px-4 align-top"><Badge status={order.status} /></td>
-            <td className="py-2.5 px-4 align-top"><LineList lines={order.lines} /></td>
+            <td className="py-2.5 px-4 align-top"><LineList lines={order.lines} limit={3} /></td>
           </tr>
         ))}
       </tbody>
