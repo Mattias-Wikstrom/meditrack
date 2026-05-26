@@ -75,7 +75,11 @@ export function UserDetailsPage() {
         <Card className="p-5">
           <h2 className="text-base font-semibold text-slate-700 mb-2">Account</h2>
           <InfoRow label="Role"><RoleBadge role={actor.role} /></InfoRow>
-          <InfoRow label="Ward Unit">{actor.wardUnit?.name ?? <span className="text-slate-300">—</span>}</InfoRow>
+          <InfoRow label="Ward Unit">
+            {actor.wardUnit
+              ? <Link to={`/ward-units/${actor.wardUnitId}`} className="text-accent hover:underline">{actor.wardUnit.name}</Link>
+              : <span className="text-slate-300">—</span>}
+          </InfoRow>
         </Card>
 
         <Card className="p-5">
