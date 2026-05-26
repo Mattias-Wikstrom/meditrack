@@ -91,4 +91,8 @@ The business domain, business rules, and business logic have been prioritized. T
 
 The React-based UI has been implemented almost exclusively by AIs, but with clear instructions to keep the code DRY by putting things in reusable React components whenever reasonable. Making the UI responsive has been another priority. You should have the feeling that you are using an 'app,' not that you are using a web page. Making things simple, logical, and consistent has also been a priority.
 
+It has been assumed that the system will be used on reasonably big screens rather than mobile screens. Tables with a handful of columns are used even though that is problematic on a mobile screen.
 
+## A possible AI function
+
+Given that the ward units currently use manual lists along with emails, one possible function is to let an AI agent read such emails and enter the information into the system. This should not be used in place of the new system, but it could potentially be a complement in certain situations.
