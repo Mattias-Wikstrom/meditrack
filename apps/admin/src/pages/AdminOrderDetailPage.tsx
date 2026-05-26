@@ -5,7 +5,7 @@ import { BackButton, Badge, Card, Spinner } from '@meditrack/ui';
 const ORDER_DETAIL_QUERY = `
   query AdminOrderDetail($id: ID!) {
     order(id: $id) {
-      id wardUnitId status createdAt
+      id wardUnitId wardUnit { name } status createdAt
       lines {
         medicationId quantity
         medication { innName }
@@ -57,8 +57,8 @@ export function AdminOrderDetailPage() {
           <div className="flex justify-between items-baseline py-2.5 border-b border-slate-100">
             <dt className="text-slate-500">Ward Unit</dt>
             <dd>
-              <Link to={`/ward-units/${order.wardUnitId}`} className="font-mono text-xs text-accent hover:underline">
-                {order.wardUnitId}
+              <Link to={`/ward-units/${order.wardUnitId}`} className="text-accent hover:underline">
+                {order.wardUnit?.name ?? order.wardUnitId}
               </Link>
             </dd>
           </div>

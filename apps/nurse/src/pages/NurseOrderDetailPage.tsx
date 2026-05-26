@@ -9,7 +9,7 @@ import { graphql } from '../gql';
 const ORDER_QUERY = graphql(`
   query NurseOrder($id: ID!) {
     order(id: $id) {
-      id wardUnitId status createdAt
+      id wardUnitId wardUnit { name } status createdAt
       lines { medicationId quantity medication { innName strength } }
     }
   }
@@ -149,7 +149,7 @@ export function NurseOrderDetailPage() {
         {saving && <span className="ml-auto text-xs text-slate-400">Saving…</span>}
       </div>
 
-      <p className="text-xs text-slate-400 mb-6">{order.wardUnitId} · {formatDate(order.createdAt)}</p>
+      <p className="text-xs text-slate-400 mb-6">{order.wardUnit?.name ?? order.wardUnitId} · {formatDate(order.createdAt)}</p>
 
       {lines.length > 0 ? (
         <Card className="mb-6 divide-y divide-slate-100">

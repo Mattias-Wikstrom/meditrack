@@ -7,7 +7,7 @@ import { graphql } from '../gql';
 const ORDERS_QUERY = graphql(`
   query AdminOrders {
     orders {
-      id wardUnitId status createdAt
+      id wardUnitId wardUnit { name } status createdAt
       lines { medicationId quantity medication { innName } }
     }
   }
@@ -21,6 +21,7 @@ const STATUS_RANK: Record<string, number> = { Draft: 0, Sent: 1, Confirmed: 2, D
 type OrderRow = {
   id: string;
   wardUnitId: string;
+  wardUnit?: { name: string } | null;
   status: string;
   createdAt: string;
   lines: { medicationId: string; quantity: number; medication?: { innName: string } | null }[];
@@ -30,7 +31,7 @@ function sortOrders(orders: OrderRow[], key: SortKey, dir: SortDir): OrderRow[] 
   return [...orders].sort((a, b) => {
     let cmp = 0;
     switch (key) {
-      case 'wardUnit':  cmp = a.wardUnitId.localeCompare(b.wardUnitId); break;
+      case 'wardUnit':  cmp = (a.wardUnit?.name ?? a.wardUnitId).localeCompare(b.wardUnit?.name ?? b.wardUnitId); break;
       case 'lines':     cmp = a.lines.length - b.lines.length; break;
       case 'createdAt': cmp = a.createdAt.localeCompare(b.createdAt); break;
       case 'status':    cmp = (STATUS_RANK[a.status] ?? 0) - (STATUS_RANK[b.status] ?? 0); break;
@@ -137,8 +138,8 @@ export function OrdersPage() {
                 <td className="py-3 px-4 text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
                 <td className="py-3 px-4"><Badge status={order.status} /></td>
                 <td className="py-3 px-4">
-                  <Link to={`/ward-units/${order.wardUnitId}`} onClick={e => e.stopPropagation()} className="font-mono text-xs text-accent hover:underline">
-                    {order.wardUnitId}
+                  <Link to={`/ward-units/${order.wardUnitId}`} onClick={e => e.stopPropagation()} className="text-accent hover:underline">
+                    {order.wardUnit?.name ?? order.wardUnitId}
                   </Link>
                 </td>
                 <td className="py-3 px-4"><LineList lines={order.lines} /></td>

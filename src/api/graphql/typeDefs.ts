@@ -63,6 +63,7 @@ export const typeDefs = /* GraphQL */ `
   type Order {
     id: ID!
     wardUnitId: ID!
+    wardUnit: WardUnit
     status: OrderStatus!
     createdAt: String!
     lines: [OrderLine!]!

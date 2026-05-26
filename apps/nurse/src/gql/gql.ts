@@ -20,8 +20,11 @@ type Documents = {
     "\n  subscription NurseOrderDraftUpdated {\n    orderDraftUpdated { orderId }\n  }\n": typeof types.NurseOrderDraftUpdatedDocument,
     "\n  subscription NurseOrderStatusChanged {\n    orderStatusChanged { orderId from to }\n  }\n": typeof types.NurseOrderStatusChangedDocument,
     "\n  query SearchMedications($query: String) {\n    medications(query: $query) { id innName atcCode form strength }\n  }\n": typeof types.SearchMedicationsDocument,
-    "\n  query NurseOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId status createdAt\n      lines { medicationId quantity medication { innName strength } }\n    }\n  }\n": typeof types.NurseOrderDocument,
+    "\n  query NurseOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId wardUnit { name } status createdAt\n      lines { medicationId quantity medication { innName strength } }\n    }\n  }\n": typeof types.NurseOrderDocument,
     "\n  query NurseOrderDetailMedications($query: String) {\n    medications(query: $query) { id innName atcCode form strength }\n  }\n": typeof types.NurseOrderDetailMedicationsDocument,
+    "\n  query NurseOverview($wardUnitId: ID!) {\n    wardUnit(id: $wardUnitId) {\n      orders { id status }\n    }\n  }\n": typeof types.NurseOverviewDocument,
+    "\n  subscription NurseOverviewStatusChanged {\n    orderStatusChanged { orderId from to }\n  }\n": typeof types.NurseOverviewStatusChangedDocument,
+    "\n  subscription NurseOverviewDraftCreated {\n    orderDraftCreated { orderId }\n  }\n": typeof types.NurseOverviewDraftCreatedDocument,
 };
 const documents: Documents = {
     "\n  query NurseWardUnitName($id: ID!) {\n    wardUnit(id: $id) { id name }\n  }\n": types.NurseWardUnitNameDocument,
@@ -30,8 +33,11 @@ const documents: Documents = {
     "\n  subscription NurseOrderDraftUpdated {\n    orderDraftUpdated { orderId }\n  }\n": types.NurseOrderDraftUpdatedDocument,
     "\n  subscription NurseOrderStatusChanged {\n    orderStatusChanged { orderId from to }\n  }\n": types.NurseOrderStatusChangedDocument,
     "\n  query SearchMedications($query: String) {\n    medications(query: $query) { id innName atcCode form strength }\n  }\n": types.SearchMedicationsDocument,
-    "\n  query NurseOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId status createdAt\n      lines { medicationId quantity medication { innName strength } }\n    }\n  }\n": types.NurseOrderDocument,
+    "\n  query NurseOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId wardUnit { name } status createdAt\n      lines { medicationId quantity medication { innName strength } }\n    }\n  }\n": types.NurseOrderDocument,
     "\n  query NurseOrderDetailMedications($query: String) {\n    medications(query: $query) { id innName atcCode form strength }\n  }\n": types.NurseOrderDetailMedicationsDocument,
+    "\n  query NurseOverview($wardUnitId: ID!) {\n    wardUnit(id: $wardUnitId) {\n      orders { id status }\n    }\n  }\n": types.NurseOverviewDocument,
+    "\n  subscription NurseOverviewStatusChanged {\n    orderStatusChanged { orderId from to }\n  }\n": types.NurseOverviewStatusChangedDocument,
+    "\n  subscription NurseOverviewDraftCreated {\n    orderDraftCreated { orderId }\n  }\n": types.NurseOverviewDraftCreatedDocument,
 };
 
 /**
@@ -75,11 +81,23 @@ export function graphql(source: "\n  query SearchMedications($query: String) {\n
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query NurseOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId status createdAt\n      lines { medicationId quantity medication { innName strength } }\n    }\n  }\n"): (typeof documents)["\n  query NurseOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId status createdAt\n      lines { medicationId quantity medication { innName strength } }\n    }\n  }\n"];
+export function graphql(source: "\n  query NurseOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId wardUnit { name } status createdAt\n      lines { medicationId quantity medication { innName strength } }\n    }\n  }\n"): (typeof documents)["\n  query NurseOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId wardUnit { name } status createdAt\n      lines { medicationId quantity medication { innName strength } }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query NurseOrderDetailMedications($query: String) {\n    medications(query: $query) { id innName atcCode form strength }\n  }\n"): (typeof documents)["\n  query NurseOrderDetailMedications($query: String) {\n    medications(query: $query) { id innName atcCode form strength }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query NurseOverview($wardUnitId: ID!) {\n    wardUnit(id: $wardUnitId) {\n      orders { id status }\n    }\n  }\n"): (typeof documents)["\n  query NurseOverview($wardUnitId: ID!) {\n    wardUnit(id: $wardUnitId) {\n      orders { id status }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  subscription NurseOverviewStatusChanged {\n    orderStatusChanged { orderId from to }\n  }\n"): (typeof documents)["\n  subscription NurseOverviewStatusChanged {\n    orderStatusChanged { orderId from to }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  subscription NurseOverviewDraftCreated {\n    orderDraftCreated { orderId }\n  }\n"): (typeof documents)["\n  subscription NurseOverviewDraftCreated {\n    orderDraftCreated { orderId }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
