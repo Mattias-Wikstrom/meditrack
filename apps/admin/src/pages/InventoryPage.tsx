@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { useQuery } from 'urql';
-import { Card, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery, useMutation } from 'urql';
+import { Card, Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
 import { graphql } from '../gql';
 
 const MEDICATIONS_QUERY = graphql(`
@@ -13,11 +13,24 @@ const MEDICATIONS_QUERY = graphql(`
   }
 `);
 
+const CREATE_MEDICATION = `
+  mutation AdminCreateMedication($innName: String!, $atcCode: String!, $form: MedicationForm!, $strength: String!) {
+    createMedication(innName: $innName, atcCode: $atcCode, form: $form, strength: $strength) { id }
+  }
+`;
+
+const FORMS = ['Tablet', 'Capsule', 'Injection', 'Solution', 'Cream', 'Drops', 'Inhaler'] as const;
+const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
+
 type SortKey = 'medication' | 'product' | 'stock';
 type SortDir = 'asc' | 'desc';
 
 export function InventoryPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [showCreate, setShowCreate] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [, createMedication] = useMutation(CREATE_MEDICATION);
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>(() => {
     const s = searchParams.get('sort');
@@ -60,8 +73,58 @@ export function InventoryPage() {
     </th>
   );
 
+  async function handleCreateMedication(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const result = await createMedication({
+      innName: fd.get('innName') as string,
+      atcCode: fd.get('atcCode') as string,
+      form: fd.get('form') as string,
+      strength: fd.get('strength') as string,
+    });
+    if (result.error) { setCreateError(result.error.message); return; }
+    setShowCreate(false);
+    setCreateError(null);
+    const id = result.data?.createMedication?.id;
+    if (id) navigate(`/medications/${id}`);
+  }
+
   return (
     <div>
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => { setShowCreate(false); setCreateError(null); }} />
+          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-slate-800 mb-4">New Medication</h2>
+            <form onSubmit={handleCreateMedication} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">INN Name</label>
+                <input name="innName" required placeholder="e.g. Paracetamol" className={inputCls} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">ATC Code</label>
+                <input name="atcCode" required placeholder="e.g. N02BE01" className={inputCls} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Form</label>
+                <select name="form" className={inputCls}>
+                  {FORMS.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Strength</label>
+                <input name="strength" required placeholder="e.g. 500 mg" className={inputCls} />
+              </div>
+              {createError && <p className="text-xs text-red-600">{createError}</p>}
+              <div className="flex gap-2 justify-end pt-1">
+                <Button type="button" variant="ghost" onClick={() => { setShowCreate(false); setCreateError(null); }}>Cancel</Button>
+                <Button type="submit">Create</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-slate-800">
           Inventory
@@ -71,12 +134,15 @@ export function InventoryPage() {
             </span>
           )}
         </h1>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search medication or product…"
-          className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
-        />
+        <div className="flex gap-3">
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search medication or product…"
+            className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+          />
+          <Button onClick={() => { setShowCreate(true); setCreateError(null); }}>+ New Medication</Button>
+        </div>
       </div>
 
       <Card className="overflow-hidden">

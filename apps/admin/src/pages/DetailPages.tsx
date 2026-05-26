@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from 'urql';
-import { BackButton, Badge, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
+import { useQuery, useMutation } from 'urql';
+import { BackButton, Badge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
 
 // ── shared helpers ────────────────────────────────────────────────────────────
 
@@ -180,13 +181,34 @@ const PRODUCT_DETAIL_QUERY = `
   }
 `;
 
+const UPDATE_PRODUCT_MUTATION = `
+  mutation AdminDetailUpdateProduct($id: ID!, $productName: String, $stockThreshold: Int) {
+    updateMedicinalProduct(id: $id, productName: $productName, stockThreshold: $stockThreshold) {
+      id productName stockLevel stockThreshold isBelowThreshold
+    }
+  }
+`;
+
+const DELETE_PRODUCT_MUTATION = `
+  mutation AdminDetailDeleteProduct($id: ID!) {
+    deleteMedicinalProduct(id: $id)
+  }
+`;
+
+const productInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
+
 export function MedicationDetailsPage() {
   const navigate = useNavigate();
   const { productId } = useParams();
-  const [{ data, fetching, error }] = useQuery({
+  const [modal, setModal] = useState<'edit' | 'confirmDelete' | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
+
+  const [{ data, fetching, error }, refetch] = useQuery({
     query: PRODUCT_DETAIL_QUERY,
     variables: { id: productId },
   });
+  const [, updateProduct] = useMutation(UPDATE_PRODUCT_MUTATION);
+  const [, deleteProduct] = useMutation(DELETE_PRODUCT_MUTATION);
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -194,11 +216,82 @@ export function MedicationDetailsPage() {
   const product = data?.medicinalProduct;
   if (!product) return <NotFound kind="medication product" to="/inventory" />;
 
+  async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const result = await updateProduct({
+      id: productId,
+      productName: fd.get('productName') as string,
+      stockThreshold: parseInt(fd.get('stockThreshold') as string),
+    });
+    if (result.error) { setModalError(result.error.message); return; }
+    setModal(null);
+    setModalError(null);
+    refetch({ requestPolicy: 'network-only' });
+  }
+
+  async function handleDelete() {
+    const result = await deleteProduct({ id: productId });
+    if (result.error) { setModalError(result.error.message); return; }
+    navigate('/inventory');
+  }
+
   return (
-    <InventoryProductDetail
-      product={product}
-      onBack={() => navigate('/inventory')}
-      getMedicationHref={id => `/medications/${id}`}
-    />
+    <>
+      <div className="flex items-center gap-3 mb-4">
+        <BackButton onClick={() => navigate('/inventory')} />
+        <div className="ml-auto flex gap-2">
+          <Button variant="ghost" size="sm" onClick={() => { setModalError(null); setModal('edit'); }}>Edit</Button>
+          <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
+        </div>
+      </div>
+
+      <InventoryProductDetail
+        product={product}
+        onBack={() => navigate('/inventory')}
+        getMedicationHref={id => `/medications/${id}`}
+      />
+
+      {modal === 'edit' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
+          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-slate-800 mb-4">Edit Product</h2>
+            <form onSubmit={handleUpdate} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Product Name</label>
+                <input name="productName" defaultValue={product.productName} required className={productInputCls} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Minimum Threshold</label>
+                <input name="stockThreshold" type="number" min={0} defaultValue={product.stockThreshold} required className={productInputCls} />
+              </div>
+              {modalError && <p className="text-xs text-red-600">{modalError}</p>}
+              <div className="flex gap-2 justify-end pt-1">
+                <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
+                <Button type="submit">Save</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {modal === 'confirmDelete' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
+          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-slate-800 mb-2">Delete Product</h2>
+            <p className="text-sm text-slate-600 mb-4">
+              Delete <strong>{product.productName}</strong>? This cannot be undone.
+            </p>
+            {modalError && <p className="text-xs text-red-600 mb-3">{modalError}</p>}
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
+              <Button variant="danger" onClick={handleDelete}>Delete</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
