@@ -265,7 +265,7 @@ export function OrderDetailPage() {
     setSubmitError(null);
     try {
       await ordersApi.deliver(order.id, productSelections);
-      navigate('/');
+      navigate('/orders');
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : 'Delivery failed');
     } finally {
