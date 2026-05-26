@@ -63,6 +63,7 @@ export const typeDefs = /* GraphQL */ `
 
     createWardUnit(name: String!): WardUnit!
     updateWardUnit(id: ID!, name: String!): WardUnit!
+    deleteWardUnit(id: ID!): Boolean!
 
     createActor(id: String!, role: String!, wardUnitId: ID, password: String!): Actor!
     updateActor(id: ID!, role: String, wardUnitId: ID): Actor!

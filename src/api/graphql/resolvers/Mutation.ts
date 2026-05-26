@@ -193,6 +193,13 @@ export const Mutation = {
     return updated;
   },
 
+  deleteWardUnit: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+    const actors = await ctx.actorRepo.findAll();
+    if (actors.some(a => a.wardUnitId === id)) throw new Error('Cannot delete a ward unit that has actors assigned — reassign them first');
+    await ctx.wardUnitRepo.delete(id as WardUnitId);
+    return true;
+  },
+
   // ── Actors ───────────────────────────────────────────────────────────────────
 
   createActor: async (

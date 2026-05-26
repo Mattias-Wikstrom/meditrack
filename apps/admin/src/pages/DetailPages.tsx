@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from 'urql';
 import { BackButton, Badge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
 
+const dialogInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
+
 // ── shared helpers ────────────────────────────────────────────────────────────
 
 function NotFound({ kind, to }: { kind: string; to: string }) {
@@ -91,13 +93,30 @@ const WARD_UNIT_DETAIL_QUERY = `
   }
 `;
 
+const UPDATE_WARD_UNIT = `
+  mutation AdminUpdateWardUnit($id: ID!, $name: String!) {
+    updateWardUnit(id: $id, name: $name) { id name }
+  }
+`;
+
+const DELETE_WARD_UNIT = `
+  mutation AdminDeleteWardUnit($id: ID!) {
+    deleteWardUnit(id: $id)
+  }
+`;
+
 export function WardUnitDetailsPage() {
   const navigate = useNavigate();
   const { wardUnitId } = useParams();
-  const [{ data, fetching, error }] = useQuery({
+  const [modal, setModal] = useState<'edit' | 'confirmDelete' | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
+
+  const [{ data, fetching, error }, refetch] = useQuery({
     query: WARD_UNIT_DETAIL_QUERY,
     variables: { id: wardUnitId },
   });
+  const [, updateWardUnit] = useMutation(UPDATE_WARD_UNIT);
+  const [, deleteWardUnit] = useMutation(DELETE_WARD_UNIT);
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -112,9 +131,31 @@ export function WardUnitDetailsPage() {
     (a: { createdAt: string }, b: { createdAt: string }) => b.createdAt.localeCompare(a.createdAt)
   );
 
+  async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const result = await updateWardUnit({ id: wardUnitId, name: fd.get('name') as string });
+    if (result.error) { setModalError(result.error.message); return; }
+    setModal(null);
+    setModalError(null);
+    refetch({ requestPolicy: 'network-only' });
+  }
+
+  async function handleDelete() {
+    const result = await deleteWardUnit({ id: wardUnitId });
+    if (result.error) { setModalError(result.error.message); return; }
+    navigate('/ward-units');
+  }
+
   return (
-    <div>
-      <BackButton onClick={() => navigate('/ward-units')} className="mb-4" />
+    <>
+      <div className="flex items-center gap-3 mb-4">
+        <BackButton onClick={() => navigate('/ward-units')} />
+        <div className="ml-auto flex gap-2">
+          <Button variant="ghost" size="sm" onClick={() => { setModalError(null); setModal('edit'); }}>Edit</Button>
+          <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
+        </div>
+      </div>
       <h1 className="text-xl font-semibold text-slate-800 mb-1">{unit.name}</h1>
       <p className="text-xs text-slate-400 font-mono mb-6">{unit.id}</p>
 
@@ -166,7 +207,44 @@ export function WardUnitDetailsPage() {
           }
         </Card>
       </div>
-    </div>
+
+      {modal === 'edit' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
+          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-slate-800 mb-4">Edit Ward Unit</h2>
+            <form onSubmit={handleUpdate} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Name</label>
+                <input name="name" defaultValue={unit.name} required className={dialogInputCls} />
+              </div>
+              {modalError && <p className="text-xs text-red-600">{modalError}</p>}
+              <div className="flex gap-2 justify-end pt-1">
+                <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
+                <Button type="submit">Save</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {modal === 'confirmDelete' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
+          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-slate-800 mb-2">Delete Ward Unit</h2>
+            <p className="text-sm text-slate-600 mb-4">
+              Delete <strong>{unit.name}</strong>? This cannot be undone. All assigned nurses must be reassigned first.
+            </p>
+            {modalError && <p className="text-xs text-red-600 mb-3">{modalError}</p>}
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
+              <Button variant="danger" onClick={handleDelete}>Delete</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

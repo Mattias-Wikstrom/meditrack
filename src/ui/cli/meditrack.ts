@@ -7,6 +7,7 @@ import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepositor
 import { PrismaWardUnitRepository } from '../../storage/prisma/PrismaWardUnitRepository';
 import { PrismaActorRepository } from '../../storage/prisma/PrismaActorRepository';
 import { PrismaAuditRepository } from '../../storage/prisma/PrismaAuditRepository';
+import { PrismaCredentialsRepository } from '../../storage/prisma/PrismaCredentialsRepository';
 import { PrismaTransactor } from '../../storage/prisma/PrismaTransactor';
 import { SimpleEventBus } from '../../eventBus/SimpleEventBus';
 import { CreateOrderUseCase } from '../../domain/order/useCases/ordering/CreateOrderUseCase';
@@ -35,6 +36,7 @@ const orderRepo = new PrismaOrderRepository(prisma);
 const wardUnitRepo = new PrismaWardUnitRepository(prisma);
 const actorRepo = new PrismaActorRepository(prisma);
 const auditRepo = new PrismaAuditRepository(prisma);
+const credentialsRepo = new PrismaCredentialsRepository(prisma);
 const transactor = new PrismaTransactor(prisma);
 const eventBus = new SimpleEventBus();
 
@@ -205,6 +207,9 @@ program
       medicinalProductRepo,
       orderRepo,
       wardUnitRepo,
+      actorRepo,
+      auditRepo,
+      credentialsRepo,
       createOrderUseCase,
       updateOrderLinesUseCase,
       sendOrderUseCase,

@@ -29,4 +29,8 @@ export class PrismaWardUnitRepository implements WardUnitRepository {
       update: { name: wardUnit.name },
     });
   }
+
+  async delete(id: WardUnitId): Promise<void> {
+    await this.prisma.wardUnit.delete({ where: { id } });
+  }
 }

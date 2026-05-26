@@ -1,5 +1,6 @@
 import { GraphQLContext } from '../../src/api/graphql/context';
 import { InMemoryActorRepository } from '../../src/storage/inMemory/InMemoryActorRepository';
+import { InMemoryCredentialsRepository } from '../../src/storage/inMemory/InMemoryCredentialsRepository';
 import { InMemoryMedicationRepository } from '../../src/storage/inMemory/InMemoryMedicationRepository';
 import { InMemoryMedicinalProductRepository } from '../../src/storage/inMemory/InMemoryMedicinalProductRepository';
 import { InMemoryOrderRepository } from '../../src/storage/inMemory/InMemoryOrderRepository';
@@ -26,6 +27,7 @@ export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
     { id: 'pharmacist-1', role: ActorRole.Pharmacist },
     { id: actorId, role: ActorRole.Nurse },
   ]);
+  const credentialsRepo = new InMemoryCredentialsRepository();
   const medicationRepo = new InMemoryMedicationRepository();
   const medicinalProductRepo = new InMemoryMedicinalProductRepository();
   const orderRepo = new InMemoryOrderRepository();
@@ -39,6 +41,9 @@ export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
     medicinalProductRepo,
     orderRepo,
     wardUnitRepo,
+    actorRepo,
+    auditRepo,
+    credentialsRepo,
     createOrderUseCase: new CreateOrderUseCase(actorRepo, transactor, eventBus),
     updateOrderLinesUseCase: new UpdateOrderLinesUseCase(actorRepo, orderRepo, transactor, eventBus),
     sendOrderUseCase: new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus),

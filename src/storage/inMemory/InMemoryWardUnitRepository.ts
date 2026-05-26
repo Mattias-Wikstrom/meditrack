@@ -16,4 +16,8 @@ export class InMemoryWardUnitRepository implements WardUnitRepository {
   async save(wardUnit: WardUnit): Promise<void> {
     this.store.set(wardUnit.id, wardUnit);
   }
+
+  async delete(id: WardUnitId): Promise<void> {
+    this.store.delete(id);
+  }
 }
