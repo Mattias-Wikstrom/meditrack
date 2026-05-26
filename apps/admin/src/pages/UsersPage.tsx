@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from 'urql';
-import { Card, Spinner, RoleBadge, SortIcon } from '@meditrack/ui';
+import { useQuery, useMutation } from 'urql';
+import { Button, Card, Spinner, RoleBadge, SortIcon } from '@meditrack/ui';
 
 const ACTORS_QUERY = /* GraphQL */ `
   query AdminActors {
@@ -11,9 +11,18 @@ const ACTORS_QUERY = /* GraphQL */ `
       wardUnitId
       wardUnit { name }
     }
+    wardUnits { id name }
   }
 `;
 
+const CREATE_ACTOR = `
+  mutation AdminCreateActor($id: String!, $role: String!, $wardUnitId: ID, $password: String!) {
+    createActor(id: $id, role: $role, wardUnitId: $wardUnitId, password: $password) { id }
+  }
+`;
+
+const ROLES = ['Nurse', 'Pharmacist', 'Admin'] as const;
+const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
 type SortKey = 'id' | 'role' | 'wardUnit';
 type SortDir = 'asc' | 'desc';
@@ -23,8 +32,12 @@ export function UsersPage() {
   const [sortKey, setSortKey] = useState<SortKey>('id');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [roleFilter, setRoleFilter] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>('Nurse');
 
   const [{ data, fetching, error }] = useQuery({ query: ACTORS_QUERY });
+  const [, createActor] = useMutation(CREATE_ACTOR);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -35,7 +48,9 @@ export function UsersPage() {
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
   type Actor = { id: string; role: string; wardUnitId?: string | null; wardUnit?: { name: string } | null };
+  type WardUnit = { id: string; name: string };
   const actors: Actor[] = data?.actors ?? [];
+  const wardUnits: WardUnit[] = data?.wardUnits ?? [];
   const filtered = roleFilter ? actors.filter(a => a.role === roleFilter) : actors;
   const sorted = [...filtered].sort((a, b) => {
     let av: string;
@@ -56,23 +71,82 @@ export function UsersPage() {
     </th>
   );
 
+  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const wardUnitId = fd.get('wardUnitId') as string | null;
+    const result = await createActor({
+      id: fd.get('id') as string,
+      role: fd.get('role') as string,
+      wardUnitId: wardUnitId || undefined,
+      password: fd.get('password') as string,
+    });
+    if (result.error) { setCreateError(result.error.message); return; }
+    setShowCreate(false);
+    setCreateError(null);
+    const id = result.data?.createActor?.id;
+    if (id) navigate(`/users/${id}`);
+  }
+
   return (
     <div>
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => { setShowCreate(false); setCreateError(null); }} />
+          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-slate-800 mb-4">New User</h2>
+            <form onSubmit={handleCreate} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Username</label>
+                <input name="id" required placeholder="e.g. nurse.anna" className={inputCls} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Role</label>
+                <select name="role" value={selectedRole} onChange={e => setSelectedRole(e.target.value)} className={inputCls}>
+                  {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              {selectedRole === 'Nurse' && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Ward Unit</label>
+                  <select name="wardUnitId" className={inputCls}>
+                    <option value="">— None —</option>
+                    {wardUnits.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                  </select>
+                </div>
+              )}
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Password</label>
+                <input name="password" type="password" required className={inputCls} />
+              </div>
+              {createError && <p className="text-xs text-red-600">{createError}</p>}
+              <div className="flex gap-2 justify-end pt-1">
+                <Button type="button" variant="ghost" onClick={() => { setShowCreate(false); setCreateError(null); }}>Cancel</Button>
+                <Button type="submit">Create</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-slate-800">
           Users
           <span className="ml-2 text-sm font-normal text-slate-400">{sorted.length}</span>
         </h1>
-        <select
-          value={roleFilter}
-          onChange={e => setRoleFilter(e.target.value)}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
-        >
-          <option value="">All roles</option>
-          <option value="Nurse">Nurse</option>
-          <option value="Pharmacist">Pharmacist</option>
-          <option value="Admin">Admin</option>
-        </select>
+        <div className="flex gap-3">
+          <select
+            value={roleFilter}
+            onChange={e => setRoleFilter(e.target.value)}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+          >
+            <option value="">All roles</option>
+            <option value="Nurse">Nurse</option>
+            <option value="Pharmacist">Pharmacist</option>
+            <option value="Admin">Admin</option>
+          </select>
+          <Button onClick={() => { setShowCreate(true); setCreateError(null); setSelectedRole('Nurse'); }}>+ New User</Button>
+        </div>
       </div>
 
       <Card className="overflow-hidden">

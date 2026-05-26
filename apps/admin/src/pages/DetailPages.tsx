@@ -22,14 +22,35 @@ function NotFound({ kind, to }: { kind: string; to: string }) {
 const ACTORS_QUERY = `
   query AdminActorDetails {
     actors { id role wardUnitId wardUnit { name } }
+    wardUnits { id name }
     auditLog { actorId action entityId occurredAt }
   }
 `;
 
+const UPDATE_ACTOR = `
+  mutation AdminUpdateActor($id: ID!, $role: String, $wardUnitId: ID) {
+    updateActor(id: $id, role: $role, wardUnitId: $wardUnitId) { id role wardUnitId }
+  }
+`;
+
+const DELETE_ACTOR = `
+  mutation AdminDeleteActor($id: ID!) {
+    deleteActor(id: $id)
+  }
+`;
+
+const ROLES = ['Nurse', 'Pharmacist', 'Admin'] as const;
+
 export function UserDetailsPage() {
   const navigate = useNavigate();
   const { userId } = useParams();
-  const [{ data, fetching, error }] = useQuery({ query: ACTORS_QUERY });
+  const [modal, setModal] = useState<'edit' | 'confirmDelete' | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
+  const [editRole, setEditRole] = useState('');
+
+  const [{ data, fetching, error }, refetch] = useQuery({ query: ACTORS_QUERY });
+  const [, updateActor] = useMutation(UPDATE_ACTOR);
+  const [, deleteActor] = useMutation(DELETE_ACTOR);
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -37,13 +58,49 @@ export function UserDetailsPage() {
   const actor = data?.actors.find((a: { id: string }) => a.id === userId);
   if (!actor) return <NotFound kind="user" to="/users" />;
 
+  type WardUnit = { id: string; name: string };
+  const wardUnits: WardUnit[] = data?.wardUnits ?? [];
+
   const recentActivity = (data?.auditLog ?? [])
     .filter((e: { actorId: string }) => e.actorId === userId)
     .slice(0, 20);
 
+  function openEdit() {
+    setEditRole(actor.role);
+    setModalError(null);
+    setModal('edit');
+  }
+
+  async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const wardUnitId = fd.get('wardUnitId') as string | null;
+    const result = await updateActor({
+      id: userId,
+      role: fd.get('role') as string,
+      wardUnitId: wardUnitId || null,
+    });
+    if (result.error) { setModalError(result.error.message); return; }
+    setModal(null);
+    setModalError(null);
+    refetch({ requestPolicy: 'network-only' });
+  }
+
+  async function handleDelete() {
+    const result = await deleteActor({ id: userId });
+    if (result.error) { setModalError(result.error.message); return; }
+    navigate('/users');
+  }
+
   return (
-    <div>
-      <BackButton onClick={() => navigate('/users')} className="mb-4" />
+    <>
+      <div className="flex items-center gap-3 mb-4">
+        <BackButton onClick={() => navigate('/users')} />
+        <div className="ml-auto flex gap-2">
+          <Button variant="ghost" size="sm" onClick={openEdit}>Edit</Button>
+          <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
+        </div>
+      </div>
       <h1 className="text-xl font-semibold text-slate-800 mb-6">{actor.id}</h1>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
@@ -74,7 +131,55 @@ export function UserDetailsPage() {
           }
         </Card>
       </div>
-    </div>
+
+      {modal === 'edit' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
+          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-slate-800 mb-4">Edit User</h2>
+            <form onSubmit={handleUpdate} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Role</label>
+                <select name="role" value={editRole} onChange={e => setEditRole(e.target.value)} className={dialogInputCls}>
+                  {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              {editRole === 'Nurse' && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Ward Unit</label>
+                  <select name="wardUnitId" defaultValue={actor.wardUnitId ?? ''} className={dialogInputCls}>
+                    <option value="">— None —</option>
+                    {wardUnits.map((u: WardUnit) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                  </select>
+                </div>
+              )}
+              {modalError && <p className="text-xs text-red-600">{modalError}</p>}
+              <div className="flex gap-2 justify-end pt-1">
+                <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
+                <Button type="submit">Save</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {modal === 'confirmDelete' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
+          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-slate-800 mb-2">Delete User</h2>
+            <p className="text-sm text-slate-600 mb-4">
+              Delete <strong>{actor.id}</strong>? This cannot be undone.
+            </p>
+            {modalError && <p className="text-xs text-red-600 mb-3">{modalError}</p>}
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
+              <Button variant="danger" onClick={handleDelete}>Delete</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
