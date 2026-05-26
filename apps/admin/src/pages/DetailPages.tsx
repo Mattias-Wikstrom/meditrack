@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from 'urql';
-import { BackButton, OrderStatusBadge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleOrderStatusBadge, formatDate } from '@meditrack/ui';
+import { BackButton, OrderStatusBadge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
+import { useAuth, createApiClient } from '@meditrack/client';
 
 const dialogInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
@@ -28,18 +29,6 @@ const ACTORS_QUERY = `
   }
 `;
 
-const UPDATE_ACTOR = `
-  mutation AdminUpdateActor($id: ID!, $role: String, $wardUnitId: ID) {
-    updateActor(id: $id, role: $role, wardUnitId: $wardUnitId) { id role wardUnitId }
-  }
-`;
-
-const DELETE_ACTOR = `
-  mutation AdminDeleteActor($id: ID!) {
-    deleteActor(id: $id)
-  }
-`;
-
 const ROLES = ['Nurse', 'Pharmacist', 'Admin'] as const;
 
 export function UserDetailsPage() {
@@ -49,9 +38,8 @@ export function UserDetailsPage() {
   const [modalError, setModalError] = useState<string | null>(null);
   const [editRole, setEditRole] = useState('');
 
+  const { token } = useAuth();
   const [{ data, fetching, error }, refetch] = useQuery({ query: ACTORS_QUERY });
-  const [, updateActor] = useMutation(UPDATE_ACTOR);
-  const [, deleteActor] = useMutation(DELETE_ACTOR);
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -76,21 +64,26 @@ export function UserDetailsPage() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const wardUnitId = fd.get('wardUnitId') as string | null;
-    const result = await updateActor({
-      id: userId,
-      role: fd.get('role') as string,
-      wardUnitId: wardUnitId || null,
-    });
-    if (result.error) { setModalError(result.error.message); return; }
-    setModal(null);
-    setModalError(null);
-    refetch({ requestPolicy: 'network-only' });
+    try {
+      await createApiClient(token!).patch(`/actors/${userId}`, {
+        role: fd.get('role') as string,
+        wardUnitId: wardUnitId || null,
+      });
+      setModal(null);
+      setModalError(null);
+      refetch({ requestPolicy: 'network-only' });
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to update user');
+    }
   }
 
   async function handleDelete() {
-    const result = await deleteActor({ id: userId });
-    if (result.error) { setModalError(result.error.message); return; }
-    navigate('/users');
+    try {
+      await createApiClient(token!).del(`/actors/${userId}`);
+      navigate('/users');
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to delete user');
+    }
   }
 
   return (
@@ -107,7 +100,7 @@ export function UserDetailsPage() {
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
         <Card className="p-5">
           <h2 className="text-base font-semibold text-slate-700 mb-2">Account</h2>
-          <InfoRow label="Role"><RoleOrderStatusBadge role={actor.role} /></InfoRow>
+          <InfoRow label="Role"><RoleBadge role={actor.role} /></InfoRow>
           <InfoRow label="Ward Unit">
             {actor.wardUnit
               ? <Link to={`/ward-units/${actor.wardUnitId}`} className="text-accent hover:underline">{actor.wardUnit.name}</Link>

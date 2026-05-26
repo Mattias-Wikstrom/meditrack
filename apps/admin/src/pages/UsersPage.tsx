@@ -1,8 +1,9 @@
 // Used for /users (admin)
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from 'urql';
+import { useQuery } from 'urql';
 import { Button, Card, Spinner, RoleBadge, SortIcon } from '@meditrack/ui';
+import { useAuth, createApiClient } from '@meditrack/client';
 
 const ACTORS_QUERY = /* GraphQL */ `
   query AdminActors {
@@ -13,12 +14,6 @@ const ACTORS_QUERY = /* GraphQL */ `
       wardUnit { name }
     }
     wardUnits { id name }
-  }
-`;
-
-const CREATE_ACTOR = `
-  mutation AdminCreateActor($id: String!, $role: String!, $wardUnitId: ID, $password: String!) {
-    createActor(id: $id, role: $role, wardUnitId: $wardUnitId, password: $password) { id }
   }
 `;
 
@@ -37,8 +32,8 @@ export function UsersPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>('Nurse');
 
+  const { token } = useAuth();
   const [{ data, fetching, error }] = useQuery({ query: ACTORS_QUERY });
-  const [, createActor] = useMutation(CREATE_ACTOR);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -76,17 +71,19 @@ export function UsersPage() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const wardUnitId = fd.get('wardUnitId') as string | null;
-    const result = await createActor({
-      id: fd.get('id') as string,
-      role: fd.get('role') as string,
-      wardUnitId: wardUnitId || undefined,
-      password: fd.get('password') as string,
-    });
-    if (result.error) { setCreateError(result.error.message); return; }
-    setShowCreate(false);
-    setCreateError(null);
-    const id = result.data?.createActor?.id;
-    if (id) navigate(`/users/${id}`);
+    try {
+      const actor = await createApiClient(token!).post<{ id: string }>('/actors', {
+        id: fd.get('id') as string,
+        role: fd.get('role') as string,
+        wardUnitId: wardUnitId || undefined,
+        password: fd.get('password') as string,
+      });
+      setShowCreate(false);
+      setCreateError(null);
+      navigate(`/users/${actor.id}`);
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Failed to create user');
+    }
   }
 
   return (
