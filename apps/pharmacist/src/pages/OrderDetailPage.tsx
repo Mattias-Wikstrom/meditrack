@@ -195,7 +195,7 @@ export function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const ordersApi = useOrdersApi();
-  const [{ data, fetching, error }] = useQuery({ query: ORDER_QUERY, variables: { id: id! } });
+  const [{ data, fetching, error }] = useQuery({ query: ORDER_QUERY, variables: { id: id! }, requestPolicy: 'network-only' });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
