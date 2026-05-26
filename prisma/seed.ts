@@ -4,6 +4,19 @@ import { ActorRole, MedicationForm, PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
+  // ── Ward units ────────────────────────────────────────────────────────────
+  // Must be seeded before actors due to the wardUnitId foreign key.
+
+  const wardUnits = [
+    { id: 'ward-akuten',   name: 'Akuten' },
+    { id: 'ward-medicin',  name: 'Medicinavdelningen' },
+    { id: 'ward-kirurgi',  name: 'Kirurgavdelningen' },
+  ];
+
+  for (const w of wardUnits) {
+    await prisma.wardUnit.upsert({ where: { id: w.id }, create: w, update: w });
+  }
+
   // ── Actors ────────────────────────────────────────────────────────────────
 
   const passwordHash = await bcrypt.hash('password', 10);
@@ -18,18 +31,6 @@ async function main() {
 
   for (const a of actors) {
     await prisma.actor.upsert({ where: { id: a.id }, create: a, update: a });
-  }
-
-  // ── Ward units ────────────────────────────────────────────────────────────
-
-  const wardUnits = [
-    { id: 'ward-akuten',   name: 'Akuten' },
-    { id: 'ward-medicin',  name: 'Medicinavdelningen' },
-    { id: 'ward-kirurgi',  name: 'Kirurgavdelningen' },
-  ];
-
-  for (const w of wardUnits) {
-    await prisma.wardUnit.upsert({ where: { id: w.id }, create: w, update: w });
   }
 
   // ── Medications ───────────────────────────────────────────────────────────
