@@ -33,7 +33,7 @@ export class UpdateMedicationUseCase {
   async execute(input: UpdateMedicationInput): Promise<UseCaseResult<Medication>> {
     const actor = await this.actorRepository.findById(input.requestingActorId);
     if (actor === undefined) return failure('ActorNotFound');
-    if (actor.role !== ActorRole.Pharmacist) return failure('UnauthorizedRole');
+    if (actor.role !== ActorRole.Admin) return failure('UnauthorizedRole');
 
     const existing = await this.medicationRepository.findById(input.id);
     if (existing === undefined) return failure('MedicationNotFound');

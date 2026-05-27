@@ -21,7 +21,7 @@ describe('UpdateMedicationUseCase', () => {
 
   beforeEach(async () => {
     actorRepo = new InMemoryActorRepository([
-      { id: 'pharm-1', role: ActorRole.Pharmacist },
+      { id: 'admin-1', role: ActorRole.Admin },
       { id: 'nurse-1', role: ActorRole.Nurse },
     ]);
     medicationRepo = new InMemoryMedicationRepository();
@@ -40,7 +40,7 @@ describe('UpdateMedicationUseCase', () => {
 
   it('updates the medication and writes an audit entry', async () => {
     const result = await useCase.execute({
-      requestingActorId: 'pharm-1',
+      requestingActorId: 'admin-1',
       id: MED_ID,
       innName: 'Paracetamol Updated',
       strength: '1000 mg',
@@ -57,7 +57,7 @@ describe('UpdateMedicationUseCase', () => {
 
   it('preserves unchanged fields', async () => {
     const result = await useCase.execute({
-      requestingActorId: 'pharm-1',
+      requestingActorId: 'admin-1',
       id: MED_ID,
       atcCode: 'N02BE02',
     });
@@ -77,7 +77,7 @@ describe('UpdateMedicationUseCase', () => {
     expect(result.errors[0]?.code).toBe('ActorNotFound');
   });
 
-  it('fails when the requesting actor is not a pharmacist', async () => {
+  it('fails when the requesting actor is not an admin', async () => {
     const result = await useCase.execute({ requestingActorId: 'nurse-1', id: MED_ID });
 
     expect(result.successful).toBe(false);
@@ -86,7 +86,7 @@ describe('UpdateMedicationUseCase', () => {
   });
 
   it('fails when the medication does not exist', async () => {
-    const result = await useCase.execute({ requestingActorId: 'pharm-1', id: 'no-such-med' as MedicationId });
+    const result = await useCase.execute({ requestingActorId: 'admin-1', id: 'no-such-med' as MedicationId });
 
     expect(result.successful).toBe(false);
     if (result.successful) return;
