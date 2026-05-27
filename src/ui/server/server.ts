@@ -67,15 +67,20 @@ const wsServer = new WebSocketServer({ server: httpServer, path: '/graphql' });
 useServer(
   {
     schema,
+    onConnect: async (ctx) => {
+      const token = ctx.connectionParams?.token as string | undefined;
+      if (!token) return false;
+      try {
+        await verifyToken(token);
+        return true;
+      } catch {
+        return false;
+      }
+    },
     context: async (ctx) => {
       const token = ctx.connectionParams?.token as string | undefined;
-      if (!token) throw unauthenticated();
-      try {
-        const { actorId } = await verifyToken(token);
-        return buildContext(actorId);
-      } catch {
-        throw unauthenticated('Session expired');
-      }
+      const { actorId } = await verifyToken(token as string);
+      return buildContext(actorId);
     },
   },
   wsServer,

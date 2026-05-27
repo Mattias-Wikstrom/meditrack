@@ -24,7 +24,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://meditrack:meditrack@db:5432/meditrack
-      JWT_SECRET: change-me-in-production
+      JWT_SECRET: meditrack-dev-secret-change-in-production
     ports:
       - "4000:4000"
     volumes:
