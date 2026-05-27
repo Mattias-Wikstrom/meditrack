@@ -5,7 +5,7 @@ import { ActorRole } from '../../shared/ActorRole';
 import { Transactor } from '../../shared/Transactor';
 import { UseCaseResult, success, failure, failures } from '../../shared/results/UseCaseResult';
 import { MedicinalProductId } from '../../shared/IdTypes';
-import { RestockRule } from '../rules/RestockRule';
+import { RestockRule } from '../rules/interfaces/RestockRule';
 import { RestockQuantityPositive } from '../rules/RestockQuantityPositive';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
 

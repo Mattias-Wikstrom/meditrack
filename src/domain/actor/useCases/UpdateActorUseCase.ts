@@ -5,7 +5,7 @@ import { Transactor } from '../../shared/Transactor';
 import { EventBus } from '../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure, failures } from '../../shared/results/UseCaseResult';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { ActorRule } from '../rules/ActorRule';
+import { ActorRule } from '../rules/interfaces/ActorRule';
 import { NurseRequiresWardUnit } from '../rules/NurseRequiresWardUnit';
 import { NonNurseCannotHaveWardUnit } from '../rules/NonNurseCannotHaveWardUnit';
 import { ActorUpdated } from '../events/ActorUpdated';

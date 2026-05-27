@@ -5,7 +5,7 @@ import { ActorRole } from '../../shared/ActorRole';
 import { Transactor } from '../../shared/Transactor';
 import { UseCaseResult, success, failure, failures } from '../../shared/results/UseCaseResult';
 import { MedicationId } from '../../shared/IdTypes';
-import { DeleteMedicationRule } from '../rules/DeleteMedicationRule';
+import { DeleteMedicationRule } from '../rules/interfaces/DeleteMedicationRule';
 import { MedicationHasNoProducts } from '../rules/MedicationHasNoProducts';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
 

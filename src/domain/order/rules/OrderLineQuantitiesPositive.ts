@@ -1,6 +1,6 @@
 import { Order } from '../Order';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { OrderRule } from './OrderRule';
+import { OrderRule } from './interfaces/OrderRule';
 
 // Each line on an order has to specify a positive quantity of something
 // TODO: What about non-integral values? That is fine?

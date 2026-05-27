@@ -1,7 +1,7 @@
 import { Medication } from '../Medication';
 import { MedicinalProduct } from '../MedicinalProduct';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { DeleteMedicationRule } from './DeleteMedicationRule';
+import { DeleteMedicationRule } from './interfaces/DeleteMedicationRule';
 
 // A medication cannot be deleted while it still has registered medicinal products
 export class MedicationHasNoProducts implements DeleteMedicationRule {

@@ -1,6 +1,6 @@
 import { Medication } from '../Medication';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { MedicationRule } from './MedicationRule';
+import { MedicationRule } from './interfaces/MedicationRule';
 
 // ATC codes follow the WHO classification system (e.g. N02BE01 for Paracetamol).
 // TODO: validate against the full ATC regex pattern.

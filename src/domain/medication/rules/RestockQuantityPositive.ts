@@ -1,5 +1,5 @@
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { RestockRule } from './RestockRule';
+import { RestockRule } from './interfaces/RestockRule';
 
 // The quantity added to stock during a restock must be greater than zero
 export class RestockQuantityPositive implements RestockRule {
