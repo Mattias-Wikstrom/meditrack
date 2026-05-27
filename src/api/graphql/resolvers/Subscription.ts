@@ -4,6 +4,7 @@ import type { DraftOrderUpdated } from '../../../domain/order/events/DraftOrderU
 import type { OrderStatusAdvanced } from '../../../domain/order/events/OrderStatusAdvanced';
 import type { StockBelowThreshold } from '../../../domain/medication/events/StockBelowThreshold';
 import type { ProductRestocked } from '../../../domain/medication/events/ProductRestocked';
+import type { MedicinalProductChanged } from '../../../domain/medication/events/MedicinalProductChanged';
 
 export const Subscription = {
   orderDraftCreated: {
@@ -47,5 +48,9 @@ export const Subscription = {
       productName: event.productName,
       stockLevel: event.stockLevel,
     }),
+  },
+  medicinalProductUpdated: {
+    subscribe: () => pubSub.subscribe('MedicinalProductChanged'),
+    resolve: (event: MedicinalProductChanged) => event,
   },
 };

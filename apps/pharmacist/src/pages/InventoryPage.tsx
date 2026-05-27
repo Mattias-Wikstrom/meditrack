@@ -15,23 +15,12 @@ const INVENTORY_QUERY = graphql(`
   }
 `);
 
-const STOCK_ALERT_SUB = graphql(`
-  subscription PharmacistInventoryStockAlert {
-    stockBelowThreshold {
-      medicinalProductId productName stockLevel stockThreshold
+const PRODUCT_UPDATED_SUB = graphql(`
+  subscription PharmacistInventoryProductUpdated {
+    medicinalProductUpdated {
+      id productName stockLevel stockThreshold isBelowThreshold
+      medication { id innName atcCode form strength }
     }
-  }
-`);
-
-const ORDER_STATUS_SUB = graphql(`
-  subscription PharmacistOrderStatusChanged {
-    orderStatusChanged { orderId from to }
-  }
-`);
-
-const PRODUCT_RESTOCKED_SUB = graphql(`
-  subscription PharmacistProductRestocked {
-    productRestocked { medicinalProductId productName stockLevel }
   }
 `);
 
@@ -101,25 +90,16 @@ export function InventoryPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const { token } = useAuth();
-  const [{ data, fetching, error }, refetch] = useQuery({ query: INVENTORY_QUERY });
+  const [{ data, fetching, error }] = useQuery({ query: INVENTORY_QUERY });
+  const [overrides, setOverrides] = useState<Map<string, NonNullable<typeof productUpdate>>>(new Map());
 
-  const [{ data: stockAlertData }] = useSubscription({ query: STOCK_ALERT_SUB });
-  const [{ data: orderStatusData }] = useSubscription({ query: ORDER_STATUS_SUB });
-  const [{ data: restockedData }] = useSubscription({ query: PRODUCT_RESTOCKED_SUB });
-
-  useEffect(() => {
-    if (stockAlertData) refetch({ requestPolicy: 'network-only' });
-  }, [stockAlertData]);
+  const [{ data: productUpdateData }] = useSubscription({ query: PRODUCT_UPDATED_SUB });
+  const productUpdate = productUpdateData?.medicinalProductUpdated;
 
   useEffect(() => {
-    if (orderStatusData?.orderStatusChanged?.to === 'Delivered') {
-      refetch({ requestPolicy: 'network-only' });
-    }
-  }, [orderStatusData]);
-
-  useEffect(() => {
-    if (restockedData) refetch({ requestPolicy: 'network-only' });
-  }, [restockedData]);
+    if (!productUpdate) return;
+    setOverrides(prev => new Map(prev).set(productUpdate.id, productUpdate));
+  }, [productUpdate]);
 
   function handleSort(key: SortKey) {
     if (key === sortKey) {
@@ -137,7 +117,6 @@ export function InventoryPage() {
     try {
       await createApiClient(token!).post(`/products/${restocking.id}/restock`, { quantity });
       setRestocking(null);
-      refetch({ requestPolicy: 'network-only' });
     } catch (err) {
       setRestockError(err instanceof Error ? err.message : 'Restock failed');
     } finally {
@@ -148,7 +127,7 @@ export function InventoryPage() {
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
-  const products = data?.medicinalProducts ?? [];
+  const products = (data?.medicinalProducts ?? []).map(p => overrides.get(p.id) ?? p);
   const lowStockCount = products.filter(p => p.isBelowThreshold).length;
 
   const q = search.toLowerCase();
