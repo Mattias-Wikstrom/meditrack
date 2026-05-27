@@ -9,6 +9,7 @@ import { OrderDetailPage } from './pages/OrderDetailPage';
 import { OverviewPage } from './pages/OverviewPage';
 import { InventoryProductPage } from './pages/InventoryProductPage';
 import { MedicationDetailPage } from './pages/MedicationDetailPage';
+import { StockAlerts } from './StockAlerts';
 
 function PharmacistNav() {
   return (
@@ -42,6 +43,7 @@ export function App() {
         onProfile={() => navigate('/me')}
         onLogout={logout}
       >
+        <StockAlerts />
         <Routes>
           <Route path="/" element={<OverviewPage />} />
           <Route path="/orders" element={<DashboardPage />} />
