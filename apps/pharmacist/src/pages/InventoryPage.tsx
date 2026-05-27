@@ -112,23 +112,18 @@ export function InventoryPage() {
   const [, restock] = useMutation(RESTOCK_MUTATION);
 
   useSubscription({ query: STOCK_ALERT_SUB }, () => {
-    console.log('[InventoryPage] stockBelowThreshold event received — refetching');
     refetch({ requestPolicy: 'network-only' });
     return undefined;
   });
 
   useSubscription({ query: ORDER_STATUS_SUB }, (prev, response) => {
-    const e = response.orderStatusChanged;
-    console.log('[InventoryPage] orderStatusChanged event received', e);
-    if (e?.to === 'Delivered') {
-      console.log('[InventoryPage] order delivered — refetching inventory');
+    if (response.orderStatusChanged?.to === 'Delivered') {
       refetch({ requestPolicy: 'network-only' });
     }
     return prev;
   });
 
-  useSubscription({ query: PRODUCT_RESTOCKED_SUB }, (prev, response) => {
-    console.log('[InventoryPage] productRestocked event received', response.productRestocked);
+  useSubscription({ query: PRODUCT_RESTOCKED_SUB }, (prev) => {
     refetch({ requestPolicy: 'network-only' });
     return prev;
   });
