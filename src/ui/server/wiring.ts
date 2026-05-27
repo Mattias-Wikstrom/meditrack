@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { EventBus } from '../../domain/shared/eventContracts/EventBus';
 import { RepositoryChangeBus } from '../../infrastructure/repositoryChange/RepositoryChangeBus';
-import { observing } from '../../infrastructure/repositoryChange/observing';
 import { PrismaMedicationRepository } from '../../storage/prisma/PrismaMedicationRepository';
 import { PrismaMedicinalProductRepository } from '../../storage/prisma/PrismaMedicinalProductRepository';
 import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepository';
@@ -30,13 +29,13 @@ import { DeleteMedicinalProductUseCase } from '../../domain/medication/useCases/
 import { PrismaCredentialsRepository } from '../../storage/prisma/PrismaCredentialsRepository';
 
 export function createWiring(prisma: PrismaClient, eventBus: EventBus, changeBus: RepositoryChangeBus) {
-  const medicationRepo = observing(new PrismaMedicationRepository(prisma), 'Medication', changeBus);
-  const medicinalProductRepo = observing(new PrismaMedicinalProductRepository(prisma), 'MedicinalProduct', changeBus);
-  const orderRepo = observing(new PrismaOrderRepository(prisma), 'Order', changeBus);
-  const wardUnitRepo = observing(new PrismaWardUnitRepository(prisma), 'WardUnit', changeBus);
-  const actorRepo = observing(new PrismaActorRepository(prisma), 'Actor', changeBus);
+  const medicationRepo = new PrismaMedicationRepository(prisma);
+  const medicinalProductRepo = new PrismaMedicinalProductRepository(prisma);
+  const orderRepo = new PrismaOrderRepository(prisma);
+  const wardUnitRepo = new PrismaWardUnitRepository(prisma);
+  const actorRepo = new PrismaActorRepository(prisma);
   const auditRepo = new PrismaAuditRepository(prisma);
-  const transactor = new PrismaTransactor(prisma);
+  const transactor = new PrismaTransactor(prisma, changeBus);
   const credentialsRepo = new PrismaCredentialsRepository(prisma);
 
   return {
