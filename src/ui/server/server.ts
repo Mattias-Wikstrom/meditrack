@@ -8,6 +8,7 @@ import { useServer } from 'graphql-ws/use/ws';
 import { prisma } from '../../storage/prisma/prismaClient';
 import { schema } from '../../api/graphql/schema';
 import { PubSubEventBus } from './PubSubEventBus';
+import { PubSubRepositoryChangeBus } from '../../infrastructure/repositoryChange/PubSubRepositoryChangeBus';
 import { createWiring } from './wiring';
 import { createOrdersRouter } from './rest/orders';
 import { createAuthRouter } from './rest/auth';
@@ -25,7 +26,8 @@ function unauthenticated(message = 'Unauthorized'): GraphQLError {
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 4000;
 
 const eventBus = new PubSubEventBus();
-const wiring = createWiring(prisma, eventBus);
+const changeBus = new PubSubRepositoryChangeBus();
+const wiring = createWiring(prisma, eventBus, changeBus);
 
 const buildContext = (actorId: string) => ({ ...wiring, actorId });
 
