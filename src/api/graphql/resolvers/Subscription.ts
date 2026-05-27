@@ -1,10 +1,20 @@
 import { pubSub } from '../../../eventBus/pubSub';
+import { changePubSub } from '../../../infrastructure/repositoryChange/changePubSub';
+import type { RepositoryChange } from '../../../infrastructure/repositoryChange/RepositoryChangeBus';
+import type { MedicinalProduct } from '../../../domain/medication/MedicinalProduct';
 import type { DraftOrderCreated } from '../../../domain/order/events/DraftOrderCreated';
 import type { DraftOrderUpdated } from '../../../domain/order/events/DraftOrderUpdated';
 import type { OrderStatusAdvanced } from '../../../domain/order/events/OrderStatusAdvanced';
 import type { StockBelowThreshold } from '../../../domain/medication/events/StockBelowThreshold';
 import type { ProductRestocked } from '../../../domain/medication/events/ProductRestocked';
-import type { MedicinalProductChanged } from '../../../domain/medication/events/MedicinalProductChanged';
+
+async function* savedEntities<T>(
+  source: AsyncIterable<RepositoryChange<T>>,
+): AsyncIterable<T> {
+  for await (const change of source) {
+    if (change.kind === 'saved') yield change.entity;
+  }
+}
 
 export const Subscription = {
   orderDraftCreated: {
@@ -50,7 +60,7 @@ export const Subscription = {
     }),
   },
   medicinalProductUpdated: {
-    subscribe: () => pubSub.subscribe('MedicinalProductChanged'),
-    resolve: (event: MedicinalProductChanged) => event,
+    subscribe: () => savedEntities<MedicinalProduct>(changePubSub.subscribe('MedicinalProduct')),
+    resolve: (entity: MedicinalProduct) => entity,
   },
 };
