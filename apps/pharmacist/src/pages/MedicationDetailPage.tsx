@@ -1,6 +1,7 @@
 // Used for /medications/:medicationId (pharmacist)
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from 'urql';
+import { useQuery, useSubscription } from 'urql';
 import { MedicationDetail, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
 
@@ -15,6 +16,14 @@ const MEDICATION_DETAIL_QUERY = graphql(`
   }
 `);
 
+const PRODUCT_UPDATED_SUB = graphql(`
+  subscription PharmacistMedicationDetailProductUpdated {
+    medicinalProductUpdated {
+      id productName stockLevel stockThreshold isBelowThreshold
+    }
+  }
+`);
+
 export function MedicationDetailPage() {
   const navigate = useNavigate();
   const { medicationId } = useParams();
@@ -23,6 +32,15 @@ export function MedicationDetailPage() {
     query: MEDICATION_DETAIL_QUERY,
     variables: { id: medicationId! },
   });
+
+  const [{ data: subData }] = useSubscription({ query: PRODUCT_UPDATED_SUB });
+  const productUpdate = subData?.medicinalProductUpdated;
+  const [overrides, setOverrides] = useState<Map<string, NonNullable<typeof productUpdate>>>(new Map());
+
+  useEffect(() => {
+    if (!productUpdate) return;
+    setOverrides(prev => new Map(prev).set(productUpdate.id, productUpdate));
+  }, [productUpdate]);
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -35,10 +53,12 @@ export function MedicationDetailPage() {
     </p>
   );
 
+  const products = (data?.medicinalProducts ?? []).map(p => overrides.get(p.id) ?? p);
+
   return (
     <MedicationDetail
       medication={medication}
-      products={data?.medicinalProducts ?? []}
+      products={products}
       onBack={() => navigate('/inventory')}
       getProductHref={id => `/inventory/${id}`}
     />

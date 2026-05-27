@@ -22,6 +22,7 @@ type Documents = {
     "\n  query PharmacistProductDetail($id: ID!) {\n    medicinalProduct(id: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": typeof types.PharmacistProductDetailDocument,
     "\n  subscription PharmacistProductDetailUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": typeof types.PharmacistProductDetailUpdatedDocument,
     "\n  query PharmacistMedicationDetail($id: ID!) {\n    medication(id: $id) {\n      id innName atcCode form strength\n    }\n    medicinalProducts(medicationId: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": typeof types.PharmacistMedicationDetailDocument,
+    "\n  subscription PharmacistMedicationDetailProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": typeof types.PharmacistMedicationDetailProductUpdatedDocument,
     "\n  query GetOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId status createdAt\n      lines {\n        medicationId quantity\n        medication { id innName }\n      }\n    }\n  }\n": typeof types.GetOrderDocument,
     "\n  query GetProducts($medicationId: ID) {\n    medicinalProducts(medicationId: $medicationId) {\n      id productName stockLevel isBelowThreshold\n    }\n  }\n": typeof types.GetProductsDocument,
 };
@@ -34,6 +35,7 @@ const documents: Documents = {
     "\n  query PharmacistProductDetail($id: ID!) {\n    medicinalProduct(id: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": types.PharmacistProductDetailDocument,
     "\n  subscription PharmacistProductDetailUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": types.PharmacistProductDetailUpdatedDocument,
     "\n  query PharmacistMedicationDetail($id: ID!) {\n    medication(id: $id) {\n      id innName atcCode form strength\n    }\n    medicinalProducts(medicationId: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": types.PharmacistMedicationDetailDocument,
+    "\n  subscription PharmacistMedicationDetailProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": types.PharmacistMedicationDetailProductUpdatedDocument,
     "\n  query GetOrder($id: ID!) {\n    order(id: $id) {\n      id wardUnitId status createdAt\n      lines {\n        medicationId quantity\n        medication { id innName }\n      }\n    }\n  }\n": types.GetOrderDocument,
     "\n  query GetProducts($medicationId: ID) {\n    medicinalProducts(medicationId: $medicationId) {\n      id productName stockLevel isBelowThreshold\n    }\n  }\n": types.GetProductsDocument,
 };
@@ -84,6 +86,10 @@ export function graphql(source: "\n  subscription PharmacistProductDetailUpdated
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query PharmacistMedicationDetail($id: ID!) {\n    medication(id: $id) {\n      id innName atcCode form strength\n    }\n    medicinalProducts(medicationId: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"): (typeof documents)["\n  query PharmacistMedicationDetail($id: ID!) {\n    medication(id: $id) {\n      id innName atcCode form strength\n    }\n    medicinalProducts(medicationId: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  subscription PharmacistMedicationDetailProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"): (typeof documents)["\n  subscription PharmacistMedicationDetailProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
