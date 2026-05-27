@@ -1,11 +1,12 @@
 // Used for /medications/:medicationId (admin)
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from 'urql';
+import { useQuery, useSubscription } from 'urql';
 import { Button, Card, PageHeader, Spinner, InfoRow } from '@meditrack/ui';
 import { useAuth, createApiClient } from '@meditrack/client';
+import { graphql } from '../gql';
 
-const MEDICATION_DETAIL_QUERY = `
+const MEDICATION_DETAIL_QUERY = graphql(`
   query AdminMedicationDetail($id: ID!) {
     medication(id: $id) {
       id innName atcCode form strength
@@ -14,7 +15,15 @@ const MEDICATION_DETAIL_QUERY = `
       id productName stockLevel stockThreshold isBelowThreshold
     }
   }
-`;
+`);
+
+const PRODUCT_UPDATED_SUB = graphql(`
+  subscription AdminMedicationDetailProductUpdated {
+    medicinalProductUpdated {
+      id productName stockLevel stockThreshold isBelowThreshold
+    }
+  }
+`);
 
 const FORMS = ['Tablet', 'Capsule', 'Injection', 'Solution', 'Cream', 'Drops', 'Inhaler'] as const;
 
@@ -63,6 +72,15 @@ export function MedicationDetailPage() {
     variables: { id: medicationId },
   });
 
+  const [{ data: subData }] = useSubscription({ query: PRODUCT_UPDATED_SUB });
+  const productUpdate = subData?.medicinalProductUpdated;
+  const [overrides, setOverrides] = useState<Map<string, NonNullable<typeof productUpdate>>>(new Map());
+
+  useEffect(() => {
+    if (!productUpdate) return;
+    setOverrides(prev => new Map(prev).set(productUpdate.id, productUpdate));
+  }, [productUpdate]);
+
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
@@ -74,7 +92,7 @@ export function MedicationDetailPage() {
     </p>
   );
 
-  const products: Product[] = data?.medicinalProducts ?? [];
+  const products: Product[] = (data?.medicinalProducts ?? []).map(p => overrides.get(p.id) ?? p);
 
   function closeModal() {
     setModal(null);
