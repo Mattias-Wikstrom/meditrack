@@ -16,7 +16,7 @@ const INVENTORY_QUERY = graphql(`
 `);
 
 const STOCK_ALERT_SUB = graphql(`
-  subscription PharmacistStockAlert {
+  subscription PharmacistInventoryStockAlert {
     stockBelowThreshold {
       medicinalProductId productName stockLevel stockThreshold
     }
