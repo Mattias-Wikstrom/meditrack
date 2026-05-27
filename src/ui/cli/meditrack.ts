@@ -42,6 +42,7 @@ import {
   addProduct,
   updateProduct,
   deleteProduct,
+  restockProduct,
 } from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
 import { login } from './commands/auth';
@@ -71,7 +72,7 @@ const updateOrderLinesUseCase = new UpdateOrderLinesUseCase(actorRepo, orderRepo
 const sendOrderUseCase = new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
 const confirmOrderUseCase = new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
 const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus);
-const restockUseCase = new RestockUseCase(actorRepo, medicinalProductRepo, transactor);
+const restockUseCase = new RestockUseCase(actorRepo, medicinalProductRepo, transactor, eventBus);
 const createMedicationUseCase = new CreateMedicationUseCase(medicationRepo, actorRepo, transactor);
 const updateMedicationUseCase = new UpdateMedicationUseCase(medicationRepo, actorRepo, transactor);
 const deleteMedicationUseCase = new DeleteMedicationUseCase(medicationRepo, medicinalProductRepo, actorRepo, transactor);
@@ -276,6 +277,15 @@ products
   .action(async (productId) => {
     const { actorId } = await requireAuth();
     return deleteProduct(deleteMedicinalProductUseCase, output, actorId, productId);
+  });
+
+products
+  .command('restock <productId>')
+  .description('Add stock to a medicinal product (pharmacist only)')
+  .requiredOption('--quantity <n>', 'units to add', parseInt)
+  .action(async (productId, opts) => {
+    const { actorId } = await requireAuth();
+    return restockProduct(restockUseCase, output, actorId, productId, opts.quantity);
   });
 
 const orders = program.command('orders');

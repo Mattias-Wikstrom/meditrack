@@ -55,7 +55,7 @@ export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
     sendOrderUseCase: new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
     confirmOrderUseCase: new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
     deliverOrderUseCase: new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus),
-    restockUseCase: new RestockUseCase(actorRepo, medicinalProductRepo, transactor),
+    restockUseCase: new RestockUseCase(actorRepo, medicinalProductRepo, transactor, eventBus),
     createMedicationUseCase: new CreateMedicationUseCase(medicationRepo, actorRepo, transactor),
     updateMedicationUseCase: new UpdateMedicationUseCase(medicationRepo, actorRepo, transactor),
     deleteMedicationUseCase: new DeleteMedicationUseCase(medicationRepo, medicinalProductRepo, actorRepo, transactor),

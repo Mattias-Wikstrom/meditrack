@@ -94,7 +94,11 @@ export function graphql(source: "\n  query GetOrder($id: ID!) {\n    order(id: $
 export function graphql(source: "\n  query GetProducts($medicationId: ID) {\n    medicinalProducts(medicationId: $medicationId) {\n      id productName stockLevel isBelowThreshold\n    }\n  }\n"): (typeof documents)["\n  query GetProducts($medicationId: ID) {\n    medicinalProducts(medicationId: $medicationId) {\n      id productName stockLevel isBelowThreshold\n    }\n  }\n"];
 
 export function graphql(source: string) {
-  return (documents as any)[source] ?? {};
+  if ((documents as any)[source]) return (documents as any)[source];
+  // Fall back to parsing the source string for queries not yet in the codegen map.
+  // This lets new operations work without re-running codegen.
+  const { parse } = require('graphql') as typeof import('graphql');
+  return parse(source);
 }
 
 export type DocumentType<TDocumentNode extends DocumentNode<any, any>> = TDocumentNode extends DocumentNode<  infer TType,  any>  ? TType  : never;

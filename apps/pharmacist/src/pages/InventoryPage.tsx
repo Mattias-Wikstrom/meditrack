@@ -1,8 +1,7 @@
 // Used for /inventory (pharmacist)
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { useQuery, useSubscription } from 'urql';
-import { useAuth, createApiClient } from '@meditrack/client';
+import { useQuery, useSubscription, useMutation } from 'urql';
 import { Card, Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
 import { graphql } from '../gql';
 
@@ -26,6 +25,12 @@ const STOCK_ALERT_SUB = graphql(`
 const ORDER_STATUS_SUB = graphql(`
   subscription PharmacistOrderStatusChanged {
     orderStatusChanged { orderId from to }
+  }
+`);
+
+const PRODUCT_RESTOCKED_SUB = graphql(`
+  subscription PharmacistProductRestocked {
+    productRestocked { medicinalProductId productName stockLevel }
   }
 `);
 
@@ -103,8 +108,8 @@ export function InventoryPage() {
   const [restockError, setRestockError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { token } = useAuth();
   const [{ data, fetching, error }, refetch] = useQuery({ query: INVENTORY_QUERY });
+  const [, restock] = useMutation(RESTOCK_MUTATION);
 
   useSubscription({ query: STOCK_ALERT_SUB }, () => {
     refetch({ requestPolicy: 'network-only' });
@@ -115,6 +120,11 @@ export function InventoryPage() {
     if (response.orderStatusChanged?.to === 'Delivered') {
       refetch({ requestPolicy: 'network-only' });
     }
+    return prev;
+  });
+
+  useSubscription({ query: PRODUCT_RESTOCKED_SUB }, (prev) => {
+    refetch({ requestPolicy: 'network-only' });
     return prev;
   });
 
@@ -131,15 +141,18 @@ export function InventoryPage() {
     if (!restocking) return;
     setSubmitting(true);
     setRestockError(null);
-    try {
-      await createApiClient(token!).post(`/products/${restocking.id}/restock`, { quantity });
-      setRestocking(null);
-      refetch({ requestPolicy: 'network-only' });
-    } catch (err) {
-      setRestockError(err instanceof Error ? err.message : 'Restock failed');
-    } finally {
-      setSubmitting(false);
+    const result = await restock({ medicinalProductId: restocking.id, quantity });
+    setSubmitting(false);
+    if (result.error) {
+      setRestockError(result.error.message);
+      return;
     }
+    if (!result.data?.restockProduct.successful) {
+      setRestockError(result.data?.restockProduct.errors.join(', ') ?? 'Restock failed');
+      return;
+    }
+    setRestocking(null);
+    refetch({ requestPolicy: 'network-only' });
   }
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;

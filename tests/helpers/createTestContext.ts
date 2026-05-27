@@ -49,7 +49,7 @@ export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
     sendOrderUseCase: new SendOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
     confirmOrderUseCase: new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
     deliverOrderUseCase: new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus),
-    restockUseCase: new RestockUseCase(actorRepo, medicinalProductRepo, transactor),
+    restockUseCase: new RestockUseCase(actorRepo, medicinalProductRepo, transactor, eventBus),
     actorId,
   };
 }

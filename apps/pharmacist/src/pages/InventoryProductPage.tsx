@@ -1,9 +1,9 @@
 // Used for /inventory/:productId (pharmacist)
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from 'urql';
-import { useAuth, createApiClient } from '@meditrack/client';
+import { useQuery, useSubscription } from 'urql';
 import { InventoryProductDetail, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
+import { useAuth, createApiClient } from '@meditrack/client';
 
 const PRODUCT_DETAIL_QUERY = graphql(`
   query PharmacistProductDetail($id: ID!) {
@@ -11,6 +11,12 @@ const PRODUCT_DETAIL_QUERY = graphql(`
       id productName stockLevel stockThreshold isBelowThreshold
       medication { id innName atcCode form strength }
     }
+  }
+`);
+
+const PRODUCT_RESTOCKED_SUB = graphql(`
+  subscription PharmacistProductDetailRestocked {
+    productRestocked { medicinalProductId productName stockLevel }
   }
 `);
 
@@ -22,6 +28,13 @@ export function InventoryProductPage() {
   const [{ data, fetching, error }, refetch] = useQuery({
     query: PRODUCT_DETAIL_QUERY,
     variables: { id: productId! },
+  });
+
+  useSubscription({ query: PRODUCT_RESTOCKED_SUB }, (prev, response) => {
+    if (response.productRestocked?.medicinalProductId === productId) {
+      refetch({ requestPolicy: 'network-only' });
+    }
+    return prev;
   });
 
   async function handleRestock(quantity: number): Promise<string | null> {
