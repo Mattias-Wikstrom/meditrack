@@ -16,6 +16,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 type Documents = {
     "\n  query AdminAuditLog {\n    auditLog {\n      actorId\n      action\n      entityId\n      occurredAt\n    }\n  }\n": typeof types.AdminAuditLogDocument,
     "\n  query AdminMedications {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": typeof types.AdminMedicationsDocument,
+    "\n  subscription AdminInventoryProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": typeof types.AdminInventoryProductUpdatedDocument,
     "\n  query AdminMedicationDetail($id: ID!) {\n    medication(id: $id) {\n      id innName atcCode form strength\n    }\n    medicinalProducts(medicationId: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": typeof types.AdminMedicationDetailDocument,
     "\n  subscription AdminMedicationDetailProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": typeof types.AdminMedicationDetailProductUpdatedDocument,
     "\n  query AdminOrders {\n    orders {\n      id wardUnitId wardUnit { name } status createdAt\n      lines { medicationId quantity medication { innName } }\n    }\n  }\n": typeof types.AdminOrdersDocument,
@@ -25,6 +26,7 @@ type Documents = {
 const documents: Documents = {
     "\n  query AdminAuditLog {\n    auditLog {\n      actorId\n      action\n      entityId\n      occurredAt\n    }\n  }\n": types.AdminAuditLogDocument,
     "\n  query AdminMedications {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": types.AdminMedicationsDocument,
+    "\n  subscription AdminInventoryProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": types.AdminInventoryProductUpdatedDocument,
     "\n  query AdminMedicationDetail($id: ID!) {\n    medication(id: $id) {\n      id innName atcCode form strength\n    }\n    medicinalProducts(medicationId: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": types.AdminMedicationDetailDocument,
     "\n  subscription AdminMedicationDetailProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": types.AdminMedicationDetailProductUpdatedDocument,
     "\n  query AdminOrders {\n    orders {\n      id wardUnitId wardUnit { name } status createdAt\n      lines { medicationId quantity medication { innName } }\n    }\n  }\n": types.AdminOrdersDocument,
@@ -54,6 +56,10 @@ export function graphql(source: "\n  query AdminAuditLog {\n    auditLog {\n    
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query AdminMedications {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n"): (typeof documents)["\n  query AdminMedications {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  subscription AdminInventoryProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"): (typeof documents)["\n  subscription AdminInventoryProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
