@@ -20,7 +20,7 @@ export class DeleteMedicinalProductUseCase {
   async execute(input: DeleteMedicinalProductInput): Promise<UseCaseResult<void>> {
     const actor = await this.actorRepository.findById(input.requestingActorId);
     if (actor === undefined) return failure('ActorNotFound');
-    if (actor.role !== ActorRole.Pharmacist) return failure('UnauthorizedRole');
+    if (actor.role !== ActorRole.Admin) return failure('UnauthorizedRole');
 
     const product = await this.medicinalProductRepository.findById(input.id);
     if (product === undefined) return failure('MedicinalProductNotFound');

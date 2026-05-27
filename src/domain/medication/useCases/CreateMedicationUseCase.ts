@@ -33,7 +33,7 @@ export class CreateMedicationUseCase {
   async execute(input: CreateMedicationInput): Promise<UseCaseResult<Medication>> {
     const actor = await this.actorRepository.findById(input.requestingActorId);
     if (actor === undefined) return failure('ActorNotFound');
-    if (actor.role !== ActorRole.Pharmacist) return failure('UnauthorizedRole');
+    if (actor.role !== ActorRole.Admin) return failure('UnauthorizedRole');
 
     const medication = new Medication(
       randomUUID() as MedicationId,

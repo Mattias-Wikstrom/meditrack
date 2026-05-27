@@ -16,7 +16,7 @@ describe('CreateMedicationUseCase', () => {
   let useCase: CreateMedicationUseCase;
 
   const validInput = {
-    requestingActorId: 'pharm-1',
+    requestingActorId: 'admin-1',
     innName: 'Paracetamol',
     atcCode: 'N02BE01',
     form: MedicationForm.Tablet,
@@ -25,7 +25,7 @@ describe('CreateMedicationUseCase', () => {
 
   beforeEach(() => {
     actorRepo = new InMemoryActorRepository([
-      { id: 'pharm-1', role: ActorRole.Pharmacist },
+      { id: 'admin-1', role: ActorRole.Admin },
       { id: 'nurse-1', role: ActorRole.Nurse },
     ]);
     medicationRepo = new InMemoryMedicationRepository();
@@ -53,7 +53,7 @@ describe('CreateMedicationUseCase', () => {
     expect(await medicationRepo.findById(result.value.id)).toBeDefined();
     expect(auditRepo.getEntries()).toHaveLength(1);
     expect(auditRepo.getEntries()[0]?.action).toBe('MedicationCreated');
-    expect(auditRepo.getEntries()[0]?.actorId).toBe('pharm-1');
+    expect(auditRepo.getEntries()[0]?.actorId).toBe('admin-1');
   });
 
   it('fails when the requesting actor is not found', async () => {
@@ -64,7 +64,7 @@ describe('CreateMedicationUseCase', () => {
     expect(result.errors[0]?.code).toBe('ActorNotFound');
   });
 
-  it('fails when the requesting actor is not a pharmacist', async () => {
+  it('fails when the requesting actor is not an admin', async () => {
     const result = await useCase.execute({ ...validInput, requestingActorId: 'nurse-1' });
 
     expect(result.successful).toBe(false);
