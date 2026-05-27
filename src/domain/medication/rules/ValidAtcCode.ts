@@ -2,10 +2,15 @@ import { Medication } from '../Medication';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
 import { MedicationRule } from './interfaces/MedicationRule';
 
-// ATC codes follow the WHO classification system (e.g. N02BE01 for Paracetamol).
-// TODO: validate against the full ATC regex pattern.
+// WHO ATC code format example: N02BE01
+const ATC_CODE_REGEX = /^[A-Z]\d{2}[A-Z]{2}\d{2}$/;
+
 export class ValidAtcCode implements MedicationRule {
-  check(_medication: Medication): ErrorInfo | null {
+  check(medication: Medication): ErrorInfo | null {
+    if (!ATC_CODE_REGEX.test(medication.atcCode)) {
+      return new ErrorInfo('InvalidATCCode');
+    }
+
     return null;
   }
 }

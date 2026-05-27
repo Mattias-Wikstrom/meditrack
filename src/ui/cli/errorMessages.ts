@@ -22,4 +22,5 @@ export const errorMessages: Record<ErrorCode, string> = {
   WardUnitHasAssignedNurses: 'Cannot delete a ward unit while nurses are assigned to it.',
   MedicationNotFound: 'Medication not found. Check that the medication ID is correct.',
   MedicationHasProducts: 'Cannot delete a medication that still has medicinal products — remove its products first.',
+  InvalidATCCode: 'Invalid ATC code — expected format is one letter, two digits, two letters, two digits (e.g. N02BE01).',
 };

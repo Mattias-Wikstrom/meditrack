@@ -19,4 +19,5 @@ export type ErrorCode =
   | 'WardUnitAlreadyExists'
   | 'WardUnitHasAssignedNurses'
   | 'MedicationNotFound'
-  | 'MedicationHasProducts';
+  | 'MedicationHasProducts'
+  | 'InvalidATCCode';

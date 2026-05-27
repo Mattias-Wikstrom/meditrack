@@ -27,7 +27,7 @@ export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
     { id: 'pharmacist-1', role: ActorRole.Pharmacist },
     { id: actorId, role: ActorRole.Nurse },
   ]);
-  const credentialsRepo = new InMemoryCredentialsRepository();
+  const credentialsRepo = new InMemoryCredentialsRepository(actorRepo);
   const medicationRepo = new InMemoryMedicationRepository();
   const medicinalProductRepo = new InMemoryMedicinalProductRepository();
   const orderRepo = new InMemoryOrderRepository();
