@@ -11,7 +11,7 @@ const ACTORS_QUERY = /* GraphQL */ `
       id
       role
       wardUnitId
-      wardUnit { name }
+      wardUnit { id name }
     }
     wardUnits { id name }
   }
