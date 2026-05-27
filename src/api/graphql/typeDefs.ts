@@ -45,31 +45,6 @@ export const typeDefs = /* GraphQL */ `
     auditLog: [AuditEvent!]!
   }
 
-  type Mutation {
-    createOrder(lines: [OrderLineInput!]!): OrderPayload!
-    updateOrderLines(orderId: ID!, lines: [OrderLineInput!]!): OrderPayload!
-    sendOrder(orderId: ID!): OrderPayload!
-    confirmOrder(orderId: ID!): OrderPayload!
-    deliverOrder(orderId: ID!, productSelections: [ProductSelectionInput!]!): OrderPayload!
-    restockProduct(medicinalProductId: ID!, quantity: Int!): RestockPayload!
-
-    createMedication(innName: String!, atcCode: String!, form: MedicationForm!, strength: String!): Medication!
-    updateMedication(id: ID!, innName: String, atcCode: String, form: MedicationForm, strength: String): Medication!
-    deleteMedication(id: ID!): Boolean!
-
-    createMedicinalProduct(productName: String!, medicationId: ID!, stockLevel: Int!, stockThreshold: Int!): MedicinalProduct!
-    updateMedicinalProduct(id: ID!, productName: String, stockThreshold: Int): MedicinalProduct!
-    deleteMedicinalProduct(id: ID!): Boolean!
-
-    createWardUnit(id: ID!, name: String!): WardUnit!
-    updateWardUnit(id: ID!, name: String!): WardUnit!
-    deleteWardUnit(id: ID!): Boolean!
-
-    createActor(id: String!, role: String!, wardUnitId: ID, password: String!): Actor!
-    updateActor(id: ID!, role: String, wardUnitId: ID): Actor!
-    deleteActor(id: ID!): Boolean!
-  }
-
   type WardUnit {
     id: ID!
     name: String!

@@ -6,6 +6,22 @@ import { MedicinalProductId } from '../../../domain/shared/IdTypes';
 export function createProductsRouter(wiring: ServerWiring): Router {
   const router = Router();
 
+  router.post('/:id/restock', requireAuth, async (req: Request, res: Response) => {
+    const { quantity } = req.body as { quantity: number };
+    const result = await wiring.restockUseCase.execute({
+      actorId: res.locals.actorId as string,
+      medicinalProductId: req.params.id as MedicinalProductId,
+      quantity,
+    });
+    if (result.successful) {
+      const { stockLevel, isBelowThreshold } = result.value;
+      res.json({ data: { stockLevel, isBelowThreshold } });
+    } else {
+      const status = result.errors.some((e) => e.code === 'MedicinalProductNotFound') ? 404 : 422;
+      res.status(status).json({ errors: result.errors.map((e) => e.code) });
+    }
+  });
+
   router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
     const { productName, stockThreshold } = req.body as {
       productName?: string;
