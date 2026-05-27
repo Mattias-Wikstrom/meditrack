@@ -16,15 +16,24 @@ services:
       timeout: 5s
       retries: 10
 
+  codegen:
+    build: .
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run codegen
+
   api:
     build: .
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
+      codegen:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql://meditrack:meditrack@db:5432/meditrack
-      JWT_SECRET: meditrack-dev-secret-change-in-production
+      JWT_SECRET: change-me-in-production
     ports:
       - "4000:4000"
     volumes:
@@ -32,11 +41,14 @@ services:
       - /app/node_modules
     # Runs migrations on every start. To seed reference data the first time,
     # run: docker compose run --rm api npx prisma db seed
-    command: sh -c "npx prisma migrate deploy && npm run codegen && npm run server"
+    command: sh -c "npx prisma migrate deploy && npm run server"
 
   nurse:
     build: .
     restart: unless-stopped
+    depends_on:
+      codegen:
+        condition: service_completed_successfully
     ports:
       - "5173:5173"
     volumes:
@@ -48,6 +60,9 @@ services:
   pharmacist:
     build: .
     restart: unless-stopped
+    depends_on:
+      codegen:
+        condition: service_completed_successfully
     ports:
       - "5174:5174"
     volumes:
@@ -59,6 +74,9 @@ services:
   admin:
     build: .
     restart: unless-stopped
+    depends_on:
+      codegen:
+        condition: service_completed_successfully
     ports:
       - "5175:5175"
     volumes:
