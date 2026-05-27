@@ -7,7 +7,7 @@ import { ActorRole } from '../../../shared/ActorRole';
 import { Transactor } from '../../../shared/Transactor';
 import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure, failures } from '../../../shared/results/UseCaseResult';
-import { OrderDelivered } from '../../events/OrderDelivered';
+import { OrderStatusAdvanced } from '../../events/OrderStatusAdvanced';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';
 import { MedicationId, MedicinalProductId, OrderId } from '../../../shared/IdTypes';
 import { DeliveryRule } from '../../rules/interfaces/DeliveryRule';
@@ -125,7 +125,7 @@ export class DeliverOrderUseCase {
     for (const ev of thresholdEvents) {
       await this.eventBus.publish(ev);
     }
-    await this.eventBus.publish(new OrderDelivered(input.actorId, order));
+    await this.eventBus.publish(new OrderStatusAdvanced(input.actorId, order.id, OrderStatus.Confirmed, OrderStatus.Delivered));
 
     return success(order);
   }
