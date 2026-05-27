@@ -80,11 +80,23 @@ export type MedicinalProduct = {
 export type Mutation = {
   __typename?: 'Mutation';
   confirmOrder: OrderPayload;
+  createActor: Actor;
+  createMedication: Medication;
+  createMedicinalProduct: MedicinalProduct;
   createOrder: OrderPayload;
+  createWardUnit: WardUnit;
+  deleteActor: Scalars['Boolean']['output'];
+  deleteMedication: Scalars['Boolean']['output'];
+  deleteMedicinalProduct: Scalars['Boolean']['output'];
+  deleteWardUnit: Scalars['Boolean']['output'];
   deliverOrder: OrderPayload;
   restockProduct: RestockPayload;
   sendOrder: OrderPayload;
+  updateActor: Actor;
+  updateMedication: Medication;
+  updateMedicinalProduct: MedicinalProduct;
   updateOrderLines: OrderPayload;
+  updateWardUnit: WardUnit;
 };
 
 
@@ -93,8 +105,58 @@ export type MutationConfirmOrderArgs = {
 };
 
 
+export type MutationCreateActorArgs = {
+  id: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  role: Scalars['String']['input'];
+  wardUnitId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationCreateMedicationArgs = {
+  atcCode: Scalars['String']['input'];
+  form: MedicationForm;
+  innName: Scalars['String']['input'];
+  strength: Scalars['String']['input'];
+};
+
+
+export type MutationCreateMedicinalProductArgs = {
+  medicationId: Scalars['ID']['input'];
+  productName: Scalars['String']['input'];
+  stockLevel: Scalars['Int']['input'];
+  stockThreshold: Scalars['Int']['input'];
+};
+
+
 export type MutationCreateOrderArgs = {
   lines: Array<OrderLineInput>;
+};
+
+
+export type MutationCreateWardUnitArgs = {
+  id: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteActorArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteMedicationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteMedicinalProductArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteWardUnitArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -115,9 +177,38 @@ export type MutationSendOrderArgs = {
 };
 
 
+export type MutationUpdateActorArgs = {
+  id: Scalars['ID']['input'];
+  role?: InputMaybe<Scalars['String']['input']>;
+  wardUnitId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationUpdateMedicationArgs = {
+  atcCode?: InputMaybe<Scalars['String']['input']>;
+  form?: InputMaybe<MedicationForm>;
+  id: Scalars['ID']['input'];
+  innName?: InputMaybe<Scalars['String']['input']>;
+  strength?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationUpdateMedicinalProductArgs = {
+  id: Scalars['ID']['input'];
+  productName?: InputMaybe<Scalars['String']['input']>;
+  stockThreshold?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type MutationUpdateOrderLinesArgs = {
   lines: Array<OrderLineInput>;
   orderId: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateWardUnitArgs = {
+  id: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
 };
 
 export type Order = {
@@ -175,6 +266,13 @@ export type OrderStatusChangedEvent = {
   from: OrderStatus;
   orderId: Scalars['ID']['output'];
   to: OrderStatus;
+};
+
+export type ProductRestockedEvent = {
+  __typename?: 'ProductRestockedEvent';
+  medicinalProductId: Scalars['ID']['output'];
+  productName: Scalars['String']['output'];
+  stockLevel: Scalars['Int']['output'];
 };
 
 export type ProductSelectionInput = {
@@ -253,6 +351,7 @@ export type Subscription = {
   orderDraftCreated: OrderDraftCreatedEvent;
   orderDraftUpdated: OrderDraftUpdatedEvent;
   orderStatusChanged: OrderStatusChangedEvent;
+  productRestocked: ProductRestockedEvent;
   stockBelowThreshold: StockAlertEvent;
 };
 
@@ -262,6 +361,11 @@ export type WardUnit = {
   name: Scalars['String']['output'];
   orders: Array<Order>;
 };
+
+export type PharmacistStockAlertSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PharmacistStockAlertSubscription = { __typename?: 'Subscription', stockBelowThreshold: { __typename?: 'StockAlertEvent', medicinalProductId: string, productName: string, stockLevel: number, stockThreshold: number } };
 
 export type PharmacistOrdersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -278,10 +382,10 @@ export type PharmacistInventoryQueryVariables = Exact<{ [key: string]: never; }>
 
 export type PharmacistInventoryQuery = { __typename?: 'Query', medicinalProducts: Array<{ __typename?: 'MedicinalProduct', id: string, productName: string, stockLevel: number, stockThreshold: number, isBelowThreshold: boolean, medication?: { __typename?: 'Medication', id: string, innName: string, atcCode: string, form: MedicationForm, strength: string } | null }> };
 
-export type PharmacistStockAlertSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type PharmacistProductRestockedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PharmacistStockAlertSubscription = { __typename?: 'Subscription', stockBelowThreshold: { __typename?: 'StockAlertEvent', medicinalProductId: string, productName: string, stockLevel: number, stockThreshold: number } };
+export type PharmacistProductRestockedSubscription = { __typename?: 'Subscription', productRestocked: { __typename?: 'ProductRestockedEvent', medicinalProductId: string, productName: string, stockLevel: number } };
 
 export type RestockProductMutationVariables = Exact<{
   medicinalProductId: Scalars['ID']['input'];
@@ -298,13 +402,10 @@ export type PharmacistProductDetailQueryVariables = Exact<{
 
 export type PharmacistProductDetailQuery = { __typename?: 'Query', medicinalProduct?: { __typename?: 'MedicinalProduct', id: string, productName: string, stockLevel: number, stockThreshold: number, isBelowThreshold: boolean, medication?: { __typename?: 'Medication', id: string, innName: string, atcCode: string, form: MedicationForm, strength: string } | null } | null };
 
-export type RestockProductDetailMutationVariables = Exact<{
-  medicinalProductId: Scalars['ID']['input'];
-  quantity: Scalars['Int']['input'];
-}>;
+export type PharmacistProductDetailRestockedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type RestockProductDetailMutation = { __typename?: 'Mutation', restockProduct: { __typename?: 'RestockPayload', successful: boolean, errors: Array<ErrorCode>, product?: { __typename?: 'MedicinalProduct', id: string, stockLevel: number, isBelowThreshold: boolean } | null } };
+export type PharmacistProductDetailRestockedSubscription = { __typename?: 'Subscription', productRestocked: { __typename?: 'ProductRestockedEvent', medicinalProductId: string, productName: string, stockLevel: number } };
 
 export type PharmacistMedicationDetailQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -328,13 +429,14 @@ export type GetProductsQueryVariables = Exact<{
 export type GetProductsQuery = { __typename?: 'Query', medicinalProducts: Array<{ __typename?: 'MedicinalProduct', id: string, productName: string, stockLevel: number, isBelowThreshold: boolean }> };
 
 
+export const PharmacistStockAlertDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"PharmacistStockAlert"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stockBelowThreshold"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicinalProductId"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}},{"kind":"Field","name":{"kind":"Name","value":"stockThreshold"}}]}}]}}]} as unknown as DocumentNode<PharmacistStockAlertSubscription, PharmacistStockAlertSubscriptionVariables>;
 export const PharmacistOrdersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PharmacistOrders"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"sent"},"name":{"kind":"Name","value":"orders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"status"},"value":{"kind":"EnumValue","value":"Sent"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"wardUnitId"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"lines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicationId"}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"medication"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"innName"}}]}}]}}]}},{"kind":"Field","alias":{"kind":"Name","value":"confirmed"},"name":{"kind":"Name","value":"orders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"status"},"value":{"kind":"EnumValue","value":"Confirmed"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"wardUnitId"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"lines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicationId"}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"medication"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"innName"}}]}}]}}]}},{"kind":"Field","alias":{"kind":"Name","value":"delivered"},"name":{"kind":"Name","value":"orders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"status"},"value":{"kind":"EnumValue","value":"Delivered"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"wardUnitId"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"lines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicationId"}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"medication"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"innName"}}]}}]}}]}}]}}]} as unknown as DocumentNode<PharmacistOrdersQuery, PharmacistOrdersQueryVariables>;
 export const PharmacistOrderStatusChangedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"PharmacistOrderStatusChanged"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"orderStatusChanged"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"orderId"}},{"kind":"Field","name":{"kind":"Name","value":"from"}},{"kind":"Field","name":{"kind":"Name","value":"to"}}]}}]}}]} as unknown as DocumentNode<PharmacistOrderStatusChangedSubscription, PharmacistOrderStatusChangedSubscriptionVariables>;
 export const PharmacistInventoryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PharmacistInventory"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicinalProducts"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}},{"kind":"Field","name":{"kind":"Name","value":"stockThreshold"}},{"kind":"Field","name":{"kind":"Name","value":"isBelowThreshold"}},{"kind":"Field","name":{"kind":"Name","value":"medication"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"innName"}},{"kind":"Field","name":{"kind":"Name","value":"atcCode"}},{"kind":"Field","name":{"kind":"Name","value":"form"}},{"kind":"Field","name":{"kind":"Name","value":"strength"}}]}}]}}]}}]} as unknown as DocumentNode<PharmacistInventoryQuery, PharmacistInventoryQueryVariables>;
-export const PharmacistStockAlertDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"PharmacistStockAlert"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stockBelowThreshold"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicinalProductId"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}},{"kind":"Field","name":{"kind":"Name","value":"stockThreshold"}}]}}]}}]} as unknown as DocumentNode<PharmacistStockAlertSubscription, PharmacistStockAlertSubscriptionVariables>;
+export const PharmacistProductRestockedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"PharmacistProductRestocked"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"productRestocked"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicinalProductId"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}}]}}]}}]} as unknown as DocumentNode<PharmacistProductRestockedSubscription, PharmacistProductRestockedSubscriptionVariables>;
 export const RestockProductDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RestockProduct"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"medicinalProductId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"quantity"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"restockProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"medicinalProductId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"medicinalProductId"}}},{"kind":"Argument","name":{"kind":"Name","value":"quantity"},"value":{"kind":"Variable","name":{"kind":"Name","value":"quantity"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"successful"}},{"kind":"Field","name":{"kind":"Name","value":"product"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}},{"kind":"Field","name":{"kind":"Name","value":"isBelowThreshold"}}]}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]} as unknown as DocumentNode<RestockProductMutation, RestockProductMutationVariables>;
 export const PharmacistProductDetailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PharmacistProductDetail"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicinalProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}},{"kind":"Field","name":{"kind":"Name","value":"stockThreshold"}},{"kind":"Field","name":{"kind":"Name","value":"isBelowThreshold"}},{"kind":"Field","name":{"kind":"Name","value":"medication"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"innName"}},{"kind":"Field","name":{"kind":"Name","value":"atcCode"}},{"kind":"Field","name":{"kind":"Name","value":"form"}},{"kind":"Field","name":{"kind":"Name","value":"strength"}}]}}]}}]}}]} as unknown as DocumentNode<PharmacistProductDetailQuery, PharmacistProductDetailQueryVariables>;
-export const RestockProductDetailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RestockProductDetail"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"medicinalProductId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"quantity"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"restockProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"medicinalProductId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"medicinalProductId"}}},{"kind":"Argument","name":{"kind":"Name","value":"quantity"},"value":{"kind":"Variable","name":{"kind":"Name","value":"quantity"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"successful"}},{"kind":"Field","name":{"kind":"Name","value":"product"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}},{"kind":"Field","name":{"kind":"Name","value":"isBelowThreshold"}}]}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]} as unknown as DocumentNode<RestockProductDetailMutation, RestockProductDetailMutationVariables>;
+export const PharmacistProductDetailRestockedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"PharmacistProductDetailRestocked"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"productRestocked"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicinalProductId"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}}]}}]}}]} as unknown as DocumentNode<PharmacistProductDetailRestockedSubscription, PharmacistProductDetailRestockedSubscriptionVariables>;
 export const PharmacistMedicationDetailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PharmacistMedicationDetail"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medication"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"innName"}},{"kind":"Field","name":{"kind":"Name","value":"atcCode"}},{"kind":"Field","name":{"kind":"Name","value":"form"}},{"kind":"Field","name":{"kind":"Name","value":"strength"}}]}},{"kind":"Field","name":{"kind":"Name","value":"medicinalProducts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"medicationId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}},{"kind":"Field","name":{"kind":"Name","value":"stockThreshold"}},{"kind":"Field","name":{"kind":"Name","value":"isBelowThreshold"}}]}}]}}]} as unknown as DocumentNode<PharmacistMedicationDetailQuery, PharmacistMedicationDetailQueryVariables>;
 export const GetOrderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetOrder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"order"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"wardUnitId"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"lines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicationId"}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"medication"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"innName"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetOrderQuery, GetOrderQueryVariables>;
 export const GetProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProducts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"medicationId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicinalProducts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"medicationId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"medicationId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}},{"kind":"Field","name":{"kind":"Name","value":"isBelowThreshold"}}]}}]}}]} as unknown as DocumentNode<GetProductsQuery, GetProductsQueryVariables>;
