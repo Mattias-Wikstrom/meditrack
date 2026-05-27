@@ -28,7 +28,7 @@ export function WardUnitsPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [idValue, setIdValue] = useState('');
   const [idTouched, setIdTouched] = useState(false);
-  const [{ data, fetching, error }, refetch] = useQuery({ query: WARD_UNITS_QUERY });
+  const [{ data, fetching, error }, refetch] = useQuery({ query: WARD_UNITS_QUERY, requestPolicy: 'cache-and-network' });
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
