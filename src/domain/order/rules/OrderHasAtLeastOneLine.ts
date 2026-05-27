@@ -1,6 +1,6 @@
 import { Order } from '../Order';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { OrderRule } from './OrderRule';
+import { OrderRule } from './interfaces/OrderRule';
 
 // Empty orders are not allowed
 export class OrderHasAtLeastOneLine implements OrderRule {

@@ -7,7 +7,7 @@ import { Transactor } from '../../shared/Transactor';
 import { UseCaseResult, success, failure, failures } from '../../shared/results/UseCaseResult';
 import { MedicationId } from '../../shared/IdTypes';
 import { MedicationForm } from '../MedicationForm';
-import { MedicationRule } from '../rules/MedicationRule';
+import { MedicationRule } from '../rules/interfaces/MedicationRule';
 import { ValidAtcCode } from '../rules/ValidAtcCode';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
 

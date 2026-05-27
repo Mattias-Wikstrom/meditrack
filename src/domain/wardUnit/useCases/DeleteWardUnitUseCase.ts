@@ -7,7 +7,7 @@ import { Transactor } from '../../shared/Transactor';
 import { EventBus } from '../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure, failures } from '../../shared/results/UseCaseResult';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { DeleteWardUnitRule } from '../rules/DeleteWardUnitRule';
+import { DeleteWardUnitRule } from '../rules/interfaces/DeleteWardUnitRule';
 import { WardUnitHasNoNurses } from '../rules/WardUnitHasNoNurses';
 import { WardUnitDeleted } from '../events/WardUnitDeleted';
 

@@ -5,7 +5,7 @@ import { Transactor } from '../../shared/Transactor';
 import { EventBus } from '../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure, failures } from '../../shared/results/UseCaseResult';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { DeleteActorRule } from '../rules/DeleteActorRule';
+import { DeleteActorRule } from '../rules/interfaces/DeleteActorRule';
 import { CannotDeleteSelf } from '../rules/CannotDeleteSelf';
 import { ActorDeleted } from '../events/ActorDeleted';
 

@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 import { Order } from '../../Order';
 import { OrderLine } from '../../OrderLine';
 import { OrderStatus } from '../../OrderStatus';
-import { OrderRule } from '../../rules/OrderRule';
+import { OrderRule } from '../../rules/interfaces/OrderRule';
 import { OrderHasAtLeastOneLine } from '../../rules/OrderHasAtLeastOneLine';
 import { OrderLineQuantitiesPositive } from '../../rules/OrderLineQuantitiesPositive';
 import { ActorRepository } from '../../../actor/ActorRepository';

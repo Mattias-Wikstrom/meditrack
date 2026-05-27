@@ -1,6 +1,6 @@
 import { Actor } from '../../shared/Actor';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { DeleteActorRule } from './DeleteActorRule';
+import { DeleteActorRule } from './interfaces/DeleteActorRule';
 
 // An admin may not delete their own account
 export class CannotDeleteSelf implements DeleteActorRule {

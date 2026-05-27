@@ -1,6 +1,6 @@
 import { DeliveryPlan } from './DeliveryPlan';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { DeliveryRule } from './DeliveryRule';
+import { DeliveryRule } from './interfaces/DeliveryRule';
 
 export class DeliveryCoversOrder implements DeliveryRule {
   check(plan: DeliveryPlan): ErrorInfo | null {

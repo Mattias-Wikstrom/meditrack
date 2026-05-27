@@ -1,6 +1,6 @@
 import { DeliveryPlan } from './DeliveryPlan';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
-import { DeliveryRule } from './DeliveryRule';
+import { DeliveryRule } from './interfaces/DeliveryRule';
 import { OrderStatus } from '../OrderStatus';
 
 export class OrderMustBeConfirmed implements DeliveryRule {

@@ -10,7 +10,7 @@ import { UseCaseResult, success, failure, failures } from '../../../shared/resul
 import { OrderDelivered } from '../../events/OrderDelivered';
 import { StockBelowThreshold } from '../../../medication/events/StockBelowThreshold';
 import { MedicationId, MedicinalProductId, OrderId } from '../../../shared/IdTypes';
-import { DeliveryRule } from '../../rules/DeliveryRule';
+import { DeliveryRule } from '../../rules/interfaces/DeliveryRule';
 import { DeliveryPlan, ResolvedLine } from '../../rules/DeliveryPlan';
 import { OrderMustBeConfirmed } from '../../rules/OrderMustBeConfirmed';
 import { DeliveryCoversOrder } from '../../rules/DeliveryCoversOrder';
