@@ -1,7 +1,7 @@
 // Used for /orders/:orderId (admin)
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { BackButton, OrderStatusBadge, Card, Spinner, formatDateTime } from '@meditrack/ui';
+import { PageHeader, OrderStatusBadge, Card, Spinner, formatDateTime } from '@meditrack/ui';
 
 const ORDER_DETAIL_QUERY = `
   query AdminOrderDetail($id: ID!) {
@@ -38,13 +38,12 @@ export function AdminOrderDetailPage() {
 
   return (
     <div className="max-w-xl">
-      <div className="flex items-center gap-3 mb-6">
-        <BackButton onClick={() => navigate('/orders')} />
+      <PageHeader onBack={() => navigate('/orders')} className="mb-6">
         <h1 className="text-xl font-semibold text-slate-800">
           Order <span className="font-mono text-base">{order.id.slice(0, 8)}…</span>
         </h1>
         <OrderStatusBadge status={order.status} />
-      </div>
+      </PageHeader>
 
       <Card className="p-5 mb-4">
         <dl className="text-sm space-y-0">

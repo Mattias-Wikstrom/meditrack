@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Button, Card, DetailHeader, Spinner, InfoRow } from '@meditrack/ui';
+import { Button, Card, PageHeader, Spinner, InfoRow } from '@meditrack/ui';
 import { useAuth, createApiClient } from '@meditrack/client';
 
 const MEDICATION_DETAIL_QUERY = `
@@ -150,10 +150,12 @@ export function MedicationDetailPage() {
 
   return (
     <div>
-      <DetailHeader onBack={() => navigate('/inventory')}>
-        <Button variant="ghost" size="sm" onClick={() => { setFormError(null); setModal({ type: 'editMedication' }); }}>Edit</Button>
-        <Button variant="danger" size="sm" onClick={() => { setFormError(null); setModal({ type: 'confirmDeleteMedication' }); }}>Delete</Button>
-      </DetailHeader>
+      <PageHeader onBack={() => navigate('/inventory')} actions={
+        <>
+          <Button variant="ghost" size="sm" onClick={() => { setFormError(null); setModal({ type: 'editMedication' }); }}>Edit</Button>
+          <Button variant="danger" size="sm" onClick={() => { setFormError(null); setModal({ type: 'confirmDeleteMedication' }); }}>Delete</Button>
+        </>
+      } />
 
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-slate-800">{medication.innName}</h1>
