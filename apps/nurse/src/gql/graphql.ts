@@ -80,11 +80,23 @@ export type MedicinalProduct = {
 export type Mutation = {
   __typename?: 'Mutation';
   confirmOrder: OrderPayload;
+  createActor: Actor;
+  createMedication: Medication;
+  createMedicinalProduct: MedicinalProduct;
   createOrder: OrderPayload;
+  createWardUnit: WardUnit;
+  deleteActor: Scalars['Boolean']['output'];
+  deleteMedication: Scalars['Boolean']['output'];
+  deleteMedicinalProduct: Scalars['Boolean']['output'];
+  deleteWardUnit: Scalars['Boolean']['output'];
   deliverOrder: OrderPayload;
   restockProduct: RestockPayload;
   sendOrder: OrderPayload;
+  updateActor: Actor;
+  updateMedication: Medication;
+  updateMedicinalProduct: MedicinalProduct;
   updateOrderLines: OrderPayload;
+  updateWardUnit: WardUnit;
 };
 
 
@@ -93,8 +105,58 @@ export type MutationConfirmOrderArgs = {
 };
 
 
+export type MutationCreateActorArgs = {
+  id: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  role: Scalars['String']['input'];
+  wardUnitId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationCreateMedicationArgs = {
+  atcCode: Scalars['String']['input'];
+  form: MedicationForm;
+  innName: Scalars['String']['input'];
+  strength: Scalars['String']['input'];
+};
+
+
+export type MutationCreateMedicinalProductArgs = {
+  medicationId: Scalars['ID']['input'];
+  productName: Scalars['String']['input'];
+  stockLevel: Scalars['Int']['input'];
+  stockThreshold: Scalars['Int']['input'];
+};
+
+
 export type MutationCreateOrderArgs = {
   lines: Array<OrderLineInput>;
+};
+
+
+export type MutationCreateWardUnitArgs = {
+  id: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteActorArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteMedicationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteMedicinalProductArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteWardUnitArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -115,9 +177,38 @@ export type MutationSendOrderArgs = {
 };
 
 
+export type MutationUpdateActorArgs = {
+  id: Scalars['ID']['input'];
+  role?: InputMaybe<Scalars['String']['input']>;
+  wardUnitId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationUpdateMedicationArgs = {
+  atcCode?: InputMaybe<Scalars['String']['input']>;
+  form?: InputMaybe<MedicationForm>;
+  id: Scalars['ID']['input'];
+  innName?: InputMaybe<Scalars['String']['input']>;
+  strength?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationUpdateMedicinalProductArgs = {
+  id: Scalars['ID']['input'];
+  productName?: InputMaybe<Scalars['String']['input']>;
+  stockThreshold?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type MutationUpdateOrderLinesArgs = {
   lines: Array<OrderLineInput>;
   orderId: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateWardUnitArgs = {
+  id: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
 };
 
 export type Order = {
@@ -175,6 +266,13 @@ export type OrderStatusChangedEvent = {
   from: OrderStatus;
   orderId: Scalars['ID']['output'];
   to: OrderStatus;
+};
+
+export type ProductRestockedEvent = {
+  __typename?: 'ProductRestockedEvent';
+  medicinalProductId: Scalars['ID']['output'];
+  productName: Scalars['String']['output'];
+  stockLevel: Scalars['Int']['output'];
 };
 
 export type ProductSelectionInput = {
@@ -253,6 +351,7 @@ export type Subscription = {
   orderDraftCreated: OrderDraftCreatedEvent;
   orderDraftUpdated: OrderDraftUpdatedEvent;
   orderStatusChanged: OrderStatusChangedEvent;
+  productRestocked: ProductRestockedEvent;
   stockBelowThreshold: StockAlertEvent;
 };
 

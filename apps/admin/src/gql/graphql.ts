@@ -80,11 +80,23 @@ export type MedicinalProduct = {
 export type Mutation = {
   __typename?: 'Mutation';
   confirmOrder: OrderPayload;
+  createActor: Actor;
+  createMedication: Medication;
+  createMedicinalProduct: MedicinalProduct;
   createOrder: OrderPayload;
+  createWardUnit: WardUnit;
+  deleteActor: Scalars['Boolean']['output'];
+  deleteMedication: Scalars['Boolean']['output'];
+  deleteMedicinalProduct: Scalars['Boolean']['output'];
+  deleteWardUnit: Scalars['Boolean']['output'];
   deliverOrder: OrderPayload;
   restockProduct: RestockPayload;
   sendOrder: OrderPayload;
+  updateActor: Actor;
+  updateMedication: Medication;
+  updateMedicinalProduct: MedicinalProduct;
   updateOrderLines: OrderPayload;
+  updateWardUnit: WardUnit;
 };
 
 
@@ -93,8 +105,58 @@ export type MutationConfirmOrderArgs = {
 };
 
 
+export type MutationCreateActorArgs = {
+  id: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  role: Scalars['String']['input'];
+  wardUnitId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationCreateMedicationArgs = {
+  atcCode: Scalars['String']['input'];
+  form: MedicationForm;
+  innName: Scalars['String']['input'];
+  strength: Scalars['String']['input'];
+};
+
+
+export type MutationCreateMedicinalProductArgs = {
+  medicationId: Scalars['ID']['input'];
+  productName: Scalars['String']['input'];
+  stockLevel: Scalars['Int']['input'];
+  stockThreshold: Scalars['Int']['input'];
+};
+
+
 export type MutationCreateOrderArgs = {
   lines: Array<OrderLineInput>;
+};
+
+
+export type MutationCreateWardUnitArgs = {
+  id: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteActorArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteMedicationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteMedicinalProductArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteWardUnitArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -115,9 +177,38 @@ export type MutationSendOrderArgs = {
 };
 
 
+export type MutationUpdateActorArgs = {
+  id: Scalars['ID']['input'];
+  role?: InputMaybe<Scalars['String']['input']>;
+  wardUnitId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationUpdateMedicationArgs = {
+  atcCode?: InputMaybe<Scalars['String']['input']>;
+  form?: InputMaybe<MedicationForm>;
+  id: Scalars['ID']['input'];
+  innName?: InputMaybe<Scalars['String']['input']>;
+  strength?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationUpdateMedicinalProductArgs = {
+  id: Scalars['ID']['input'];
+  productName?: InputMaybe<Scalars['String']['input']>;
+  stockThreshold?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type MutationUpdateOrderLinesArgs = {
   lines: Array<OrderLineInput>;
   orderId: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateWardUnitArgs = {
+  id: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
 };
 
 export type Order = {
@@ -175,6 +266,13 @@ export type OrderStatusChangedEvent = {
   from: OrderStatus;
   orderId: Scalars['ID']['output'];
   to: OrderStatus;
+};
+
+export type ProductRestockedEvent = {
+  __typename?: 'ProductRestockedEvent';
+  medicinalProductId: Scalars['ID']['output'];
+  productName: Scalars['String']['output'];
+  stockLevel: Scalars['Int']['output'];
 };
 
 export type ProductSelectionInput = {
@@ -253,6 +351,7 @@ export type Subscription = {
   orderDraftCreated: OrderDraftCreatedEvent;
   orderDraftUpdated: OrderDraftUpdatedEvent;
   orderStatusChanged: OrderStatusChangedEvent;
+  productRestocked: ProductRestockedEvent;
   stockBelowThreshold: StockAlertEvent;
 };
 
@@ -281,7 +380,7 @@ export type AdminOrdersQuery = { __typename?: 'Query', orders: Array<{ __typenam
 export type AdminActorsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AdminActorsQuery = { __typename?: 'Query', actors: Array<{ __typename?: 'Actor', id: string, role: string, wardUnitId?: string | null, wardUnit?: { __typename?: 'WardUnit', name: string } | null }> };
+export type AdminActorsQuery = { __typename?: 'Query', actors: Array<{ __typename?: 'Actor', id: string, role: string, wardUnitId?: string | null, wardUnit?: { __typename?: 'WardUnit', name: string } | null }>, wardUnits: Array<{ __typename?: 'WardUnit', id: string, name: string }> };
 
 export type AdminWardUnitsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -292,5 +391,5 @@ export type AdminWardUnitsQuery = { __typename?: 'Query', wardUnits: Array<{ __t
 export const AdminAuditLogDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminAuditLog"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"auditLog"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actorId"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"entityId"}},{"kind":"Field","name":{"kind":"Name","value":"occurredAt"}}]}}]}}]} as unknown as DocumentNode<AdminAuditLogQuery, AdminAuditLogQueryVariables>;
 export const AdminMedicationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminMedications"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicinalProducts"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"stockLevel"}},{"kind":"Field","name":{"kind":"Name","value":"stockThreshold"}},{"kind":"Field","name":{"kind":"Name","value":"isBelowThreshold"}},{"kind":"Field","name":{"kind":"Name","value":"medication"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"innName"}},{"kind":"Field","name":{"kind":"Name","value":"atcCode"}},{"kind":"Field","name":{"kind":"Name","value":"form"}},{"kind":"Field","name":{"kind":"Name","value":"strength"}}]}}]}}]}}]} as unknown as DocumentNode<AdminMedicationsQuery, AdminMedicationsQueryVariables>;
 export const AdminOrdersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminOrders"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"orders"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"wardUnitId"}},{"kind":"Field","name":{"kind":"Name","value":"wardUnit"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"lines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"medicationId"}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"medication"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"innName"}}]}}]}}]}}]}}]} as unknown as DocumentNode<AdminOrdersQuery, AdminOrdersQueryVariables>;
-export const AdminActorsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminActors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"wardUnitId"}},{"kind":"Field","name":{"kind":"Name","value":"wardUnit"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<AdminActorsQuery, AdminActorsQueryVariables>;
+export const AdminActorsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminActors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"wardUnitId"}},{"kind":"Field","name":{"kind":"Name","value":"wardUnit"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"wardUnits"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<AdminActorsQuery, AdminActorsQueryVariables>;
 export const AdminWardUnitsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminWardUnits"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"wardUnits"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<AdminWardUnitsQuery, AdminWardUnitsQueryVariables>;

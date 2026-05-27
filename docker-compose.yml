@@ -32,7 +32,7 @@ services:
       - /app/node_modules
     # Runs migrations on every start. To seed reference data the first time,
     # run: docker compose run --rm api npx prisma db seed
-    command: sh -c "npx prisma migrate deploy && npm run server"
+    command: sh -c "npx prisma migrate deploy && npm run codegen && npm run server"
 
   nurse:
     build: .
