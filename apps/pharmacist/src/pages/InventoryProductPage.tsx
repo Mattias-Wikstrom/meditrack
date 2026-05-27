@@ -1,8 +1,9 @@
 // Used for /inventory/:productId (pharmacist)
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useMutation } from 'urql';
+import { useQuery } from 'urql';
 import { InventoryProductDetail, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
+import { useAuth, createApiClient } from '@meditrack/client';
 
 const PRODUCT_DETAIL_QUERY = graphql(`
   query PharmacistProductDetail($id: ID!) {
@@ -13,34 +14,24 @@ const PRODUCT_DETAIL_QUERY = graphql(`
   }
 `);
 
-const RESTOCK_MUTATION = graphql(`
-  mutation RestockProductDetail($medicinalProductId: ID!, $quantity: Int!) {
-    restockProduct(medicinalProductId: $medicinalProductId, quantity: $quantity) {
-      successful
-      product { id stockLevel isBelowThreshold }
-      errors
-    }
-  }
-`);
-
 export function InventoryProductPage() {
   const navigate = useNavigate();
   const { productId } = useParams();
+  const { token } = useAuth();
 
   const [{ data, fetching, error }, refetch] = useQuery({
     query: PRODUCT_DETAIL_QUERY,
     variables: { id: productId! },
   });
-  const [, restock] = useMutation(RESTOCK_MUTATION);
 
   async function handleRestock(quantity: number): Promise<string | null> {
-    const result = await restock({ medicinalProductId: productId!, quantity });
-    if (result.error) return result.error.message;
-    if (!result.data?.restockProduct.successful) {
-      return result.data?.restockProduct.errors.join(', ') ?? 'Restock failed';
+    try {
+      await createApiClient(token!).post(`/products/${productId}/restock`, { quantity });
+      refetch({ requestPolicy: 'network-only' });
+      return null;
+    } catch (err) {
+      return err instanceof Error ? err.message : 'Restock failed';
     }
-    refetch({ requestPolicy: 'network-only' });
-    return null;
   }
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
