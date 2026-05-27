@@ -42,6 +42,7 @@ import {
   addProduct,
   updateProduct,
   deleteProduct,
+  restockProduct,
 } from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
 import { login } from './commands/auth';
@@ -276,6 +277,15 @@ products
   .action(async (productId) => {
     const { actorId } = await requireAuth();
     return deleteProduct(deleteMedicinalProductUseCase, output, actorId, productId);
+  });
+
+products
+  .command('restock <productId>')
+  .description('Add stock to a medicinal product (pharmacist only)')
+  .requiredOption('--quantity <n>', 'units to add', parseInt)
+  .action(async (productId, opts) => {
+    const { actorId } = await requireAuth();
+    return restockProduct(restockUseCase, output, actorId, productId, opts.quantity);
   });
 
 const orders = program.command('orders');

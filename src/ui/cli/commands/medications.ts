@@ -6,6 +6,7 @@ import { DeleteMedicationUseCase } from '../../../domain/medication/useCases/Del
 import { CreateMedicinalProductUseCase } from '../../../domain/medication/useCases/CreateMedicinalProductUseCase';
 import { UpdateMedicinalProductUseCase } from '../../../domain/medication/useCases/UpdateMedicinalProductUseCase';
 import { DeleteMedicinalProductUseCase } from '../../../domain/medication/useCases/DeleteMedicinalProductUseCase';
+import { RestockUseCase } from '../../../domain/medication/useCases/RestockUseCase';
 import { MedicationForm } from '../../../domain/medication/MedicationForm';
 import { MedicationId, MedicinalProductId } from '../../../domain/shared/IdTypes';
 import { CliOutput } from '../CliOutput';
@@ -172,6 +173,26 @@ export async function deleteProduct(
   const result = await useCase.execute({ requestingActorId, id: id as MedicinalProductId });
   if (result.successful) {
     output.print(`Product deleted: ${id}`);
+  } else {
+    result.errors.forEach((e) => output.error(errorMessages[e.code] ?? e.code));
+    output.exit(1);
+  }
+}
+
+export async function restockProduct(
+  useCase: RestockUseCase,
+  output: CliOutput,
+  actorId: string,
+  id: string,
+  quantity: number,
+): Promise<void> {
+  const result = await useCase.execute({
+    actorId,
+    medicinalProductId: id as MedicinalProductId,
+    quantity,
+  });
+  if (result.successful) {
+    output.print(`Restocked: ${result.value.productName}  new stock: ${result.value.stockLevel}`);
   } else {
     result.errors.forEach((e) => output.error(errorMessages[e.code] ?? e.code));
     output.exit(1);
