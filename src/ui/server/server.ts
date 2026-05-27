@@ -13,6 +13,8 @@ import { createOrdersRouter } from './rest/orders';
 import { createAuthRouter } from './rest/auth';
 import { createActorsRouter } from './rest/actors';
 import { createWardUnitsRouter } from './rest/wardUnits';
+import { createMedicationsRouter } from './rest/medications';
+import { createProductsRouter } from './rest/products';
 import { requireAuth } from './middleware/requireAuth';
 import { verifyToken } from '../../domain/auth/jwt';
 
@@ -54,6 +56,8 @@ api.use('/actors', createActorsRouter(wiring));
 api.use('/auth', createAuthRouter());
 api.use('/orders', requireAuth, createOrdersRouter(wiring));
 api.use('/ward-units', createWardUnitsRouter(wiring));
+api.use('/medications', createMedicationsRouter(wiring));
+api.use('/products', createProductsRouter(wiring));
 app.use('/api', api);
 
 // --- HTTP + WebSocket server ---
