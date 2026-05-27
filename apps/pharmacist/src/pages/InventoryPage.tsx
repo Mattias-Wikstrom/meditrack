@@ -4,20 +4,11 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
 import { graphql } from '../gql';
-import { useAuth, createApiClient, useMedicinalProductOverrides } from '@meditrack/client';
+import { useAuth, createApiClient } from '@meditrack/client';
 
 const INVENTORY_QUERY = graphql(`
   query PharmacistInventory {
     medicinalProducts {
-      id productName stockLevel stockThreshold isBelowThreshold
-      medication { id innName atcCode form strength }
-    }
-  }
-`);
-
-const PRODUCT_UPDATED_SUB = graphql(`
-  subscription PharmacistInventoryProductUpdated {
-    medicinalProductUpdated {
       id productName stockLevel stockThreshold isBelowThreshold
       medication { id innName atcCode form strength }
     }
@@ -91,7 +82,6 @@ export function InventoryPage() {
 
   const { token } = useAuth();
   const [{ data, fetching, error }] = useQuery({ query: INVENTORY_QUERY });
-  const applyUpdates = useMedicinalProductOverrides(PRODUCT_UPDATED_SUB);
 
   function handleSort(key: SortKey) {
     if (key === sortKey) {
@@ -119,7 +109,7 @@ export function InventoryPage() {
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
-  const products = applyUpdates(data?.medicinalProducts ?? []);
+  const products = data?.medicinalProducts ?? [];
   const lowStockCount = products.filter(p => p.isBelowThreshold).length;
 
   const q = search.toLowerCase();

@@ -7,7 +7,6 @@ import { useOrdersApi } from '../api/orders';
 import type { ProductSelection } from '../api/orders';
 import { graphql } from '../gql';
 import type { GetOrderQuery } from '../gql/graphql';
-import { useMedicinalProductOverrides } from '@meditrack/client';
 
 // ── Confirm view (order is Sent, awaiting pharmacist confirmation) ─────────────
 
@@ -80,14 +79,6 @@ const PRODUCTS_QUERY = graphql(`
   }
 `);
 
-const PRODUCT_UPDATED_SUB = graphql(`
-  subscription PharmacistOrderDetailProductUpdated {
-    medicinalProductUpdated {
-      id productName stockLevel isBelowThreshold
-    }
-  }
-`);
-
 type OrderLine = NonNullable<NonNullable<GetOrderQuery['order']>['lines'][number]>;
 
 // One row in the split list for a single order line.
@@ -110,8 +101,7 @@ function LineDeliverySection({
     variables: { medicationId: line.medicationId },
   });
 
-  const applyUpdates = useMedicinalProductOverrides(PRODUCT_UPDATED_SUB);
-  const products = applyUpdates(data?.medicinalProducts ?? []);
+  const products = data?.medicinalProducts ?? [];
   const selectedSplits = splits.filter(s => s.medicinalProductId !== '');
   const totalAllocated = selectedSplits.reduce((sum, s) => sum + s.quantity, 0);
   const remaining = line.quantity - totalAllocated;

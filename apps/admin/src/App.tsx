@@ -12,6 +12,7 @@ import { UserDetailsPage, WardUnitDetailsPage, MedicationDetailsPage } from './p
 import { MedicationDetailPage } from './pages/MedicationDetailPage';
 import { AdminOrderDetailPage } from './pages/AdminOrderDetailPage';
 import { OverviewPage } from './pages/OverviewPage';
+import { StockSync } from './StockSync';
 
 function AdminNav() {
   return (
@@ -40,6 +41,7 @@ export function App() {
 
   return (
     <Provider value={urqlClient}>
+      <StockSync />
       <AppShell
         appName="Admin"
         actorName={actorId!}

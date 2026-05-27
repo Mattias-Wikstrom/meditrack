@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Button, Card, PageHeader, Spinner, InfoRow } from '@meditrack/ui';
-import { useAuth, createApiClient, useMedicinalProductOverrides } from '@meditrack/client';
+import { useAuth, createApiClient } from '@meditrack/client';
 import { graphql } from '../gql';
 
 const MEDICATION_DETAIL_QUERY = graphql(`
@@ -12,14 +12,6 @@ const MEDICATION_DETAIL_QUERY = graphql(`
       id innName atcCode form strength
     }
     medicinalProducts(medicationId: $id) {
-      id productName stockLevel stockThreshold isBelowThreshold
-    }
-  }
-`);
-
-const PRODUCT_UPDATED_SUB = graphql(`
-  subscription AdminMedicationDetailProductUpdated {
-    medicinalProductUpdated {
       id productName stockLevel stockThreshold isBelowThreshold
     }
   }
@@ -72,8 +64,6 @@ export function MedicationDetailPage() {
     variables: { id: medicationId },
   });
 
-  const applyUpdates = useMedicinalProductOverrides(PRODUCT_UPDATED_SUB);
-
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
@@ -85,7 +75,7 @@ export function MedicationDetailPage() {
     </p>
   );
 
-  const products: Product[] = applyUpdates(data?.medicinalProducts ?? []);
+  const products: Product[] = data?.medicinalProducts ?? [];
 
   function closeModal() {
     setModal(null);
