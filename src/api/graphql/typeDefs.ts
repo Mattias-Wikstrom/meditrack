@@ -6,6 +6,13 @@ export const typeDefs = /* GraphQL */ `
     stockBelowThreshold: StockAlertEvent!
     productRestocked: ProductRestockedEvent!
     medicinalProductUpdated: MedicinalProduct!
+    repositoryChanged: RepositoryChangeEvent!
+  }
+
+  type RepositoryChangeEvent {
+    entityType: String!
+    kind: String!
+    entityId: String!
   }
 
   type ProductRestockedEvent {

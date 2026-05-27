@@ -63,4 +63,12 @@ export const Subscription = {
     subscribe: () => savedEntities<MedicinalProduct>(changePubSub.subscribe('MedicinalProduct')),
     resolve: (entity: MedicinalProduct) => entity,
   },
+  repositoryChanged: {
+    subscribe: () => changePubSub.subscribe('__all__'),
+    resolve: (change: RepositoryChange<any>) => ({
+      entityType: change.entityType,
+      kind: change.kind,
+      entityId: change.kind === 'saved' ? String((change.entity as any).id) : String(change.id),
+    }),
+  },
 };
