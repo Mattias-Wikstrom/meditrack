@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "codegen": "graphql-codegen --config codegen.ts",
     "cli": "tsx src/ui/cli/meditrack.ts",
-    "server": "tsx src/ui/server/server.ts"
+    "server": "tsx src/ui/server/server.ts",
+    "repos:spy": "tsx src/ui/events/repo-spy.ts"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.0",
