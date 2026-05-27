@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
-import { useAuth, createApiClient } from '@meditrack/client';
+import { useAuth, createApiClient, useMedicinalProductOverrides } from '@meditrack/client';
 import { graphql } from '../gql';
 
 const MEDICATIONS_QUERY = graphql(`
@@ -11,6 +11,14 @@ const MEDICATIONS_QUERY = graphql(`
     medicinalProducts {
       id productName stockLevel stockThreshold isBelowThreshold
       medication { id innName atcCode form strength }
+    }
+  }
+`);
+
+const PRODUCT_UPDATED_SUB = graphql(`
+  subscription AdminInventoryProductUpdated {
+    medicinalProductUpdated {
+      id productName stockLevel stockThreshold isBelowThreshold
     }
   }
 `);
@@ -37,6 +45,7 @@ export function InventoryPage() {
   );
 
   const [{ data, fetching, error }] = useQuery({ query: MEDICATIONS_QUERY, requestPolicy: 'cache-and-network' });
+  const applyUpdates = useMedicinalProductOverrides(PRODUCT_UPDATED_SUB);
 
   function handleSort(key: SortKey) {
     if (key === sortKey) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -46,7 +55,7 @@ export function InventoryPage() {
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
-  const products = data?.medicinalProducts ?? [];
+  const products = applyUpdates(data?.medicinalProducts ?? []);
   const lowStockCount = products.filter(p => p.isBelowThreshold).length;
 
   const q = search.toLowerCase();

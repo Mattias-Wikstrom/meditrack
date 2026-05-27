@@ -16,14 +16,24 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 type Documents = {
     "\n  query AdminAuditLog {\n    auditLog {\n      actorId\n      action\n      entityId\n      occurredAt\n    }\n  }\n": typeof types.AdminAuditLogDocument,
     "\n  query AdminMedications {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": typeof types.AdminMedicationsDocument,
+    "\n  subscription AdminInventoryProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": typeof types.AdminInventoryProductUpdatedDocument,
+    "\n  query AdminMedicationDetail($id: ID!) {\n    medication(id: $id) {\n      id innName atcCode form strength\n    }\n    medicinalProducts(medicationId: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": typeof types.AdminMedicationDetailDocument,
+    "\n  subscription AdminMedicationDetailProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": typeof types.AdminMedicationDetailProductUpdatedDocument,
     "\n  query AdminOrders {\n    orders {\n      id wardUnitId wardUnit { name } status createdAt\n      lines { medicationId quantity medication { innName } }\n    }\n  }\n": typeof types.AdminOrdersDocument,
+    "\n  query AdminOverview {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { innName atcCode strength }\n    }\n    orders { id status }\n  }\n": typeof types.AdminOverviewDocument,
+    "\n  subscription AdminOverviewProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": typeof types.AdminOverviewProductUpdatedDocument,
     "\n  query AdminActors {\n    actors {\n      id\n      role\n      wardUnitId\n      wardUnit { name }\n    }\n    wardUnits { id name }\n  }\n": typeof types.AdminActorsDocument,
     "\n  query AdminWardUnits {\n    wardUnits {\n      id\n      name\n    }\n  }\n": typeof types.AdminWardUnitsDocument,
 };
 const documents: Documents = {
     "\n  query AdminAuditLog {\n    auditLog {\n      actorId\n      action\n      entityId\n      occurredAt\n    }\n  }\n": types.AdminAuditLogDocument,
     "\n  query AdminMedications {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { id innName atcCode form strength }\n    }\n  }\n": types.AdminMedicationsDocument,
+    "\n  subscription AdminInventoryProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": types.AdminInventoryProductUpdatedDocument,
+    "\n  query AdminMedicationDetail($id: ID!) {\n    medication(id: $id) {\n      id innName atcCode form strength\n    }\n    medicinalProducts(medicationId: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": types.AdminMedicationDetailDocument,
+    "\n  subscription AdminMedicationDetailProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": types.AdminMedicationDetailProductUpdatedDocument,
     "\n  query AdminOrders {\n    orders {\n      id wardUnitId wardUnit { name } status createdAt\n      lines { medicationId quantity medication { innName } }\n    }\n  }\n": types.AdminOrdersDocument,
+    "\n  query AdminOverview {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { innName atcCode strength }\n    }\n    orders { id status }\n  }\n": types.AdminOverviewDocument,
+    "\n  subscription AdminOverviewProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n": types.AdminOverviewProductUpdatedDocument,
     "\n  query AdminActors {\n    actors {\n      id\n      role\n      wardUnitId\n      wardUnit { name }\n    }\n    wardUnits { id name }\n  }\n": types.AdminActorsDocument,
     "\n  query AdminWardUnits {\n    wardUnits {\n      id\n      name\n    }\n  }\n": types.AdminWardUnitsDocument,
 };
@@ -53,7 +63,27 @@ export function graphql(source: "\n  query AdminMedications {\n    medicinalProd
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  subscription AdminInventoryProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"): (typeof documents)["\n  subscription AdminInventoryProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query AdminMedicationDetail($id: ID!) {\n    medication(id: $id) {\n      id innName atcCode form strength\n    }\n    medicinalProducts(medicationId: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"): (typeof documents)["\n  query AdminMedicationDetail($id: ID!) {\n    medication(id: $id) {\n      id innName atcCode form strength\n    }\n    medicinalProducts(medicationId: $id) {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  subscription AdminMedicationDetailProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"): (typeof documents)["\n  subscription AdminMedicationDetailProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  query AdminOrders {\n    orders {\n      id wardUnitId wardUnit { name } status createdAt\n      lines { medicationId quantity medication { innName } }\n    }\n  }\n"): (typeof documents)["\n  query AdminOrders {\n    orders {\n      id wardUnitId wardUnit { name } status createdAt\n      lines { medicationId quantity medication { innName } }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query AdminOverview {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { innName atcCode strength }\n    }\n    orders { id status }\n  }\n"): (typeof documents)["\n  query AdminOverview {\n    medicinalProducts {\n      id productName stockLevel stockThreshold isBelowThreshold\n      medication { innName atcCode strength }\n    }\n    orders { id status }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  subscription AdminOverviewProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"): (typeof documents)["\n  subscription AdminOverviewProductUpdated {\n    medicinalProductUpdated {\n      id productName stockLevel stockThreshold isBelowThreshold\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
