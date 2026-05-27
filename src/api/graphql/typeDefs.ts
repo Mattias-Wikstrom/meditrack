@@ -5,6 +5,7 @@ export const typeDefs = /* GraphQL */ `
     orderStatusChanged: OrderStatusChangedEvent!
     stockBelowThreshold: StockAlertEvent!
     productRestocked: ProductRestockedEvent!
+    medicinalProductUpdated: MedicinalProduct!
   }
 
   type ProductRestockedEvent {

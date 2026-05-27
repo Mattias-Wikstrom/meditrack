@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { EventBus } from '../../domain/shared/eventContracts/EventBus';
 import { PrismaMedicationRepository } from '../../storage/prisma/PrismaMedicationRepository';
 import { PrismaMedicinalProductRepository } from '../../storage/prisma/PrismaMedicinalProductRepository';
+import { PublishingMedicinalProductRepository } from '../../storage/PublishingMedicinalProductRepository';
 import { PrismaOrderRepository } from '../../storage/prisma/PrismaOrderRepository';
 import { PrismaWardUnitRepository } from '../../storage/prisma/PrismaWardUnitRepository';
 import { PrismaActorRepository } from '../../storage/prisma/PrismaActorRepository';
@@ -29,7 +30,10 @@ import { PrismaCredentialsRepository } from '../../storage/prisma/PrismaCredenti
 
 export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
   const medicationRepo = new PrismaMedicationRepository(prisma);
-  const medicinalProductRepo = new PrismaMedicinalProductRepository(prisma);
+  const medicinalProductRepo = new PublishingMedicinalProductRepository(
+    new PrismaMedicinalProductRepository(prisma),
+    eventBus,
+  );
   const orderRepo = new PrismaOrderRepository(prisma);
   const wardUnitRepo = new PrismaWardUnitRepository(prisma);
   const actorRepo = new PrismaActorRepository(prisma);
