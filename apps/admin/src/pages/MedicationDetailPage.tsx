@@ -1,8 +1,9 @@
 // Used for /medications/:medicationId (admin)
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useMutation } from 'urql';
+import { useQuery } from 'urql';
 import { Button, Card, DetailHeader, Spinner, InfoRow } from '@meditrack/ui';
+import { useAuth, createApiClient } from '@meditrack/client';
 
 const MEDICATION_DETAIL_QUERY = `
   query AdminMedicationDetail($id: ID!) {
@@ -12,42 +13,6 @@ const MEDICATION_DETAIL_QUERY = `
     medicinalProducts(medicationId: $id) {
       id productName stockLevel stockThreshold isBelowThreshold
     }
-  }
-`;
-
-const UPDATE_MEDICATION = `
-  mutation AdminUpdateMedication($id: ID!, $innName: String, $atcCode: String, $form: MedicationForm, $strength: String) {
-    updateMedication(id: $id, innName: $innName, atcCode: $atcCode, form: $form, strength: $strength) {
-      id innName atcCode form strength
-    }
-  }
-`;
-
-const DELETE_MEDICATION = `
-  mutation AdminDeleteMedication($id: ID!) {
-    deleteMedication(id: $id)
-  }
-`;
-
-const CREATE_PRODUCT = `
-  mutation AdminCreateProduct($productName: String!, $medicationId: ID!, $stockLevel: Int!, $stockThreshold: Int!) {
-    createMedicinalProduct(productName: $productName, medicationId: $medicationId, stockLevel: $stockLevel, stockThreshold: $stockThreshold) {
-      id productName stockLevel stockThreshold isBelowThreshold
-    }
-  }
-`;
-
-const UPDATE_PRODUCT = `
-  mutation AdminUpdateProduct($id: ID!, $productName: String, $stockThreshold: Int) {
-    updateMedicinalProduct(id: $id, productName: $productName, stockThreshold: $stockThreshold) {
-      id productName stockLevel stockThreshold isBelowThreshold
-    }
-  }
-`;
-
-const DELETE_PRODUCT = `
-  mutation AdminDeleteProduct($id: ID!) {
-    deleteMedicinalProduct(id: $id)
   }
 `;
 
@@ -89,6 +54,7 @@ function DialogShell({ title, onClose, children }: { title: string; onClose: () 
 export function MedicationDetailPage() {
   const navigate = useNavigate();
   const { medicationId } = useParams();
+  const { token } = useAuth();
   const [modal, setModal] = useState<ModalState>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -96,12 +62,6 @@ export function MedicationDetailPage() {
     query: MEDICATION_DETAIL_QUERY,
     variables: { id: medicationId },
   });
-
-  const [, updateMedication] = useMutation(UPDATE_MEDICATION);
-  const [, deleteMedication] = useMutation(DELETE_MEDICATION);
-  const [, createProduct] = useMutation(CREATE_PRODUCT);
-  const [, updateProduct] = useMutation(UPDATE_PRODUCT);
-  const [, deleteProduct] = useMutation(DELETE_PRODUCT);
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -124,56 +84,68 @@ export function MedicationDetailPage() {
   async function handleUpdateMedication(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const result = await updateMedication({
-      id: medicationId,
-      innName: fd.get('innName') as string,
-      atcCode: fd.get('atcCode') as string,
-      form: fd.get('form') as string,
-      strength: fd.get('strength') as string,
-    });
-    if (result.error) { setFormError(result.error.message); return; }
-    closeModal();
-    refetch({ requestPolicy: 'network-only' });
+    try {
+      await createApiClient(token!).patch(`/medications/${medicationId}`, {
+        innName: fd.get('innName') as string,
+        atcCode: fd.get('atcCode') as string,
+        form: fd.get('form') as string,
+        strength: fd.get('strength') as string,
+      });
+      closeModal();
+      refetch({ requestPolicy: 'network-only' });
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Failed to update medication');
+    }
   }
 
   async function handleDeleteMedication() {
-    const result = await deleteMedication({ id: medicationId });
-    if (result.error) { setFormError(result.error.message); return; }
-    navigate('/inventory');
+    try {
+      await createApiClient(token!).del(`/medications/${medicationId}`);
+      navigate('/inventory');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Failed to delete medication');
+    }
   }
 
   async function handleCreateProduct(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const result = await createProduct({
-      productName: fd.get('productName') as string,
-      medicationId,
-      stockLevel: parseInt(fd.get('stockLevel') as string),
-      stockThreshold: parseInt(fd.get('stockThreshold') as string),
-    });
-    if (result.error) { setFormError(result.error.message); return; }
-    closeModal();
-    refetch({ requestPolicy: 'network-only' });
+    try {
+      await createApiClient(token!).post(`/medications/${medicationId}/products`, {
+        productName: fd.get('productName') as string,
+        stockLevel: parseInt(fd.get('stockLevel') as string),
+        stockThreshold: parseInt(fd.get('stockThreshold') as string),
+      });
+      closeModal();
+      refetch({ requestPolicy: 'network-only' });
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Failed to add product');
+    }
   }
 
   async function handleUpdateProduct(e: React.FormEvent<HTMLFormElement>, productId: string) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const result = await updateProduct({
-      id: productId,
-      productName: fd.get('productName') as string,
-      stockThreshold: parseInt(fd.get('stockThreshold') as string),
-    });
-    if (result.error) { setFormError(result.error.message); return; }
-    closeModal();
-    refetch({ requestPolicy: 'network-only' });
+    try {
+      await createApiClient(token!).patch(`/products/${productId}`, {
+        productName: fd.get('productName') as string,
+        stockThreshold: parseInt(fd.get('stockThreshold') as string),
+      });
+      closeModal();
+      refetch({ requestPolicy: 'network-only' });
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Failed to update product');
+    }
   }
 
   async function handleDeleteProduct(productId: string) {
-    const result = await deleteProduct({ id: productId });
-    if (result.error) { setFormError(result.error.message); return; }
-    closeModal();
-    refetch({ requestPolicy: 'network-only' });
+    try {
+      await createApiClient(token!).del(`/products/${productId}`);
+      closeModal();
+      refetch({ requestPolicy: 'network-only' });
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Failed to delete product');
+    }
   }
 
   return (

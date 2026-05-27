@@ -1,7 +1,7 @@
 // Used for /ward-units/:wardUnitId, /users/:userId, /inventory/:productId (admin)
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useMutation } from 'urql';
+import { useQuery } from 'urql';
 import { BackButton, OrderStatusBadge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
 import { useAuth, createApiClient } from '@meditrack/client';
 
@@ -355,25 +355,12 @@ const PRODUCT_DETAIL_QUERY = `
   }
 `;
 
-const UPDATE_PRODUCT_MUTATION = `
-  mutation AdminDetailUpdateProduct($id: ID!, $productName: String, $stockThreshold: Int) {
-    updateMedicinalProduct(id: $id, productName: $productName, stockThreshold: $stockThreshold) {
-      id productName stockLevel stockThreshold isBelowThreshold
-    }
-  }
-`;
-
-const DELETE_PRODUCT_MUTATION = `
-  mutation AdminDetailDeleteProduct($id: ID!) {
-    deleteMedicinalProduct(id: $id)
-  }
-`;
-
 const productInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
 export function MedicationDetailsPage() {
   const navigate = useNavigate();
   const { productId } = useParams();
+  const { token } = useAuth();
   const [modal, setModal] = useState<'edit' | 'confirmDelete' | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
 
@@ -381,8 +368,6 @@ export function MedicationDetailsPage() {
     query: PRODUCT_DETAIL_QUERY,
     variables: { id: productId },
   });
-  const [, updateProduct] = useMutation(UPDATE_PRODUCT_MUTATION);
-  const [, deleteProduct] = useMutation(DELETE_PRODUCT_MUTATION);
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -393,21 +378,26 @@ export function MedicationDetailsPage() {
   async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const result = await updateProduct({
-      id: productId,
-      productName: fd.get('productName') as string,
-      stockThreshold: parseInt(fd.get('stockThreshold') as string),
-    });
-    if (result.error) { setModalError(result.error.message); return; }
-    setModal(null);
-    setModalError(null);
-    refetch({ requestPolicy: 'network-only' });
+    try {
+      await createApiClient(token!).patch(`/products/${productId}`, {
+        productName: fd.get('productName') as string,
+        stockThreshold: parseInt(fd.get('stockThreshold') as string),
+      });
+      setModal(null);
+      setModalError(null);
+      refetch({ requestPolicy: 'network-only' });
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to update product');
+    }
   }
 
   async function handleDelete() {
-    const result = await deleteProduct({ id: productId });
-    if (result.error) { setModalError(result.error.message); return; }
-    navigate('/inventory');
+    try {
+      await createApiClient(token!).del(`/products/${productId}`);
+      navigate('/inventory');
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to delete product');
+    }
   }
 
   return (

@@ -4,7 +4,9 @@ export type AuditAction =
   | 'PasswordChanged'
   | 'ProductRestocked'
   | 'ActorCreated' | 'ActorUpdated' | 'ActorDeleted'
-  | 'WardUnitCreated' | 'WardUnitUpdated' | 'WardUnitDeleted';
+  | 'WardUnitCreated' | 'WardUnitUpdated' | 'WardUnitDeleted'
+  | 'MedicationCreated' | 'MedicationUpdated' | 'MedicationDeleted'
+  | 'MedicinalProductCreated' | 'MedicinalProductUpdated' | 'MedicinalProductDeleted';
 
 export interface AuditEntry {
   actorId: string;

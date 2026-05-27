@@ -28,9 +28,15 @@ const ACTION_STYLES: Record<string, string> = {
   ActorCreated:       'bg-teal-100 text-teal-700',
   ActorUpdated:       'bg-blue-100 text-blue-700',
   ActorDeleted:       'bg-red-100 text-red-700',
-  WardUnitCreated:    'bg-teal-100 text-teal-700',
-  WardUnitUpdated:    'bg-blue-100 text-blue-700',
-  WardUnitDeleted:    'bg-red-100 text-red-700',
+  WardUnitCreated:          'bg-teal-100 text-teal-700',
+  WardUnitUpdated:          'bg-blue-100 text-blue-700',
+  WardUnitDeleted:          'bg-red-100 text-red-700',
+  MedicationCreated:        'bg-teal-100 text-teal-700',
+  MedicationUpdated:        'bg-blue-100 text-blue-700',
+  MedicationDeleted:        'bg-red-100 text-red-700',
+  MedicinalProductCreated:  'bg-teal-100 text-teal-700',
+  MedicinalProductUpdated:  'bg-blue-100 text-blue-700',
+  MedicinalProductDeleted:  'bg-red-100 text-red-700',
 };
 
 function ActionBadge({ action }: { action: string }) {
@@ -52,6 +58,12 @@ function toEntityDetailsRoute(action: string, entityId: string): string | null {
     case 'WardUnitCreated':
     case 'WardUnitUpdated':
       return `/ward-units/${entityId}`;
+    case 'MedicationCreated':
+    case 'MedicationUpdated':
+      return `/inventory/${entityId}`;
+    case 'MedicinalProductCreated':
+    case 'MedicinalProductUpdated':
+      return `/inventory/products/${entityId}`;
     case 'ProductRestocked':
       return `/inventory/${entityId}`;
     case 'DraftOrderCreated':

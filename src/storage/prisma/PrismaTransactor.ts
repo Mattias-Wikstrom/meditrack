@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Transactor, WriteTransaction } from '../../domain/shared/Transactor';
 import { PrismaOrderRepository } from './PrismaOrderRepository';
+import { PrismaMedicationRepository } from './PrismaMedicationRepository';
 import { PrismaMedicinalProductRepository } from './PrismaMedicinalProductRepository';
 import { PrismaAuditRepository } from './PrismaAuditRepository';
 import { PrismaActorRepository } from './PrismaActorRepository';
@@ -18,6 +19,7 @@ export class PrismaTransactor implements Transactor {
         const txClient = prismaTransactionClient as unknown as PrismaClient;
         return work({
           orderRepository: new PrismaOrderRepository(txClient),
+          medicationRepository: new PrismaMedicationRepository(txClient),
           medicinalProductRepository: new PrismaMedicinalProductRepository(txClient),
           auditRepository: new PrismaAuditRepository(txClient),
           actorRepository: new PrismaActorRepository(txClient),

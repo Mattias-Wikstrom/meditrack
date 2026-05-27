@@ -1,8 +1,9 @@
 // Used for /inventory (admin)
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useQuery, useMutation } from 'urql';
+import { useQuery } from 'urql';
 import { Card, Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
+import { useAuth, createApiClient } from '@meditrack/client';
 import { graphql } from '../gql';
 
 const MEDICATIONS_QUERY = graphql(`
@@ -14,12 +15,6 @@ const MEDICATIONS_QUERY = graphql(`
   }
 `);
 
-const CREATE_MEDICATION = `
-  mutation AdminCreateMedication($innName: String!, $atcCode: String!, $form: MedicationForm!, $strength: String!) {
-    createMedication(innName: $innName, atcCode: $atcCode, form: $form, strength: $strength) { id }
-  }
-`;
-
 const FORMS = ['Tablet', 'Capsule', 'Injection', 'Solution', 'Cream', 'Drops', 'Inhaler'] as const;
 const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
@@ -28,10 +23,10 @@ type SortDir = 'asc' | 'desc';
 
 export function InventoryPage() {
   const navigate = useNavigate();
+  const { token } = useAuth();
   const [searchParams] = useSearchParams();
   const [showCreate, setShowCreate] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [, createMedication] = useMutation(CREATE_MEDICATION);
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>(() => {
     const s = searchParams.get('sort');
@@ -77,17 +72,19 @@ export function InventoryPage() {
   async function handleCreateMedication(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const result = await createMedication({
-      innName: fd.get('innName') as string,
-      atcCode: fd.get('atcCode') as string,
-      form: fd.get('form') as string,
-      strength: fd.get('strength') as string,
-    });
-    if (result.error) { setCreateError(result.error.message); return; }
-    setShowCreate(false);
-    setCreateError(null);
-    const id = result.data?.createMedication?.id;
-    if (id) navigate(`/medications/${id}`);
+    try {
+      const medication = await createApiClient(token!).post<{ id: string }>('/medications', {
+        innName: fd.get('innName') as string,
+        atcCode: fd.get('atcCode') as string,
+        form: fd.get('form') as string,
+        strength: fd.get('strength') as string,
+      });
+      setShowCreate(false);
+      setCreateError(null);
+      navigate(`/medications/${medication.id}`);
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Failed to create medication');
+    }
   }
 
   return (

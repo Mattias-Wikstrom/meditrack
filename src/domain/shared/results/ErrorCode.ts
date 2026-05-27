@@ -17,4 +17,6 @@ export type ErrorCode =
   | 'InvalidQuantity'
   | 'WardUnitNotFound'
   | 'WardUnitAlreadyExists'
-  | 'WardUnitHasAssignedNurses';
+  | 'WardUnitHasAssignedNurses'
+  | 'MedicationNotFound'
+  | 'MedicationHasProducts';

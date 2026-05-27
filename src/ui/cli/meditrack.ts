@@ -21,13 +21,28 @@ import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOr
 import { ConfirmOrderUseCase } from '../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { RestockUseCase } from '../../domain/medication/useCases/RestockUseCase';
+import { CreateMedicationUseCase } from '../../domain/medication/useCases/CreateMedicationUseCase';
+import { UpdateMedicationUseCase } from '../../domain/medication/useCases/UpdateMedicationUseCase';
+import { DeleteMedicationUseCase } from '../../domain/medication/useCases/DeleteMedicationUseCase';
+import { CreateMedicinalProductUseCase } from '../../domain/medication/useCases/CreateMedicinalProductUseCase';
+import { UpdateMedicinalProductUseCase } from '../../domain/medication/useCases/UpdateMedicinalProductUseCase';
+import { DeleteMedicinalProductUseCase } from '../../domain/medication/useCases/DeleteMedicinalProductUseCase';
 import { verifyToken } from '../../domain/auth/jwt';
 import { readToken } from './auth/tokenStore';
 import { ConsoleOutput } from './ConsoleOutput';
 import { listActors, createActor, deleteActor, bootstrapCreateActor } from './commands/actors';
 import { listWardUnits, createWardUnit, updateWardUnit, deleteWardUnit } from './commands/wardUnits';
 import { listAudit } from './commands/audit';
-import { listMedications, showMedication } from './commands/medications';
+import {
+  listMedications,
+  showMedication,
+  createMedication,
+  updateMedication,
+  deleteMedication,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+} from './commands/medications';
 import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from './commands/orders';
 import { login } from './commands/auth';
 import { passwd } from './commands/passwd';
@@ -57,6 +72,12 @@ const sendOrderUseCase = new SendOrderUseCase(actorRepo, orderRepo, transactor, 
 const confirmOrderUseCase = new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus);
 const deliverOrderUseCase = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus);
 const restockUseCase = new RestockUseCase(actorRepo, medicinalProductRepo, transactor);
+const createMedicationUseCase = new CreateMedicationUseCase(medicationRepo, actorRepo, transactor);
+const updateMedicationUseCase = new UpdateMedicationUseCase(medicationRepo, actorRepo, transactor);
+const deleteMedicationUseCase = new DeleteMedicationUseCase(medicationRepo, medicinalProductRepo, actorRepo, transactor);
+const createMedicinalProductUseCase = new CreateMedicinalProductUseCase(medicinalProductRepo, medicationRepo, actorRepo, transactor);
+const updateMedicinalProductUseCase = new UpdateMedicinalProductUseCase(medicinalProductRepo, actorRepo, transactor);
+const deleteMedicinalProductUseCase = new DeleteMedicinalProductUseCase(medicinalProductRepo, actorRepo, transactor);
 
 const output = new ConsoleOutput();
 
@@ -185,6 +206,77 @@ medications
   .command('show <id>')
   .description('Show a medication and its registered medicinal products')
   .action(async (id) => showMedication(medicationRepo, medicinalProductRepo, output, id));
+
+medications
+  .command('create')
+  .description('Create a new medication (pharmacist only)')
+  .requiredOption('--inn-name <name>', 'INN (generic) name')
+  .requiredOption('--atc-code <code>', 'ATC code')
+  .requiredOption('--form <form>', 'dosage form (e.g. Tablet, Capsule, Solution)')
+  .requiredOption('--strength <strength>', 'strength (e.g. "500 mg")')
+  .action(async (opts) => {
+    const { actorId } = await requireAuth();
+    return createMedication(createMedicationUseCase, output, actorId, opts.innName, opts.atcCode, opts.form, opts.strength);
+  });
+
+medications
+  .command('update <medicationId>')
+  .description('Update a medication (pharmacist only)')
+  .option('--inn-name <name>', 'new INN name')
+  .option('--atc-code <code>', 'new ATC code')
+  .option('--form <form>', 'new dosage form')
+  .option('--strength <strength>', 'new strength')
+  .action(async (medicationId, opts) => {
+    const { actorId } = await requireAuth();
+    return updateMedication(updateMedicationUseCase, output, actorId, medicationId, {
+      innName: opts.innName,
+      atcCode: opts.atcCode,
+      form: opts.form,
+      strength: opts.strength,
+    });
+  });
+
+medications
+  .command('delete <medicationId>')
+  .description('Delete a medication (pharmacist only — blocked if products exist)')
+  .action(async (medicationId) => {
+    const { actorId } = await requireAuth();
+    return deleteMedication(deleteMedicationUseCase, output, actorId, medicationId);
+  });
+
+const products = program.command('products');
+
+products
+  .command('add <medicationId>')
+  .description('Add a medicinal product to a medication (pharmacist only)')
+  .requiredOption('--product-name <name>', 'product name (e.g. "Alvedon 500 mg")')
+  .requiredOption('--stock-level <n>', 'initial stock level', parseInt)
+  .requiredOption('--stock-threshold <n>', 'low-stock threshold', parseInt)
+  .action(async (medicationId, opts) => {
+    const { actorId } = await requireAuth();
+    return addProduct(createMedicinalProductUseCase, output, actorId, medicationId, opts.productName, opts.stockLevel, opts.stockThreshold);
+  });
+
+products
+  .command('update <productId>')
+  .description('Update a medicinal product (pharmacist only)')
+  .option('--product-name <name>', 'new product name')
+  .option('--stock-threshold <n>', 'new low-stock threshold', parseInt)
+  .action(async (productId, opts) => {
+    const { actorId } = await requireAuth();
+    return updateProduct(updateMedicinalProductUseCase, output, actorId, productId, {
+      productName: opts.productName,
+      stockThreshold: opts.stockThreshold,
+    });
+  });
+
+products
+  .command('delete <productId>')
+  .description('Delete a medicinal product (pharmacist only)')
+  .action(async (productId) => {
+    const { actorId } = await requireAuth();
+    return deleteProduct(deleteMedicinalProductUseCase, output, actorId, productId);
+  });
 
 const orders = program.command('orders');
 

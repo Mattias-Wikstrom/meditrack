@@ -3,8 +3,11 @@ import { MedicinalProductRepository } from '../MedicinalProductRepository';
 import { ActorRepository } from '../../actor/ActorRepository';
 import { ActorRole } from '../../shared/ActorRole';
 import { Transactor } from '../../shared/Transactor';
-import { UseCaseResult, success, failure } from '../../shared/results/UseCaseResult';
+import { UseCaseResult, success, failure, failures } from '../../shared/results/UseCaseResult';
 import { MedicinalProductId } from '../../shared/IdTypes';
+import { RestockRule } from '../rules/RestockRule';
+import { RestockQuantityPositive } from '../rules/RestockQuantityPositive';
+import { ErrorInfo } from '../../shared/results/ErrorInfo';
 
 export interface RestockInput {
   actorId: string;
@@ -13,6 +16,10 @@ export interface RestockInput {
 }
 
 export class RestockUseCase {
+  private readonly rules: RestockRule[] = [
+    new RestockQuantityPositive(),
+  ];
+
   constructor(
     private readonly actorRepository: ActorRepository,
     private readonly medicinalProductRepository: MedicinalProductRepository,
@@ -24,7 +31,12 @@ export class RestockUseCase {
     if (actor === undefined) return failure('ActorNotFound');
     if (actor.role !== ActorRole.Pharmacist) return failure('UnauthorizedRole');
 
-    if (input.quantity <= 0) return failure('InvalidQuantity');
+    const errors: ErrorInfo[] = [];
+    for (const rule of this.rules) {
+      const error = rule.check(input.quantity);
+      if (error !== null) errors.push(error);
+    }
+    if (errors.length > 0) return failures(errors);
 
     const product = await this.medicinalProductRepository.findById(input.medicinalProductId);
     if (product === undefined) return failure('MedicinalProductNotFound');
