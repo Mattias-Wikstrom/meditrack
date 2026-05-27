@@ -100,7 +100,14 @@ export function graphql(source: "\n  subscription NurseOverviewStatusChanged {\n
 export function graphql(source: "\n  subscription NurseOverviewDraftCreated {\n    orderDraftCreated { orderId }\n  }\n"): (typeof documents)["\n  subscription NurseOverviewDraftCreated {\n    orderDraftCreated { orderId }\n  }\n"];
 
 export function graphql(source: string) {
-  return (documents as any)[source] ?? {};
+  const doc = (documents as any)[source];
+  if (doc === undefined) {
+    throw new Error(
+      'GraphQL operation not found in generated types — run "npm run codegen".\n' +
+      `Source: ${(source as string).trim().slice(0, 120)}`,
+    );
+  }
+  return doc;
 }
 
 export type DocumentType<TDocumentNode extends DocumentNode<any, any>> = TDocumentNode extends DocumentNode<  infer TType,  any>  ? TType  : never;

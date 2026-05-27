@@ -94,7 +94,14 @@ export function graphql(source: "\n  query GetOrder($id: ID!) {\n    order(id: $
 export function graphql(source: "\n  query GetProducts($medicationId: ID) {\n    medicinalProducts(medicationId: $medicationId) {\n      id productName stockLevel isBelowThreshold\n    }\n  }\n"): (typeof documents)["\n  query GetProducts($medicationId: ID) {\n    medicinalProducts(medicationId: $medicationId) {\n      id productName stockLevel isBelowThreshold\n    }\n  }\n"];
 
 export function graphql(source: string) {
-  return (documents as any)[source] ?? {};
+  const doc = (documents as any)[source];
+  if (doc === undefined) {
+    throw new Error(
+      'GraphQL operation not found in generated types — run "npm run codegen".\n' +
+      `Source: ${(source as string).trim().slice(0, 120)}`,
+    );
+  }
+  return doc;
 }
 
 export type DocumentType<TDocumentNode extends DocumentNode<any, any>> = TDocumentNode extends DocumentNode<  infer TType,  any>  ? TType  : never;
