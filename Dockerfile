@@ -10,7 +10,8 @@ COPY packages/ui/package.json      ./packages/ui/
 COPY packages/client/package.json  ./packages/client/
 COPY packages/config/package.json  ./packages/config/
 
-RUN npm install
+RUN --mount=type=cache,target=/root/.npm \
+    npm install
 
 # Generate the Prisma client so it is available in node_modules
 COPY prisma ./prisma
