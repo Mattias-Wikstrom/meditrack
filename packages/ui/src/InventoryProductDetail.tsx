@@ -1,7 +1,7 @@
 // Used for a product like 'Alvedon' as opposed to something generic such as 'Paracetamol'
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DetailHeader } from './DetailHeader';
+import { PageHeader } from './PageHeader';
 import { Button } from './Button';
 import { Card } from './Card';
 import { InfoRow } from './utils';
@@ -57,7 +57,7 @@ export function InventoryProductDetail({ product, onBack, actions, onRestock, ge
 
   return (
     <div>
-      <DetailHeader onBack={onBack}>{actions}</DetailHeader>
+      <PageHeader onBack={onBack} actions={actions} />
       <h1 className="text-xl font-semibold text-slate-800 mb-1">{product.productName}</h1>
       <p className="text-xs text-slate-400 font-mono mb-6">{product.id}</p>
 

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { OrderStatusBadge, Button, Card, Spinner, BackButton } from '@meditrack/ui';
+import { OrderStatusBadge, Button, Card, Spinner, PageHeader } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import type { ProductSelection } from '../api/orders';
 import { graphql } from '../gql';
@@ -281,11 +281,10 @@ export function OrderDetailPage() {
 
   return (
     <div className="max-w-xl">
-      <div className="flex items-center gap-3 mb-6">
-        <BackButton onClick={() => navigate('/orders')} />
+      <PageHeader onBack={() => navigate('/orders')} className="mb-6">
         <h1 className="text-xl font-semibold text-slate-800">Order <span className="font-mono">{shortId}…</span></h1>
         <OrderStatusBadge status={order.status} />
-      </div>
+      </PageHeader>
 
       {order.status === 'Sent' ? (
         <ConfirmView order={order} onConfirmed={() => navigate('/orders')} />

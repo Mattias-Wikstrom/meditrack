@@ -2,7 +2,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClient } from 'urql';
-import { MedicationSearch, Button, Card, BackButton } from '@meditrack/ui';
+import { MedicationSearch, Button, Card, PageHeader } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
@@ -95,11 +95,13 @@ export function NewOrderPage() {
 
   return (
     <div className="max-w-xl">
-      <div className="flex items-center gap-3 mb-6">
-        <BackButton onClick={() => navigate('/orders')} />
+      <PageHeader
+        onBack={() => navigate('/orders')}
+        className="mb-6"
+        actions={saving ? <span className="text-xs text-slate-400">Saving…</span> : undefined}
+      >
         <h1 className="text-xl font-semibold text-slate-800">New Order</h1>
-        {saving && <span className="ml-auto text-xs text-slate-400">Saving…</span>}
-      </div>
+      </PageHeader>
 
       {lines.length > 0 && (
         <Card className="mb-6 divide-y divide-slate-100">

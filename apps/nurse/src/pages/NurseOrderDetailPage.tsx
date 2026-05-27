@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useClient } from 'urql';
-import { OrderStatusBadge, MedicationSearch, Button, Card, Spinner, BackButton, formatDateTime } from '@meditrack/ui';
+import { OrderStatusBadge, MedicationSearch, Button, Card, Spinner, PageHeader, formatDateTime } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
@@ -122,12 +122,14 @@ export function NurseOrderDetailPage() {
 
   return (
     <div className="max-w-xl">
-      <div className="flex items-center gap-3 mb-2">
-        <BackButton onClick={() => navigate('/orders')} />
+      <PageHeader
+        onBack={() => navigate('/orders')}
+        className="mb-2"
+        actions={saving ? <span className="text-xs text-slate-400">Saving…</span> : undefined}
+      >
         <h1 className="text-xl font-semibold text-slate-800">Order</h1>
         <OrderStatusBadge status={order.status} />
-        {saving && <span className="ml-auto text-xs text-slate-400">Saving…</span>}
-      </div>
+      </PageHeader>
 
       <p className="text-xs text-slate-400 mb-6">{order.wardUnit?.name ?? order.wardUnitId} · {formatDateTime(order.createdAt)}</p>
 

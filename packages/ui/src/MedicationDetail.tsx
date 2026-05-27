@@ -1,6 +1,6 @@
 // Used for generic things such as 'Paracetamol' as opposed to specific products such as 'Alvedon'
 import { Link } from 'react-router-dom';
-import { BackButton } from './BackButton';
+import { PageHeader } from './PageHeader';
 import { Card } from './Card';
 import { InfoRow } from './utils';
 
@@ -32,7 +32,7 @@ export interface MedicationDetailProps {
 export function MedicationDetail({ medication, products, onBack, getProductHref }: MedicationDetailProps) {
   return (
     <div>
-      <BackButton onClick={onBack} className="mb-4" />
+      <PageHeader onBack={onBack} />
       <h1 className="text-xl font-semibold text-slate-800 mb-1">{medication.innName}</h1>
       <p className="text-xs text-slate-400 font-mono mb-6">{medication.atcCode}</p>
 
