@@ -330,6 +330,13 @@ export type QueryWardUnitArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type RepositoryChangeEvent = {
+  __typename?: 'RepositoryChangeEvent';
+  entityId: Scalars['String']['output'];
+  entityType: Scalars['String']['output'];
+  kind: Scalars['String']['output'];
+};
+
 export type RestockPayload = {
   __typename?: 'RestockPayload';
   errors: Array<ErrorCode>;
@@ -348,10 +355,12 @@ export type StockAlertEvent = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  medicinalProductUpdated: MedicinalProduct;
   orderDraftCreated: OrderDraftCreatedEvent;
   orderDraftUpdated: OrderDraftUpdatedEvent;
   orderStatusChanged: OrderStatusChangedEvent;
   productRestocked: ProductRestockedEvent;
+  repositoryChanged: RepositoryChangeEvent;
   stockBelowThreshold: StockAlertEvent;
 };
 
