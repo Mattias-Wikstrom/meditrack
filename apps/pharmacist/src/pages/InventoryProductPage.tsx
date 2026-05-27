@@ -1,4 +1,5 @@
 // Used for /inventory/:productId (pharmacist)
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
 import { InventoryProductDetail, Spinner } from '@meditrack/ui';
@@ -30,12 +31,13 @@ export function InventoryProductPage() {
     variables: { id: productId! },
   });
 
-  useSubscription({ query: PRODUCT_RESTOCKED_SUB }, (prev, response) => {
-    if (response.productRestocked?.medicinalProductId === productId) {
+  const [{ data: restockedData }] = useSubscription({ query: PRODUCT_RESTOCKED_SUB });
+
+  useEffect(() => {
+    if (restockedData?.productRestocked?.medicinalProductId === productId) {
       refetch({ requestPolicy: 'network-only' });
     }
-    return prev;
-  });
+  }, [restockedData]);
 
   async function handleRestock(quantity: number): Promise<string | null> {
     try {

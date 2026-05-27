@@ -1,5 +1,5 @@
 // Used for /inventory (pharmacist)
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery, useSubscription } from 'urql';
 import { Card, Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
@@ -16,7 +16,7 @@ const INVENTORY_QUERY = graphql(`
 `);
 
 const STOCK_ALERT_SUB = graphql(`
-  subscription PharmacistStockAlert {
+  subscription PharmacistInventoryStockAlert {
     stockBelowThreshold {
       medicinalProductId productName stockLevel stockThreshold
     }
@@ -103,22 +103,23 @@ export function InventoryPage() {
   const { token } = useAuth();
   const [{ data, fetching, error }, refetch] = useQuery({ query: INVENTORY_QUERY });
 
-  useSubscription({ query: STOCK_ALERT_SUB }, () => {
-    refetch({ requestPolicy: 'network-only' });
-    return undefined;
-  });
+  const [{ data: stockAlertData }] = useSubscription({ query: STOCK_ALERT_SUB });
+  const [{ data: orderStatusData }] = useSubscription({ query: ORDER_STATUS_SUB });
+  const [{ data: restockedData }] = useSubscription({ query: PRODUCT_RESTOCKED_SUB });
 
-  useSubscription({ query: ORDER_STATUS_SUB }, (prev, response) => {
-    if (response.orderStatusChanged?.to === 'Delivered') {
+  useEffect(() => {
+    if (stockAlertData) refetch({ requestPolicy: 'network-only' });
+  }, [stockAlertData]);
+
+  useEffect(() => {
+    if (orderStatusData?.orderStatusChanged?.to === 'Delivered') {
       refetch({ requestPolicy: 'network-only' });
     }
-    return prev;
-  });
+  }, [orderStatusData]);
 
-  useSubscription({ query: PRODUCT_RESTOCKED_SUB }, (prev) => {
-    refetch({ requestPolicy: 'network-only' });
-    return prev;
-  });
+  useEffect(() => {
+    if (restockedData) refetch({ requestPolicy: 'network-only' });
+  }, [restockedData]);
 
   function handleSort(key: SortKey) {
     if (key === sortKey) {
