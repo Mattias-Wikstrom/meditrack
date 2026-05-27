@@ -2,6 +2,9 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
   schema: 'src/api/graphql/typeDefs.ts',
+  hooks: {
+    afterAllFileWrite: ['tsx scripts/guard-gql-fallback.ts'],
+  },
   generates: {
     'apps/nurse/src/gql/': {
       preset: 'client',
