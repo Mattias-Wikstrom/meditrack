@@ -1,9 +1,9 @@
 // Used for /inventory (admin)
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useQuery, useSubscription } from 'urql';
+import { useQuery } from 'urql';
 import { Card, Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
-import { useAuth, createApiClient } from '@meditrack/client';
+import { useAuth, createApiClient, useMedicinalProductOverrides } from '@meditrack/client';
 import { graphql } from '../gql';
 
 const MEDICATIONS_QUERY = graphql(`
@@ -45,15 +45,7 @@ export function InventoryPage() {
   );
 
   const [{ data, fetching, error }] = useQuery({ query: MEDICATIONS_QUERY, requestPolicy: 'cache-and-network' });
-
-  const [{ data: subData }] = useSubscription({ query: PRODUCT_UPDATED_SUB });
-  const productUpdate = subData?.medicinalProductUpdated;
-  const [overrides, setOverrides] = useState<Map<string, NonNullable<typeof productUpdate>>>(new Map());
-
-  useEffect(() => {
-    if (!productUpdate) return;
-    setOverrides(prev => new Map(prev).set(productUpdate.id, productUpdate));
-  }, [productUpdate]);
+  const applyUpdates = useMedicinalProductOverrides(PRODUCT_UPDATED_SUB);
 
   function handleSort(key: SortKey) {
     if (key === sortKey) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -63,7 +55,7 @@ export function InventoryPage() {
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
-  const products = (data?.medicinalProducts ?? []).map(p => overrides.get(p.id) ?? p);
+  const products = applyUpdates(data?.medicinalProducts ?? []);
   const lowStockCount = products.filter(p => p.isBelowThreshold).length;
 
   const q = search.toLowerCase();

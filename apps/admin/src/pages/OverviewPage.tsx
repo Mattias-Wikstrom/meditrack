@@ -1,8 +1,8 @@
 // Used for / (admin)
-import { useState, useEffect } from 'react';
-import { useQuery, useSubscription } from 'urql';
+import { useQuery } from 'urql';
 import { OrderAndStockOverview, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
+import { useMedicinalProductOverrides } from '@meditrack/client';
 
 const OVERVIEW_QUERY = graphql(`
   query AdminOverview {
@@ -25,19 +25,12 @@ const PRODUCT_UPDATED_SUB = graphql(`
 export function OverviewPage() {
   const [{ data, fetching, error }] = useQuery({ query: OVERVIEW_QUERY });
 
-  const [{ data: subData }] = useSubscription({ query: PRODUCT_UPDATED_SUB });
-  const productUpdate = subData?.medicinalProductUpdated;
-  const [overrides, setOverrides] = useState<Map<string, NonNullable<typeof productUpdate>>>(new Map());
-
-  useEffect(() => {
-    if (!productUpdate) return;
-    setOverrides(prev => new Map(prev).set(productUpdate.id, productUpdate));
-  }, [productUpdate]);
+  const applyUpdates = useMedicinalProductOverrides(PRODUCT_UPDATED_SUB);
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
-  const products = (data?.medicinalProducts ?? []).map(p => overrides.get(p.id) ?? p);
+  const products = applyUpdates(data?.medicinalProducts ?? []);
 
   return (
     <OrderAndStockOverview
