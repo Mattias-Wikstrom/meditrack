@@ -23,10 +23,8 @@ const STOCK_ALERT_SUB = graphql(`
 `);
 
 const ORDER_STATUS_SUB = graphql(`
-  subscription PharmacistInventoryOrderStatus {
-    orderStatusChanged {
-      orderId to
-    }
+  subscription PharmacistOrderStatusChanged {
+    orderStatusChanged { orderId from to }
   }
 `);
 

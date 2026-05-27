@@ -3,7 +3,7 @@ import { useSubscription } from 'urql';
 import { graphql } from './gql';
 
 const STOCK_ALERT_SUB = graphql(`
-  subscription StockAlertBanners {
+  subscription PharmacistStockAlert {
     stockBelowThreshold {
       medicinalProductId productName stockLevel stockThreshold
     }
