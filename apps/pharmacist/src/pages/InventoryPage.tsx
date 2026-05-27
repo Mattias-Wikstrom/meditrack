@@ -22,6 +22,14 @@ const STOCK_ALERT_SUB = graphql(`
   }
 `);
 
+const ORDER_STATUS_SUB = graphql(`
+  subscription PharmacistInventoryOrderStatus {
+    orderStatusChanged {
+      orderId to
+    }
+  }
+`);
+
 const RESTOCK_MUTATION = graphql(`
   mutation RestockProduct($medicinalProductId: ID!, $quantity: Int!) {
     restockProduct(medicinalProductId: $medicinalProductId, quantity: $quantity) {
@@ -102,6 +110,13 @@ export function InventoryPage() {
   useSubscription({ query: STOCK_ALERT_SUB }, () => {
     refetch({ requestPolicy: 'network-only' });
     return undefined;
+  });
+
+  useSubscription({ query: ORDER_STATUS_SUB }, (prev, response) => {
+    if (response.orderStatusChanged?.to === 'Delivered') {
+      refetch({ requestPolicy: 'network-only' });
+    }
+    return prev;
   });
 
   function handleSort(key: SortKey) {
