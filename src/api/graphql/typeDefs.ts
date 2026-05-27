@@ -4,6 +4,13 @@ export const typeDefs = /* GraphQL */ `
     orderDraftUpdated: OrderDraftUpdatedEvent!
     orderStatusChanged: OrderStatusChangedEvent!
     stockBelowThreshold: StockAlertEvent!
+    productRestocked: ProductRestockedEvent!
+  }
+
+  type ProductRestockedEvent {
+    medicinalProductId: ID!
+    productName: String!
+    stockLevel: Int!
   }
 
   type OrderDraftCreatedEvent {

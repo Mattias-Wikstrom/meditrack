@@ -3,10 +3,12 @@ import { MedicinalProductRepository } from '../MedicinalProductRepository';
 import { ActorRepository } from '../../actor/ActorRepository';
 import { ActorRole } from '../../shared/ActorRole';
 import { Transactor } from '../../shared/Transactor';
+import { EventBus } from '../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure, failures } from '../../shared/results/UseCaseResult';
 import { MedicinalProductId } from '../../shared/IdTypes';
 import { RestockRule } from '../rules/interfaces/RestockRule';
 import { RestockQuantityPositive } from '../rules/RestockQuantityPositive';
+import { ProductRestocked } from '../events/ProductRestocked';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
 
 export interface RestockInput {
@@ -24,6 +26,7 @@ export class RestockUseCase {
     private readonly actorRepository: ActorRepository,
     private readonly medicinalProductRepository: MedicinalProductRepository,
     private readonly transactor: Transactor,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(input: RestockInput): Promise<UseCaseResult<MedicinalProduct>> {
@@ -52,6 +55,8 @@ export class RestockUseCase {
         occurredAt: new Date(),
       });
     });
+
+    await this.eventBus.publish(new ProductRestocked(input.actorId, product));
 
     return success(product);
   }
