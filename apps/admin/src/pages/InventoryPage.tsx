@@ -36,7 +36,7 @@ export function InventoryPage() {
     searchParams.get('dir') === 'desc' ? 'desc' : 'asc'
   );
 
-  const [{ data, fetching, error }] = useQuery({ query: MEDICATIONS_QUERY });
+  const [{ data, fetching, error }] = useQuery({ query: MEDICATIONS_QUERY, requestPolicy: 'cache-and-network' });
 
   function handleSort(key: SortKey) {
     if (key === sortKey) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
