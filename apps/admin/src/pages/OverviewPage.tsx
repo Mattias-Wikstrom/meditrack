@@ -2,7 +2,6 @@
 import { useQuery } from 'urql';
 import { OrderAndStockOverview, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
-import { useMedicinalProductOverrides } from '@meditrack/client';
 
 const OVERVIEW_QUERY = graphql(`
   query AdminOverview {
@@ -14,23 +13,13 @@ const OVERVIEW_QUERY = graphql(`
   }
 `);
 
-const PRODUCT_UPDATED_SUB = graphql(`
-  subscription AdminOverviewProductUpdated {
-    medicinalProductUpdated {
-      id productName stockLevel stockThreshold isBelowThreshold
-    }
-  }
-`);
-
 export function OverviewPage() {
   const [{ data, fetching, error }] = useQuery({ query: OVERVIEW_QUERY });
-
-  const applyUpdates = useMedicinalProductOverrides(PRODUCT_UPDATED_SUB);
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
-  const products = applyUpdates(data?.medicinalProducts ?? []);
+  const products = data?.medicinalProducts ?? [];
 
   return (
     <OrderAndStockOverview

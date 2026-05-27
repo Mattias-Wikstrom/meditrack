@@ -1,6 +1,6 @@
 // Used for /inventory/:productId (pharmacist)
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useSubscription } from 'urql';
+import { useQuery } from 'urql';
 import { InventoryProductDetail, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
 import { useAuth, createApiClient } from '@meditrack/client';
@@ -8,15 +8,6 @@ import { useAuth, createApiClient } from '@meditrack/client';
 const PRODUCT_DETAIL_QUERY = graphql(`
   query PharmacistProductDetail($id: ID!) {
     medicinalProduct(id: $id) {
-      id productName stockLevel stockThreshold isBelowThreshold
-      medication { id innName atcCode form strength }
-    }
-  }
-`);
-
-const PRODUCT_UPDATED_SUB = graphql(`
-  subscription PharmacistProductDetailUpdated {
-    medicinalProductUpdated {
       id productName stockLevel stockThreshold isBelowThreshold
       medication { id innName atcCode form strength }
     }
@@ -33,11 +24,6 @@ export function InventoryProductPage() {
     variables: { id: productId! },
   });
 
-  const [{ data: productUpdateData }] = useSubscription({ query: PRODUCT_UPDATED_SUB });
-  const liveProduct = productUpdateData?.medicinalProductUpdated?.id === productId
-    ? productUpdateData.medicinalProductUpdated
-    : undefined;
-
   async function handleRestock(quantity: number): Promise<string | null> {
     try {
       await createApiClient(token!).post(`/products/${productId}/restock`, { quantity });
@@ -50,7 +36,7 @@ export function InventoryProductPage() {
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
 
-  const product = liveProduct ?? data?.medicinalProduct;
+  const product = data?.medicinalProduct;
   if (!product) return (
     <p className="text-sm text-slate-500">
       Product not found.{' '}

@@ -10,6 +10,7 @@ import { OverviewPage } from './pages/OverviewPage';
 import { InventoryProductPage } from './pages/InventoryProductPage';
 import { MedicationDetailPage } from './pages/MedicationDetailPage';
 import { StockAlerts } from './StockAlerts';
+import { StockSync } from './StockSync';
 
 function PharmacistNav() {
   return (
@@ -35,6 +36,7 @@ export function App() {
 
   return (
     <Provider value={urqlClient}>
+      <StockSync />
       <AppShell
         appName="Pharmacy"
         actorName={actorId!}

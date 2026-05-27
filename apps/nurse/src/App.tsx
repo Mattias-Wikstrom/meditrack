@@ -8,6 +8,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { NewOrderPage } from './pages/NewOrderPage';
 import { NurseOrderDetailPage } from './pages/NurseOrderDetailPage';
 import { graphql } from './gql';
+import { StockSync } from './StockSync';
 
 const WARD_UNIT_NAME_QUERY = graphql(`
   query NurseWardUnitName($id: ID!) {
@@ -65,6 +66,7 @@ export function App() {
 
   return (
     <Provider value={urqlClient}>
+      <StockSync />
       <NurseShell token={token} actorId={actorId!} wardUnitId={wardUnitId ?? ''} role={role!} />
     </Provider>
   );

@@ -1,4 +1,6 @@
-import { createClient, cacheExchange, fetchExchange, mapExchange, subscriptionExchange } from 'urql';
+import { createClient, fetchExchange, mapExchange, subscriptionExchange } from 'urql';
+import { cacheExchange } from '@urql/exchange-graphcache';
+import { gql } from '@urql/core';
 import { createClient as createWsClient } from 'graphql-ws';
 
 export function createUrqlClient(token: string, onUnauthenticated: () => void) {
@@ -21,7 +23,29 @@ export function createUrqlClient(token: string, onUnauthenticated: () => void) {
           if (isAuthError) onUnauthenticated();
         },
       }),
-      cacheExchange,
+      cacheExchange({
+        keys: {
+          MedicinalProduct: (data) => (data as { id?: string }).id ?? null,
+          Medication: (data) => (data as { id?: string }).id ?? null,
+          Order: (data) => (data as { id?: string }).id ?? null,
+          WardUnit: (data) => (data as { id?: string }).id ?? null,
+          User: (data) => (data as { id?: string }).id ?? null,
+        },
+        updates: {
+          Subscription: {
+            medicinalProductUpdated(result, _args, cache) {
+              const incoming = (result as { medicinalProductUpdated: unknown }).medicinalProductUpdated;
+              if (!incoming) return;
+              cache.writeFragment(
+                gql`fragment MedicinalProductCacheUpdate on MedicinalProduct {
+                  id productName stockLevel stockThreshold isBelowThreshold
+                }`,
+                incoming as Parameters<typeof cache.writeFragment>[1],
+              );
+            },
+          },
+        },
+      }),
       fetchExchange,
       subscriptionExchange({
         forwardSubscription(request) {
