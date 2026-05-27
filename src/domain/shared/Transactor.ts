@@ -1,4 +1,5 @@
 import { OrderRepository } from '../order/OrderRepository';
+import { MedicationRepository } from '../medication/MedicationRepository';
 import { MedicinalProductRepository } from '../medication/MedicinalProductRepository';
 import { AuditRepository } from '../audit/AuditRepository';
 import { ActorRepository } from '../actor/ActorRepository';
@@ -9,6 +10,7 @@ import { WardUnitRepository } from '../wardUnit/WardUnitRepository';
 // all writes go through here so they commit (or roll back) together with the audit entry.
 export interface WriteTransaction {
   orderRepository: OrderRepository;
+  medicationRepository: MedicationRepository;
   medicinalProductRepository: MedicinalProductRepository;
   auditRepository: AuditRepository;
   actorRepository: ActorRepository;

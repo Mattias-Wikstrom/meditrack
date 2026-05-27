@@ -1,11 +1,8 @@
-import { randomUUID } from 'crypto';
 import { Router, Request, Response } from 'express';
 import { ServerWiring } from '../wiring';
 import { requireAuth } from '../middleware/requireAuth';
-import { Medication } from '../../../domain/medication/Medication';
-import { MedicinalProduct } from '../../../domain/medication/MedicinalProduct';
 import { MedicationForm } from '../../../domain/medication/MedicationForm';
-import { MedicationId, MedicinalProductId } from '../../../domain/shared/IdTypes';
+import { MedicationId } from '../../../domain/shared/IdTypes';
 
 export function createMedicationsRouter(wiring: ServerWiring): Router {
   const router = Router();
@@ -17,48 +14,54 @@ export function createMedicationsRouter(wiring: ServerWiring): Router {
       form: string;
       strength: string;
     };
-    const medication = new Medication(
-      randomUUID() as MedicationId,
+    const result = await wiring.createMedicationUseCase.execute({
+      requestingActorId: res.locals.actorId as string,
       innName,
       atcCode,
-      form as MedicationForm,
+      form: form as MedicationForm,
       strength,
-    );
-    await wiring.medicationRepo.save(medication);
-    res.status(201).json({ data: medication });
+    });
+    if (result.successful) {
+      res.status(201).json({ data: result.value });
+    } else {
+      res.status(422).json({ errors: result.errors.map((e) => e.code) });
+    }
   });
 
   router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
-    const existing = await wiring.medicationRepo.findById(req.params.id as MedicationId);
-    if (!existing) {
-      res.status(404).json({ errors: ['Medication not found.'] });
-      return;
-    }
     const { innName, atcCode, form, strength } = req.body as {
       innName?: string;
       atcCode?: string;
       form?: string;
       strength?: string;
     };
-    const updated = new Medication(
-      existing.id,
-      innName ?? existing.innName,
-      atcCode ?? existing.atcCode,
-      (form ?? existing.form) as MedicationForm,
-      strength ?? existing.strength,
-    );
-    await wiring.medicationRepo.save(updated);
-    res.json({ data: updated });
+    const result = await wiring.updateMedicationUseCase.execute({
+      requestingActorId: res.locals.actorId as string,
+      id: req.params.id as MedicationId,
+      innName,
+      atcCode,
+      form: form as MedicationForm | undefined,
+      strength,
+    });
+    if (result.successful) {
+      res.json({ data: result.value });
+    } else {
+      const status = result.errors.some((e) => e.code === 'MedicationNotFound') ? 404 : 422;
+      res.status(status).json({ errors: result.errors.map((e) => e.code) });
+    }
   });
 
   router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
-    const products = await wiring.medicinalProductRepo.findByMedicationId(req.params.id as MedicationId);
-    if (products.length > 0) {
-      res.status(422).json({ errors: ['Cannot delete a medication that has products — remove its products first.'] });
-      return;
+    const result = await wiring.deleteMedicationUseCase.execute({
+      requestingActorId: res.locals.actorId as string,
+      id: req.params.id as MedicationId,
+    });
+    if (result.successful) {
+      res.status(204).send();
+    } else {
+      const status = result.errors.some((e) => e.code === 'MedicationNotFound') ? 404 : 422;
+      res.status(status).json({ errors: result.errors.map((e) => e.code) });
     }
-    await wiring.medicationRepo.delete(req.params.id as MedicationId);
-    res.status(204).send();
   });
 
   router.post('/:medicationId/products', requireAuth, async (req: Request, res: Response) => {
@@ -67,15 +70,19 @@ export function createMedicationsRouter(wiring: ServerWiring): Router {
       stockLevel: number;
       stockThreshold: number;
     };
-    const product = new MedicinalProduct(
-      randomUUID() as MedicinalProductId,
+    const result = await wiring.createMedicinalProductUseCase.execute({
+      requestingActorId: res.locals.actorId as string,
+      medicationId: req.params.medicationId as MedicationId,
       productName,
-      req.params.medicationId as MedicationId,
       stockLevel,
       stockThreshold,
-    );
-    await wiring.medicinalProductRepo.save(product);
-    res.status(201).json({ data: product });
+    });
+    if (result.successful) {
+      res.status(201).json({ data: result.value });
+    } else {
+      const status = result.errors.some((e) => e.code === 'MedicationNotFound') ? 404 : 422;
+      res.status(status).json({ errors: result.errors.map((e) => e.code) });
+    }
   });
 
   return router;

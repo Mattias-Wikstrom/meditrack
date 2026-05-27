@@ -19,6 +19,12 @@ import { SendOrderUseCase } from '../../domain/order/useCases/fulfillment/SendOr
 import { ConfirmOrderUseCase } from '../../domain/order/useCases/fulfillment/ConfirmOrderUseCase';
 import { DeliverOrderUseCase } from '../../domain/order/useCases/fulfillment/DeliverOrderUseCase';
 import { RestockUseCase } from '../../domain/medication/useCases/RestockUseCase';
+import { CreateMedicationUseCase } from '../../domain/medication/useCases/CreateMedicationUseCase';
+import { UpdateMedicationUseCase } from '../../domain/medication/useCases/UpdateMedicationUseCase';
+import { DeleteMedicationUseCase } from '../../domain/medication/useCases/DeleteMedicationUseCase';
+import { CreateMedicinalProductUseCase } from '../../domain/medication/useCases/CreateMedicinalProductUseCase';
+import { UpdateMedicinalProductUseCase } from '../../domain/medication/useCases/UpdateMedicinalProductUseCase';
+import { DeleteMedicinalProductUseCase } from '../../domain/medication/useCases/DeleteMedicinalProductUseCase';
 import { PrismaCredentialsRepository } from '../../storage/prisma/PrismaCredentialsRepository';
 
 export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
@@ -50,6 +56,12 @@ export function createWiring(prisma: PrismaClient, eventBus: EventBus) {
     confirmOrderUseCase: new ConfirmOrderUseCase(actorRepo, orderRepo, transactor, eventBus),
     deliverOrderUseCase: new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, transactor, eventBus),
     restockUseCase: new RestockUseCase(actorRepo, medicinalProductRepo, transactor),
+    createMedicationUseCase: new CreateMedicationUseCase(medicationRepo, actorRepo, transactor),
+    updateMedicationUseCase: new UpdateMedicationUseCase(medicationRepo, actorRepo, transactor),
+    deleteMedicationUseCase: new DeleteMedicationUseCase(medicationRepo, medicinalProductRepo, actorRepo, transactor),
+    createMedicinalProductUseCase: new CreateMedicinalProductUseCase(medicinalProductRepo, medicationRepo, actorRepo, transactor),
+    updateMedicinalProductUseCase: new UpdateMedicinalProductUseCase(medicinalProductRepo, actorRepo, transactor),
+    deleteMedicinalProductUseCase: new DeleteMedicinalProductUseCase(medicinalProductRepo, actorRepo, transactor),
     credentialsRepo,
   };
 }

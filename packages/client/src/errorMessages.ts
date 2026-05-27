@@ -20,4 +20,6 @@ export const errorMessages: Record<string, string> = {
   WardUnitNotFound: 'Ward unit not found.',
   WardUnitAlreadyExists: 'A ward unit with that ID already exists.',
   WardUnitHasAssignedNurses: 'Cannot delete a ward unit while nurses are assigned to it.',
+  MedicationNotFound: 'Medication not found.',
+  MedicationHasProducts: 'Cannot delete a medication that still has medicinal products.',
 };
