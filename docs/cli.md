@@ -19,7 +19,7 @@ npm run mt-cli -- <command> [options]
 
 ## Authentication
 
-Commands that modify state (`orders create`, `send`, `confirm`, `deliver`, and `graphql` mutations) require an active session. Read-only commands (`medications list/show`, `orders list`) do not.
+Commands that modify state require an active session. Read-only commands (`medications list/show`, `orders list`, `actors list`, `ward-units list`) do not.
 
 ### login
 
@@ -152,6 +152,49 @@ Actor created: pharmacist-eva  role: Pharmacist
 
 ---
 
+### bootstrap-create
+
+Create the very first admin actor on a fresh database. Blocked if any admin already exists — use `actors create` instead once an admin is present. Does not require an active session.
+
+```
+npm run mt-cli -- actors bootstrap-create --actor-id <id> --role <role> [--ward-unit-id <id>] --password <password>
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--actor-id <id>` | A unique identifier for the actor |
+| `--role <role>` | `Nurse`, `Pharmacist`, or `Admin` |
+| `--ward-unit-id <id>` | Ward unit the actor belongs to (required for `Nurse` role) |
+| `--password <password>` | Initial password |
+
+**Example**
+
+```
+$ npm run mt-cli -- actors bootstrap-create --actor-id admin --role Admin --password secret
+Actor created: admin  role: Admin
+```
+
+---
+
+### delete
+
+Delete an actor (admin only).
+
+```
+npm run mt-cli -- actors delete <actorId>
+```
+
+**Example**
+
+```
+$ npm run mt-cli -- actors delete nurse-maja
+Actor deleted: nurse-maja
+```
+
+---
+
 ## ward-units
 
 ### list
@@ -175,7 +218,7 @@ ward-kirurgi              Kirurgavdelningen
 
 ### create
 
-Create a new ward unit.
+Create a new ward unit (admin only).
 
 ```
 npm run mt-cli -- ward-units create --ward-unit-id <id> --name <name>
@@ -193,6 +236,46 @@ npm run mt-cli -- ward-units create --ward-unit-id <id> --name <name>
 ```
 $ npm run mt-cli -- ward-units create --ward-unit-id ward-ortopedi --name Ortopedavdelningen
 Ward unit created: ward-ortopedi  name: Ortopedavdelningen
+```
+
+---
+
+### update
+
+Update the display name of a ward unit (admin only).
+
+```
+npm run mt-cli -- ward-units update <wardUnitId> --name <name>
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--name <name>` | New display name |
+
+**Example**
+
+```
+$ npm run mt-cli -- ward-units update ward-ortopedi --name "Ortopedavdelningen 2"
+Ward unit updated: ward-ortopedi
+```
+
+---
+
+### delete
+
+Delete a ward unit (admin only). Blocked if any nurses are still assigned to it.
+
+```
+npm run mt-cli -- ward-units delete <wardUnitId>
+```
+
+**Example**
+
+```
+$ npm run mt-cli -- ward-units delete ward-ortopedi
+Ward unit deleted: ward-ortopedi
 ```
 
 ---
@@ -247,6 +330,168 @@ Medicinal products:
 ```
 
 Stock is flagged with `*** BELOW THRESHOLD ***` when it is at or below the product's configured threshold.
+
+---
+
+### create
+
+Create a new medication (pharmacist only).
+
+```
+npm run mt-cli -- medications create --inn-name <name> --atc-code <code> --form <form> --strength <strength>
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--inn-name <name>` | INN (generic) name (e.g. `Paracetamol`) |
+| `--atc-code <code>` | ATC code (e.g. `N02BE01`) |
+| `--form <form>` | Dosage form (e.g. `Tablet`, `Capsule`, `Solution`) |
+| `--strength <strength>` | Strength (e.g. `500 mg`) |
+
+**Example**
+
+```
+$ npm run mt-cli -- medications create --inn-name Paracetamol --atc-code N02BE01 --form Tablet --strength "500 mg"
+Medication created: med-abc123
+```
+
+---
+
+### update
+
+Update one or more fields of a medication (pharmacist only).
+
+```
+npm run mt-cli -- medications update <medicationId> [--inn-name <name>] [--atc-code <code>] [--form <form>] [--strength <strength>]
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--inn-name <name>` | New INN name |
+| `--atc-code <code>` | New ATC code |
+| `--form <form>` | New dosage form |
+| `--strength <strength>` | New strength |
+
+**Example**
+
+```
+$ npm run mt-cli -- medications update med-1 --strength "1000 mg"
+Medication updated: med-1
+```
+
+---
+
+### delete
+
+Delete a medication (pharmacist only). Blocked if any medicinal products exist for it — delete those first.
+
+```
+npm run mt-cli -- medications delete <medicationId>
+```
+
+**Example**
+
+```
+$ npm run mt-cli -- medications delete med-1
+Medication deleted: med-1
+```
+
+---
+
+## products
+
+Medicinal products are the specific branded or generic items held in stock. Each product belongs to a medication.
+
+### add
+
+Add a medicinal product to a medication (pharmacist only).
+
+```
+npm run mt-cli -- products add <medicationId> --product-name <name> --stock-level <n> --stock-threshold <n>
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--product-name <name>` | Product name (e.g. `Alvedon 500 mg`) |
+| `--stock-level <n>` | Initial stock level |
+| `--stock-threshold <n>` | Low-stock threshold — stock at or below this level is flagged |
+
+**Example**
+
+```
+$ npm run mt-cli -- products add med-1 --product-name "Alvedon 500 mg" --stock-level 100 --stock-threshold 10
+Product created: prod-abc123
+```
+
+---
+
+### update
+
+Update a medicinal product (pharmacist only).
+
+```
+npm run mt-cli -- products update <productId> [--product-name <name>] [--stock-threshold <n>]
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--product-name <name>` | New product name |
+| `--stock-threshold <n>` | New low-stock threshold |
+
+**Example**
+
+```
+$ npm run mt-cli -- products update prod-1 --stock-threshold 20
+Product updated: prod-1
+```
+
+---
+
+### delete
+
+Delete a medicinal product (pharmacist only).
+
+```
+npm run mt-cli -- products delete <productId>
+```
+
+**Example**
+
+```
+$ npm run mt-cli -- products delete prod-1
+Product deleted: prod-1
+```
+
+---
+
+### restock
+
+Add units to a medicinal product's stock (pharmacist only).
+
+```
+npm run mt-cli -- products restock <productId> --quantity <n>
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--quantity <n>` | Number of units to add |
+
+**Example**
+
+```
+$ npm run mt-cli -- products restock prod-1 --quantity 50
+Restocked prod-1: +50 units.
+```
 
 ---
 
@@ -357,6 +602,33 @@ $ npm run mt-cli -- orders deliver ord-abc123 \
     --product med-paracetamol:prod-panodil-500:20 \
     --product med-ibuprofen:prod-ibumetin-400:10
 Order ord-abc123 delivered.
+```
+
+---
+
+## graphql
+
+Execute a GraphQL query or mutation directly in-process against the database, without going through the HTTP server. Useful for ad-hoc queries and debugging. Requires an active session.
+
+```
+npm run mt-cli -- graphql <query> [--variables <json>]
+```
+
+**Options**
+
+| Flag | Description |
+|------|-------------|
+| `--variables <json>` | Variables as a JSON object |
+
+**Examples**
+
+```
+$ npm run mt-cli -- graphql '{ medications { id innName atcCode } }'
+
+$ npm run mt-cli -- graphql '{ orders { id status } }'
+
+$ npm run mt-cli -- graphql 'mutation($id: ID!) { sendOrder(id: $id) { id status } }' \
+    --variables '{"id": "ord-abc123"}'
 ```
 
 ---
