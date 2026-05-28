@@ -20,10 +20,13 @@ meditrack/
 │   ├── domain/         # Domain model (entities, use cases, business rules, events)
 │   ├── storage/        # Repository implementations (Prisma + in-memory)
 │   ├── eventBus/       # Event bus implementations
+│   ├── infrastructure/ # Cross-cutting utilities (repository change observation)
 │   ├── api/            # GraphQL schema and resolvers
 │   └── ui/
 │       ├── cli/        # CLI entry point and commands
-│       └── server/     # HTTP server, REST routes, wiring
+│       ├── server/     # HTTP server, REST routes, wiring
+│       └── events/     # Dev tools: event spy and trigger scripts
+├── tests/              # Test suites
 ├── prisma/             # Database schema and migrations
 ├── docs/               # Documentation
 └── codegen.ts          # GraphQL code generation config
@@ -136,7 +139,7 @@ There are two implementations:
   GraphQL subscription clients.
 
 Current domain events include `DraftOrderCreated`, `DraftOrderUpdated`, `OrderStatusAdvanced`,
-`OrderDelivered`, and `StockBelowThreshold`.
+`StockBelowThreshold`, and `ProductRestocked`.
 
 ### Dependency injection (`src/ui/server/wiring.ts`)
 
@@ -174,8 +177,12 @@ When an actor performs an action that raises a domain event, the `PubSubEventBus
 to the graphql-yoga pub/sub system. Frontend clients that have subscribed to the relevant
 GraphQL subscription receive the update in real time without polling.
 
-Current subscriptions: `orderDraftCreated`, `orderDraftUpdated`, `orderStatusChanged`,
-`stockBelowThreshold`.
+Domain event subscriptions: `orderDraftCreated`, `orderDraftUpdated`, `orderStatusChanged`,
+`stockBelowThreshold`, `productRestocked`.
+
+Repository change subscriptions: `repositoryChanged` (all entity writes/deletes),
+`medicinalProductUpdated` (full `MedicinalProduct` fields on every save — used by all three
+frontend apps to keep stock levels fresh in real time).
 
 The JWT is passed in the WebSocket `connectionParams` so that subscription connections are
 authenticated in the same way as HTTP requests.
