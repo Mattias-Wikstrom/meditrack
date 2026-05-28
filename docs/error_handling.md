@@ -16,17 +16,27 @@ Use cases never throw for expected failure conditions. Instead they return a
 | Code | Meaning |
 |---|---|
 | `ActorNotFound` | The requesting actor does not exist |
+| `ActorAlreadyExists` | An actor with the given ID already exists |
 | `UnauthorizedRole` | The actor's role is not permitted for this use case |
 | `ActorNotAssignedToWardUnit` | A nurse action was attempted without a ward unit |
+| `NurseRequiresWardUnit` | A nurse must be assigned to a ward unit |
+| `WardUnitAssignmentNotAllowed` | A non-nurse actor cannot be assigned to a ward unit |
+| `CannotDeleteSelf` | An actor cannot delete their own account |
+| `WardUnitNotFound` | The referenced ward unit does not exist |
+| `WardUnitAlreadyExists` | A ward unit with the given ID already exists |
+| `WardUnitHasAssignedNurses` | A ward unit cannot be deleted while nurses are assigned to it |
 | `OrderHasAtLeastOneLine` | An order must have at least one line |
 | `OrderLineQuantitiesPositive` | All line quantities must be greater than zero |
 | `OrderNotFound` | The referenced order does not exist |
 | `InvalidStatusTransition` | The order is not in the right status for this action |
+| `MedicationNotFound` | The referenced medication does not exist |
+| `MedicationHasProducts` | A medication cannot be deleted while medicinal products exist for it |
 | `MedicinalProductNotFound` | A product referenced in a delivery does not exist |
 | `ProductMedicationMismatch` | A product does not belong to the specified medication |
 | `SelectionQuantityMismatch` | Delivered quantities do not match the order line totals |
 | `InsufficientStock` | A product does not have enough stock to cover the delivery |
 | `InvalidQuantity` | A quantity value is zero or negative |
+| `InvalidATCCode` | The supplied ATC code does not match the expected format |
 
 ### From use case to HTTP response
 
