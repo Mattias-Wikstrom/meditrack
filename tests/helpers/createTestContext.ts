@@ -23,7 +23,7 @@ export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
   wardUnitRepo: InMemoryWardUnitRepository;
 } {
   const actorRepo = new InMemoryActorRepository([
-    { id: 'nurse-1', role: ActorRole.Nurse },
+    { id: 'nurse-1', role: ActorRole.Nurse, wardUnitId: 'ward-1' },
     { id: 'pharmacist-1', role: ActorRole.Pharmacist },
     { id: actorId, role: ActorRole.Nurse },
   ]);

@@ -17,7 +17,7 @@ import { RecordingOutput, ExitError } from './RecordingOutput';
 
 const makeActorRepo = () =>
   new InMemoryActorRepository([
-    { id: 'nurse-1', role: ActorRole.Nurse },
+    { id: 'nurse-1', role: ActorRole.Nurse, wardUnitId: 'ward-1' as WardUnitId },
     { id: 'pharmacist-1', role: ActorRole.Pharmacist },
   ]);
 
