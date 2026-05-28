@@ -1,6 +1,6 @@
-# meditrack CLI
+# mt-cli
 
-A command-line interface for managing medications and orders against the meditrack PostgreSQL database.
+A command-line interface for managing medications and orders against the MediTrack PostgreSQL database.
 
 ## Prerequisites
 
@@ -125,10 +125,10 @@ pharmacist-sofia         Pharmacist
 
 ### create
 
-Create a new actor. Does not set a password — run `passwd` afterwards to allow the actor to log in.
+Create a new actor (admin only). Requires an initial password — the actor can log in immediately after creation.
 
 ```
-npm run cli -- actors create --actor-id <id> --role <role> [--ward-unit-id <id>]
+npm run cli -- actors create --actor-id <id> --role <role> [--ward-unit-id <id>] --password <password>
 ```
 
 **Options**
@@ -138,17 +138,16 @@ npm run cli -- actors create --actor-id <id> --role <role> [--ward-unit-id <id>]
 | `--actor-id <id>` | A unique identifier for the actor (e.g. `nurse-maja`) |
 | `--role <role>` | `Nurse`, `Pharmacist`, or `Admin` |
 | `--ward-unit-id <id>` | Ward unit the actor belongs to (required for `Nurse` role) |
+| `--password <password>` | Initial password |
 
 **Examples**
 
 ```
-$ npm run cli -- actors create --actor-id nurse-maja --role Nurse --ward-unit-id ward-akuten
+$ npm run cli -- actors create --actor-id nurse-maja --role Nurse --ward-unit-id ward-akuten --password secret
 Actor created: nurse-maja  role: Nurse  ward: ward-akuten
-Set a password with: meditrack passwd --actor-id nurse-maja
 
-$ npm run cli -- actors create --actor-id pharmacist-eva --role Pharmacist
+$ npm run cli -- actors create --actor-id pharmacist-eva --role Pharmacist --password secret
 Actor created: pharmacist-eva  role: Pharmacist
-Set a password with: meditrack passwd --actor-id pharmacist-eva
 ```
 
 ---
@@ -273,24 +272,23 @@ ord-2  Confirmed  ward: ward-2  lines: 1
 
 ### create
 
-Create a new order in `Draft` status. Currently creates a single-line order (one medication per invocation).
+Create a new order in `Draft` status (nurse only). The ward unit is derived from your session — no flag needed.
 
 ```
-npm run cli -- orders create --ward-unit-id <id> --medication-id <id> --quantity <n>
+npm run cli -- orders create --medication-id <id> --quantity <n>
 ```
 
 **Options**
 
 | Flag | Description |
 |------|-------------|
-| `--ward-unit-id <id>` | ID of the ward unit placing the order |
 | `--medication-id <id>` | ID of the medication being ordered |
 | `--quantity <n>` | Quantity to order (integer) |
 
 **Example**
 
 ```
-$ npm run cli -- orders create --ward-unit-id ward-1 --medication-id med-1 --quantity 50
+$ npm run cli -- orders create --medication-id med-1 --quantity 50
 Order created: ord-abc123  status: Draft
 ```
 
@@ -381,8 +379,8 @@ On failure, commands print an error message to stderr and exit with code 1.
 Auth errors:
 
 ```
-Not logged in. Run: meditrack login --actor-id <id> --password <password>
-Session expired. Run: meditrack login --actor-id <id> --password <password>
+Not logged in. Run: npm run cli -- login --actor-id <id> --password <password>
+Session expired. Run: npm run cli -- login --actor-id <id> --password <password>
 Login failed: invalid actor ID or password.
 ```
 
