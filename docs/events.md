@@ -204,7 +204,7 @@ Output example:
 }
 ```
 
-Authentication uses the stored CLI session by default (see `npm run cli -- login`).
+Authentication uses the stored CLI session by default (see `npm run mt-cli -- login`).
 
 ### `events-spy` — domain event spy
 

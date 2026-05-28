@@ -9,10 +9,10 @@ A command-line interface for managing medications and orders against the MediTra
 
 ## Running commands
 
-All commands are run via the `cli` npm script. Arguments after `--` are passed to the program:
+All commands are run via the `mt-cli` npm script. Arguments after `--` are passed to the program:
 
 ```
-npm run cli -- <command> [options]
+npm run mt-cli -- <command> [options]
 ```
 
 ---
@@ -26,7 +26,7 @@ Commands that modify state (`orders create`, `send`, `confirm`, `deliver`, and `
 Verify your credentials and store a session token in `~/.meditrack/token`. The token is valid for 8 hours.
 
 ```
-npm run cli -- login --actor-id <id> --password <password>
+npm run mt-cli -- login --actor-id <id> --password <password>
 ```
 
 **Options**
@@ -39,7 +39,7 @@ npm run cli -- login --actor-id <id> --password <password>
 **Example**
 
 ```
-$ npm run cli -- login --actor-id nurse-anna --password password
+$ npm run mt-cli -- login --actor-id nurse-anna --password password
 Logged in as nurse-anna.
 ```
 
@@ -52,7 +52,7 @@ Once logged in, subsequent commands read your identity from the stored token —
 Set the password for an actor. Prompts for the new password twice (input is not echoed). Does not require an active session — this is an administrative operation for operators with server access.
 
 ```
-npm run cli -- passwd --actor-id <id>
+npm run mt-cli -- passwd --actor-id <id>
 ```
 
 **Options**
@@ -64,7 +64,7 @@ npm run cli -- passwd --actor-id <id>
 **Example**
 
 ```
-$ npm run cli -- passwd --actor-id nurse-anna
+$ npm run mt-cli -- passwd --actor-id nurse-anna
 New password: 
 Confirm password: 
 Password updated.
@@ -79,7 +79,7 @@ Password updated.
 List audit log entries, optionally filtered by actor or order.
 
 ```
-npm run cli -- audit list [--actor-id <id>] [--order-id <id>]
+npm run mt-cli -- audit list [--actor-id <id>] [--order-id <id>]
 ```
 
 **Options**
@@ -92,10 +92,10 @@ npm run cli -- audit list [--actor-id <id>] [--order-id <id>]
 **Examples**
 
 ```
-$ npm run cli -- audit list --order-id d5d7cc27-7ce7-4881-b569-72b414d5916b
+$ npm run mt-cli -- audit list --order-id d5d7cc27-7ce7-4881-b569-72b414d5916b
 2026-05-25T10:14:22.000Z  nurse-anna               OrderPlaced      d5d7cc27-7ce7-4881-b569-72b414d5916b
 
-$ npm run cli -- audit list --actor-id nurse-anna
+$ npm run mt-cli -- audit list --actor-id nurse-anna
 2026-05-25T10:14:22.000Z  nurse-anna               OrderPlaced      d5d7cc27-7ce7-4881-b569-72b414d5916b
 ```
 
@@ -108,13 +108,13 @@ $ npm run cli -- audit list --actor-id nurse-anna
 List all actors and their roles.
 
 ```
-npm run cli -- actors list
+npm run mt-cli -- actors list
 ```
 
 **Example**
 
 ```
-$ npm run cli -- actors list
+$ npm run mt-cli -- actors list
 nurse-anna               Nurse
 nurse-erik               Nurse
 pharmacist-lars          Pharmacist
@@ -128,7 +128,7 @@ pharmacist-sofia         Pharmacist
 Create a new actor (admin only). Requires an initial password — the actor can log in immediately after creation.
 
 ```
-npm run cli -- actors create --actor-id <id> --role <role> [--ward-unit-id <id>] --password <password>
+npm run mt-cli -- actors create --actor-id <id> --role <role> [--ward-unit-id <id>] --password <password>
 ```
 
 **Options**
@@ -143,10 +143,10 @@ npm run cli -- actors create --actor-id <id> --role <role> [--ward-unit-id <id>]
 **Examples**
 
 ```
-$ npm run cli -- actors create --actor-id nurse-maja --role Nurse --ward-unit-id ward-akuten --password secret
+$ npm run mt-cli -- actors create --actor-id nurse-maja --role Nurse --ward-unit-id ward-akuten --password secret
 Actor created: nurse-maja  role: Nurse  ward: ward-akuten
 
-$ npm run cli -- actors create --actor-id pharmacist-eva --role Pharmacist --password secret
+$ npm run mt-cli -- actors create --actor-id pharmacist-eva --role Pharmacist --password secret
 Actor created: pharmacist-eva  role: Pharmacist
 ```
 
@@ -159,13 +159,13 @@ Actor created: pharmacist-eva  role: Pharmacist
 List all ward units.
 
 ```
-npm run cli -- ward-units list
+npm run mt-cli -- ward-units list
 ```
 
 **Example**
 
 ```
-$ npm run cli -- ward-units list
+$ npm run mt-cli -- ward-units list
 ward-akuten               Akuten
 ward-medicin              Medicinavdelningen
 ward-kirurgi              Kirurgavdelningen
@@ -178,7 +178,7 @@ ward-kirurgi              Kirurgavdelningen
 Create a new ward unit.
 
 ```
-npm run cli -- ward-units create --ward-unit-id <id> --name <name>
+npm run mt-cli -- ward-units create --ward-unit-id <id> --name <name>
 ```
 
 **Options**
@@ -191,7 +191,7 @@ npm run cli -- ward-units create --ward-unit-id <id> --name <name>
 **Example**
 
 ```
-$ npm run cli -- ward-units create --ward-unit-id ward-ortopedi --name Ortopedavdelningen
+$ npm run mt-cli -- ward-units create --ward-unit-id ward-ortopedi --name Ortopedavdelningen
 Ward unit created: ward-ortopedi  name: Ortopedavdelningen
 ```
 
@@ -204,7 +204,7 @@ Ward unit created: ward-ortopedi  name: Ortopedavdelningen
 List all medications. Optionally filter by INN name, ATC code, or form.
 
 ```
-npm run cli -- medications list [-q <query>]
+npm run mt-cli -- medications list [-q <query>]
 ```
 
 **Options**
@@ -216,11 +216,11 @@ npm run cli -- medications list [-q <query>]
 **Examples**
 
 ```
-$ npm run cli -- medications list
+$ npm run mt-cli -- medications list
 med-1  Paracetamol  N02BE01  Tablet  500mg
 med-2  Ibuprofen    M01AE01  Tablet  400mg
 
-$ npm run cli -- medications list -q para
+$ npm run mt-cli -- medications list -q para
 med-1  Paracetamol  N02BE01  Tablet  500mg
 ```
 
@@ -231,13 +231,13 @@ med-1  Paracetamol  N02BE01  Tablet  500mg
 Show full details for a single medication, including all registered medicinal products and their stock levels.
 
 ```
-npm run cli -- medications show <id>
+npm run mt-cli -- medications show <id>
 ```
 
 **Examples**
 
 ```
-$ npm run cli -- medications show med-1
+$ npm run mt-cli -- medications show med-1
 Paracetamol (N02BE01)
 Form: Tablet   Strength: 500mg
 
@@ -257,13 +257,13 @@ Stock is flagged with `*** BELOW THRESHOLD ***` when it is at or below the produ
 List all orders across all ward units.
 
 ```
-npm run cli -- orders list
+npm run mt-cli -- orders list
 ```
 
 **Example**
 
 ```
-$ npm run cli -- orders list
+$ npm run mt-cli -- orders list
 ord-1  Draft      ward: ward-1  lines: 2
 ord-2  Confirmed  ward: ward-2  lines: 1
 ```
@@ -275,7 +275,7 @@ ord-2  Confirmed  ward: ward-2  lines: 1
 Create a new order in `Draft` status (nurse only). The ward unit is derived from your session — no flag needed.
 
 ```
-npm run cli -- orders create --medication-id <id> --quantity <n>
+npm run mt-cli -- orders create --medication-id <id> --quantity <n>
 ```
 
 **Options**
@@ -288,7 +288,7 @@ npm run cli -- orders create --medication-id <id> --quantity <n>
 **Example**
 
 ```
-$ npm run cli -- orders create --medication-id med-1 --quantity 50
+$ npm run mt-cli -- orders create --medication-id med-1 --quantity 50
 Order created: ord-abc123  status: Draft
 ```
 
@@ -299,13 +299,13 @@ Order created: ord-abc123  status: Draft
 Performed by a nurse. Submits a draft order to the pharmacy.
 
 ```
-npm run cli -- orders send <orderId>
+npm run mt-cli -- orders send <orderId>
 ```
 
 **Example**
 
 ```
-$ npm run cli -- orders send ord-abc123
+$ npm run mt-cli -- orders send ord-abc123
 Order ord-abc123 is now: Sent
 ```
 
@@ -316,13 +316,13 @@ Order ord-abc123 is now: Sent
 Performed by a pharmacist. Confirms receipt of a sent order, making it ready for delivery.
 
 ```
-npm run cli -- orders confirm <orderId>
+npm run mt-cli -- orders confirm <orderId>
 ```
 
 **Example**
 
 ```
-$ npm run cli -- orders confirm ord-abc123
+$ npm run mt-cli -- orders confirm ord-abc123
 Order ord-abc123 is now: Confirmed
 ```
 
@@ -333,7 +333,7 @@ Order ord-abc123 is now: Confirmed
 Mark a `Confirmed` order as delivered. Requires explicit product selections covering every order line — the pharmacist specifies which medicinal products were used and in what quantity. A single line can be fulfilled by multiple products. Stock is updated accordingly.
 
 ```
-npm run cli -- orders deliver <orderId> --product <medicationId>:<medicinalProductId>:<quantity> [--product ...]
+npm run mt-cli -- orders deliver <orderId> --product <medicationId>:<medicinalProductId>:<quantity> [--product ...]
 ```
 
 **Options**
@@ -345,14 +345,14 @@ npm run cli -- orders deliver <orderId> --product <medicationId>:<medicinalProdu
 **Example**
 
 ```
-$ npm run cli -- orders deliver ord-abc123 --product med-paracetamol:prod-alvedon-500:50
+$ npm run mt-cli -- orders deliver ord-abc123 --product med-paracetamol:prod-alvedon-500:50
 Order ord-abc123 delivered.
 ```
 
 Multi-line order, with one line split across two products:
 
 ```
-$ npm run cli -- orders deliver ord-abc123 \
+$ npm run mt-cli -- orders deliver ord-abc123 \
     --product med-paracetamol:prod-alvedon-500:30 \
     --product med-paracetamol:prod-panodil-500:20 \
     --product med-ibuprofen:prod-ibumetin-400:10
@@ -379,8 +379,8 @@ On failure, commands print an error message to stderr and exit with code 1.
 Auth errors:
 
 ```
-Not logged in. Run: npm run cli -- login --actor-id <id> --password <password>
-Session expired. Run: npm run cli -- login --actor-id <id> --password <password>
+Not logged in. Run: npm run mt-cli -- login --actor-id <id> --password <password>
+Session expired. Run: npm run mt-cli -- login --actor-id <id> --password <password>
 Login failed: invalid actor ID or password.
 ```
 

@@ -16,7 +16,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "codegen": "graphql-codegen --config codegen.ts",
-    "cli": "tsx src/ui/cli/meditrack.ts",
+    "mt-cli": "tsx src/ui/cli/mt-cli.ts",
     "server": "tsx src/ui/server/server.ts",
     "repos:spy": "tsx src/ui/events/repo-spy.ts"
   },

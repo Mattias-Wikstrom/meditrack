@@ -70,7 +70,7 @@ the `passwd` CLI command. This is an administrative operation that does not requ
 session — it is intended to be run by an operator with direct server access.
 
 ```sh
-npm run cli -- passwd --actor-id <id>
+npm run mt-cli -- passwd --actor-id <id>
 ```
 
 See the [CLI reference](cli.md#passwd) for details.
@@ -82,7 +82,7 @@ See the [CLI reference](cli.md#passwd) for details.
 Use the `ward-units create` CLI command:
 
 ```sh
-npm run cli -- ward-units create --ward-unit-id ward-ortopedi --name Ortopedavdelningen
+npm run mt-cli -- ward-units create --ward-unit-id ward-ortopedi --name Ortopedavdelningen
 ```
 
 See the [CLI reference](cli.md#create-1) for full details.
@@ -94,14 +94,12 @@ See the [CLI reference](cli.md#create-1) for full details.
 Use the `actors create` CLI command:
 
 ```sh
-npm run cli -- actors create --actor-id nurse-maja --role Nurse --ward-unit-id ward-akuten
-npm run cli -- actors create --actor-id pharmacist-eva --role Pharmacist
+npm run mt-cli -- actors create --actor-id nurse-maja --role Nurse --ward-unit-id ward-akuten --password secret
+npm run mt-cli -- actors create --actor-id pharmacist-eva --role Pharmacist --password secret
 ```
 
 Valid roles are `Nurse`, `Pharmacist`, and `Admin`. `--ward-unit-id` is required for nurses
-and optional for pharmacists and admins.
-
-After creating the actor, set their password with the `passwd` command described above.
+and optional for pharmacists and admins. `--password` sets the initial password immediately.
 
 See the [CLI reference](cli.md#create) for full details.
 
