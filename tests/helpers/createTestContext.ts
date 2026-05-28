@@ -22,10 +22,11 @@ export function createTestContext(actorId = 'test-actor'): GraphQLContext & {
   orderRepo: InMemoryOrderRepository;
   wardUnitRepo: InMemoryWardUnitRepository;
 } {
+  const presetActorIds = ['nurse-1', 'pharmacist-1'];
   const actorRepo = new InMemoryActorRepository([
     { id: 'nurse-1', role: ActorRole.Nurse, wardUnitId: 'ward-1' },
     { id: 'pharmacist-1', role: ActorRole.Pharmacist },
-    { id: actorId, role: ActorRole.Nurse },
+    ...(!presetActorIds.includes(actorId) ? [{ id: actorId, role: ActorRole.Nurse }] : []),
   ]);
   const credentialsRepo = new InMemoryCredentialsRepository(actorRepo);
   const medicationRepo = new InMemoryMedicationRepository();

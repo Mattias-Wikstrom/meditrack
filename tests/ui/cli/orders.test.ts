@@ -54,7 +54,7 @@ describe('createOrder', () => {
     const useCase = new CreateOrderUseCase(makeActorRepo(), makeTransactor(orderRepo), new SimpleEventBus());
     const output = new RecordingOutput();
 
-    await createOrder(useCase, output, 'nurse-1', 'ward-1', 'med-1', 5);
+    await createOrder(useCase, output, 'nurse-1', 'med-1', 5);
 
     expect(output.messages).toHaveLength(1);
     expect(output.messages[0]).toContain('created');
@@ -65,7 +65,7 @@ describe('createOrder', () => {
     const useCase = new CreateOrderUseCase(makeActorRepo(), makeTransactor(orderRepo), new SimpleEventBus());
     const output = new RecordingOutput();
 
-    await expect(createOrder(useCase, output, 'nurse-1', 'ward-1', 'med-1', 0)).rejects.toThrow(ExitError);
+    await expect(createOrder(useCase, output, 'nurse-1', 'med-1', 0)).rejects.toThrow(ExitError);
     expect(output.errors[0]).toContain('greater than zero');
   });
 });
