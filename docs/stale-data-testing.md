@@ -8,9 +8,13 @@ The general test pattern is: open the screen, trigger the change from a second s
 
 ## General update mechanism
 
-All three apps mount a `RepositorySync` component (from `@meditrack/client`) that holds open a `repositoryChanged` WebSocket subscription. The server emits one event for every entity saved or deleted. On each event, `@urql/exchange-graphcache` automatically invalidates the affected entity and its list query, causing any active urql query that references that entity to refetch.
+Two complementary mechanisms work together:
 
-This means most stale-data cases are handled automatically without page-level subscription code. The exceptions are noted below.
+**`RepositorySync` + graphcache invalidation (lazy)**
+All three apps mount a `RepositorySync` component that holds open a `repositoryChanged` WebSocket subscription. On each event, `@urql/exchange-graphcache` invalidates the affected entity in the normalized cache. This ensures that navigating _to_ a page never serves stale data — but it does not immediately re-execute queries that are already mounted.
+
+**`useRefetchOn` (eager)**
+Pages that display data that can change while the user is looking at them call `useRefetchOn(entityTypes, refetch)` from `@meditrack/client`. This subscribes to `repositoryChanged` and calls `refetch({ requestPolicy: 'network-only' })` immediately whenever a matching entity type arrives. This is the mechanism responsible for live updates on mounted pages.
 
 ---
 
@@ -20,10 +24,11 @@ Order status progresses through: `Draft → Sent → Confirmed → Delivered`.
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Admin app — Orders page | Status badge per order | Yes | Yes — `repositoryChanged` / graphcache |
-| Admin app — Orders page filter | Count of orders per status | Yes | Yes — `repositoryChanged` / graphcache |
-| Nurse app — Overview page | Order count by status | Yes | Subscription `orderStatusChanged` |
-| Nurse app — Overview page | Order cards | Yes | Subscriptions `orderStatusChanged`, `orderDraftCreated` |
+| Admin app — Orders page | Status badge per order | Yes | Yes — `useRefetchOn('Order')` |
+| Admin app — Orders page filter | Count of orders per status | Yes | Yes — `useRefetchOn('Order')` |
+| Admin app — Order detail | Status badge | Yes | Yes — `useRefetchOn('Order')` |
+| Nurse app — Overview page | Order count by status | Yes | Yes — `useRefetchOn('Order')` |
+| Nurse app — Orders page | Order cards | Yes | Yes — `useRefetchOn('Order')` |
 | CLI — `orders list` | Status column | No (snapshot) | — |
 | CLI — `orders send/confirm/deliver` output | Status after action | No (result of action) | — |
 
@@ -37,11 +42,13 @@ Stock level decreases when an order is delivered and increases when a product is
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Admin app — Inventory page | `stockLevel` per product | Yes | Yes — `repositoryChanged` / graphcache |
-| Admin app — Inventory page | Below-threshold warning ⚠︎ | Yes | Yes — `repositoryChanged` / graphcache |
-| Admin app — Inventory page | Low stock count summary | Yes | Yes — `repositoryChanged` / graphcache |
-| Admin app — Product detail | `stockLevel`, `isBelowThreshold` | Yes | Yes — `repositoryChanged` / `useRefetchOn` |
-| Pharmacy app — Deliver order screen | Stock level shown per product selection | Yes | Yes — `repositoryChanged` / graphcache |
+| Admin app — Inventory page | `stockLevel` per product | Yes | Yes — `useRefetchOn('MedicinalProduct')` |
+| Admin app — Inventory page | Below-threshold warning ⚠︎ | Yes | Yes — `useRefetchOn('MedicinalProduct')` |
+| Admin app — Inventory page | Low stock count summary | Yes | Yes — `useRefetchOn('MedicinalProduct')` |
+| Admin app — Product detail | `stockLevel`, `isBelowThreshold` | Yes | Yes — `useRefetchOn('MedicinalProduct')` |
+| Pharmacy app — Inventory page | `stockLevel` per product | Yes | Yes — `useRefetchOn('MedicinalProduct')` |
+| Pharmacy app — Product detail | `stockLevel`, `isBelowThreshold` | Yes | Yes — `useRefetchOn('MedicinalProduct')` |
+| Pharmacy app — Deliver order screen | Stock level shown per product selection | Yes | Yes — `useRefetchOn('MedicinalProduct')` triggers product re-query |
 | CLI — `medications show` | `stock: N` per product | No (snapshot) | — |
 | CLI — `medications restock` output | New stock level | No (result of action) | — |
 
@@ -57,10 +64,10 @@ Order lines (the medications and quantities on a draft order) can be edited by t
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Nurse app — Order detail | Line items (medication, quantity) | Yes, until sent | Yes — `repositoryChanged` / `useRefetchOn` |
-| Admin app — Orders page | Medication names and line count | Yes, until sent | Yes — `repositoryChanged` / `useRefetchOn` |
-| Admin app — Order detail | Status badge, line items | Yes | Yes — `repositoryChanged` / `useRefetchOn` |
-| Pharmacy app — Deliver order screen | Order lines to fulfil | Yes, until confirmed | Yes — `repositoryChanged` / graphcache |
+| Nurse app — Order detail | Line items (medication, quantity) | Yes, until sent | Yes — `useRefetchOn('Order')` |
+| Admin app — Orders page | Medication names and line count | Yes, until sent | Yes — `useRefetchOn('Order')` |
+| Admin app — Order detail | Line items | Yes, until sent | Yes — `useRefetchOn('Order')` |
+| Pharmacy app — Deliver order screen | Order lines to fulfil | No — order is Confirmed at this stage; lines are frozen | — |
 
 ---
 
@@ -70,9 +77,10 @@ These change rarely (admin action required) but they can change.
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Admin app — Inventory page | `productName` | Rarely | Yes — `repositoryChanged` / graphcache |
-| Admin app — Inventory page | `stockThreshold` | Rarely | Yes — `repositoryChanged` / graphcache |
-| Pharmacy app — Deliver order screen | `productName` in product selector | Rarely | Yes — `repositoryChanged` / graphcache |
+| Admin app — Inventory page | `productName` | Rarely | Yes — `useRefetchOn('MedicinalProduct')` |
+| Admin app — Inventory page | `stockThreshold` | Rarely | Yes — `useRefetchOn('MedicinalProduct')` |
+| Admin app — Product detail | `productName`, `stockThreshold` | Rarely | Yes — `useRefetchOn('MedicinalProduct')` |
+| Pharmacy app — Deliver order screen | `productName` in product selector | Rarely | Yes — `useRefetchOn('MedicinalProduct')` triggers product re-query |
 | CLI — `medications show` | `productName` | No (snapshot) | — |
 
 ---
@@ -89,10 +97,10 @@ Ward unit names can be changed by an admin via `UpdateWardUnitUseCase`.
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Nurse app — Header | Ward unit name (app context) | Rarely | Yes — `repositoryChanged` / graphcache |
-| Admin app — Users page | Ward unit name alongside each nurse | Rarely | Yes — `repositoryChanged` / graphcache |
-| Admin app — Orders page | Ward unit name per order | Rarely | Yes — `repositoryChanged` / graphcache |
-| Nurse app — Overview page | Ward unit context | Rarely | Yes — `repositoryChanged` / graphcache |
+| Nurse app — Header | Ward unit name (app context) | Rarely | Yes — `useRefetchOn('WardUnit')` |
+| Admin app — Users page | Ward unit name alongside each nurse | Rarely | Yes — `useRefetchOn('Actor', 'WardUnit')` |
+| Admin app — Orders page | Ward unit name per order | Rarely | Yes — `useRefetchOn('Order', 'WardUnit')` |
+| Admin app — Ward unit detail | Ward unit name | Rarely | Yes — `useRefetchOn('WardUnit', ...)` |
 | CLI — `ward-units list` | Ward unit name | No (snapshot) | — |
 
 ---
@@ -103,9 +111,9 @@ Actors can be created, updated, or deleted by an admin. Role and ward unit assig
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Admin app — Users page | Actor list with roles and ward | Rarely | Yes — `repositoryChanged` / `useRefetchOn` |
-| Admin app — User detail | Role, ward unit assignment, recent activity | Rarely | Yes — `repositoryChanged` / `useRefetchOn` |
-| Admin app — Ward unit detail | Name, assigned nurses, orders | Rarely | Yes — `repositoryChanged` / `useRefetchOn` |
+| Admin app — Users page | Actor list with roles and ward | Rarely | Yes — `useRefetchOn('Actor', 'WardUnit')` |
+| Admin app — User detail | Role, ward unit assignment, recent activity | Rarely | Yes — `useRefetchOn('Actor', 'WardUnit')` |
+| Admin app — Ward unit detail | Assigned nurses | Rarely | Yes — `useRefetchOn('WardUnit', 'Actor', 'Order')` |
 
 **Remaining gap:** If an admin changes a nurse's ward unit assignment while the nurse is logged in, the nurse's session token still reflects the old `wardUnitId`. The nurse would need to log out and back in to pick up the new assignment. This is a session-level staleness that the repository change mechanism cannot address.
 
@@ -117,7 +125,7 @@ Append-only. Existing entries never change. New entries appear while viewing.
 
 | Where shown | Real-time update? |
 |---|---|
-| Admin app — Audit page | Yes — any `repositoryChanged` event invalidates `auditLog` (every write produces an audit entry, even though `AuditRepository` itself is not observed) |
+| Admin app — Audit page | Yes — `useRefetchOn` watches all entity types; any write produces a new audit entry |
 
 ---
 
@@ -125,11 +133,11 @@ Append-only. Existing entries never change. New entries appear while viewing.
 
 | Screen | Risk | Mechanism in place? |
 |---|---|---|
-| Pharmacy app — Deliver order | Stock may be stale at time of delivery | Yes — `repositoryChanged` / graphcache |
-| Admin app — Inventory page | Stock level and threshold warning | Yes — `repositoryChanged` / graphcache |
-| Admin app — Orders page | Order status, lines, ward unit name | Yes — `repositoryChanged` / graphcache |
-| Nurse app — Overview page | Order status and counts | Yes — `orderStatusChanged` subscription |
-| Admin app — Users page | Actor list, roles, ward assignments | Yes — `repositoryChanged` / graphcache |
-| Admin app — Orders page / Nurse app | Ward unit name shown alongside orders | Yes — `repositoryChanged` / graphcache |
-| Admin app — Audit page | New audit entries | Yes — `repositoryChanged` / graphcache |
+| Pharmacy app — Deliver order | Stock may be stale at time of delivery | Yes — `useRefetchOn('MedicinalProduct')` |
+| Admin app — Inventory page | Stock level and threshold warning | Yes — `useRefetchOn('MedicinalProduct')` |
+| Admin app — Orders page | Order status, lines, ward unit name | Yes — `useRefetchOn('Order', 'WardUnit')` |
+| Nurse app — Overview page | Order status and counts | Yes — `useRefetchOn('Order')` |
+| Nurse app — Orders page | Order cards | Yes — `useRefetchOn('Order')` |
+| Admin app — Users page | Actor list, roles, ward assignments | Yes — `useRefetchOn('Actor', 'WardUnit')` |
+| Admin app — Audit page | New audit entries | Yes — `useRefetchOn` (all entity types) |
 | CLI (all commands) | All data | No — all CLI output is a point-in-time snapshot |
