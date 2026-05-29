@@ -22,11 +22,12 @@ export class InMemoryMedicinalProductRepository implements MedicinalProductRepos
     this.store.set(product.id, product);
   }
 
-  async adjustStock(id: MedicinalProductId, newLevel: number, expectedLevel: number): Promise<void> {
+  async adjustStock(id: MedicinalProductId, newLevel: number, expectedLevel: number): Promise<MedicinalProduct> {
     const stored = this.store.get(id);
     if (stored === undefined) throw new Error(`MedicinalProduct ${id} not found`);
     if (stored.stockLevel !== expectedLevel) throw new ConflictError();
     stored.stockLevel = newLevel;
+    return stored;
   }
 
   async delete(id: MedicinalProductId): Promise<void> {

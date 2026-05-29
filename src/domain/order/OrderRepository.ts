@@ -8,6 +8,6 @@ export interface OrderRepository {
   findByWardUnit(wardUnitId: WardUnitId): Promise<Order[]>;
   save(order: Order): Promise<void>;
   // Atomically sets status to newStatus, but only if it currently equals expectedStatus.
-  // Throws ConflictError if the check fails.
-  advanceStatus(id: OrderId, newStatus: OrderStatus, expectedStatus: OrderStatus): Promise<void>;
+  // Returns the updated entity. Throws ConflictError if the check fails.
+  advanceStatus(id: OrderId, newStatus: OrderStatus, expectedStatus: OrderStatus): Promise<Order>;
 }

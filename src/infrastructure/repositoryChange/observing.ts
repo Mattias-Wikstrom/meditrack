@@ -15,6 +15,13 @@ export function observing<TRepo extends object>(
           bus.publish({ kind: 'saved', entityType, entity });
         };
       }
+      if (key === 'adjustStock' || key === 'advanceStatus') {
+        return async (...args: unknown[]) => {
+          const entity = await (original as (...a: unknown[]) => unknown).call(target, ...args);
+          bus.publish({ kind: 'saved', entityType, entity });
+          return entity;
+        };
+      }
       if (key === 'delete') {
         return async (id: unknown) => {
           await (original as (...a: unknown[]) => unknown).call(target, id);

@@ -58,12 +58,14 @@ export class PrismaMedicinalProductRepository implements MedicinalProductReposit
     });
   }
 
-  async adjustStock(id: MedicinalProductId, newLevel: number, expectedLevel: number): Promise<void> {
+  async adjustStock(id: MedicinalProductId, newLevel: number, expectedLevel: number): Promise<MedicinalProduct> {
     const { count } = await this.prisma.medicinalProduct.updateMany({
       where: { id, stockLevel: expectedLevel },
       data: { stockLevel: newLevel },
     });
     if (count === 0) throw new ConflictError();
+    const row = await this.prisma.medicinalProduct.findUnique({ where: { id } });
+    return toDomain(row!);
   }
 
   async delete(id: MedicinalProductId): Promise<void> {

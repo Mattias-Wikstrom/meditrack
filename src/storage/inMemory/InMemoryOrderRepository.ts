@@ -23,10 +23,11 @@ export class InMemoryOrderRepository implements OrderRepository {
     this.store.set(order.id, order);
   }
 
-  async advanceStatus(id: OrderId, newStatus: OrderStatus, expectedStatus: OrderStatus): Promise<void> {
+  async advanceStatus(id: OrderId, newStatus: OrderStatus, expectedStatus: OrderStatus): Promise<Order> {
     const stored = this.store.get(id);
     if (stored === undefined) throw new Error(`Order ${id} not found`);
     if (stored.status !== expectedStatus) throw new ConflictError();
     stored.status = newStatus;
+    return stored;
   }
 }

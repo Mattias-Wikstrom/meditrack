@@ -87,11 +87,13 @@ export class PrismaOrderRepository implements OrderRepository {
     }
   }
 
-  async advanceStatus(id: OrderId, newStatus: OrderStatus, expectedStatus: OrderStatus): Promise<void> {
+  async advanceStatus(id: OrderId, newStatus: OrderStatus, expectedStatus: OrderStatus): Promise<Order> {
     const { count } = await this.prisma.order.updateMany({
       where: { id, status: expectedStatus },
       data: { status: newStatus },
     });
     if (count === 0) throw new ConflictError();
+    const row = await this.prisma.order.findUnique({ where: { id }, include: { lines: true } });
+    return toDomain(row!);
   }
 }

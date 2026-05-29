@@ -7,7 +7,7 @@ export interface MedicinalProductRepository {
   findAll(): Promise<MedicinalProduct[]>;
   save(product: MedicinalProduct): Promise<void>;
   // Atomically sets stockLevel to newLevel, but only if it currently equals expectedLevel.
-  // Throws ConflictError if the check fails.
-  adjustStock(id: MedicinalProductId, newLevel: number, expectedLevel: number): Promise<void>;
+  // Returns the updated entity. Throws ConflictError if the check fails.
+  adjustStock(id: MedicinalProductId, newLevel: number, expectedLevel: number): Promise<MedicinalProduct>;
   delete(id: MedicinalProductId): Promise<void>;
 }
