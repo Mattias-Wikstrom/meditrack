@@ -71,12 +71,12 @@ useServer(
     schema,
     onConnect: async (ctx) => {
       const token = ctx.connectionParams?.token as string | undefined;
-      if (!token) throw new Error('No token provided — run: npm run mt-cli -- login');
+      if (!token) return false;
       try {
         await verifyToken(token);
         return true;
       } catch {
-        throw new Error('Session expired or token invalid — run: npm run mt-cli -- login');
+        return false;
       }
     },
     context: async (ctx) => {

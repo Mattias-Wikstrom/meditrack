@@ -104,8 +104,14 @@ program
             const code = e['code'] as number | undefined;
             const raw = e['reason'];
             const reason = Buffer.isBuffer(raw) ? raw.toString() : String(raw ?? '');
+            if (code === 4403) {
+              console.error('The server rejected your session token. Try logging in again:');
+              console.error('  npm run mt-cli -- login --actor-id <id> --password <password>');
+              cleanup();
+              process.exit(1);
+            }
             const detail = reason ? `: ${reason}` : '';
-            if (code === 4400 || code === 4401 || code === 4403 || code === 4500) {
+            if (code === 4400 || code === 4401 || code === 4500) {
               console.error(`Connection rejected (${String(code)})${detail}`);
               cleanup();
               process.exit(1);
