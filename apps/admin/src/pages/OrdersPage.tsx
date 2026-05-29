@@ -1,9 +1,15 @@
 // Used for /orders (admin)
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from 'urql';
+import { useQuery, useSubscription } from 'urql';
 import { Card, OrderStatusBadge, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
 import { graphql } from '../gql';
+
+const ORDERS_CHANGED_SUB = graphql(`
+  subscription AdminOrdersRepoChanged {
+    repositoryChanged { entityType kind entityId }
+  }
+`);
 
 const ORDERS_QUERY = graphql(`
   query AdminOrders {
@@ -45,7 +51,14 @@ export function OrdersPage() {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const [{ data, fetching, error }] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
+  const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
+
+  function handleRepoChanged(_: unknown, event: { repositoryChanged?: { entityType: string } | null }) {
+    const t = event.repositoryChanged?.entityType;
+    if (t === 'Order' || t === 'WardUnit') refetch({ requestPolicy: 'network-only' });
+    return undefined;
+  }
+  useSubscription({ query: ORDERS_CHANGED_SUB }, handleRepoChanged);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');

@@ -1,9 +1,10 @@
 // Used for /users (admin)
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from 'urql';
+import { useQuery, useSubscription } from 'urql';
 import { Button, Card, Spinner, RoleBadge, SortIcon } from '@meditrack/ui';
 import { useAuth, createApiClient } from '@meditrack/client';
+import { graphql } from '../gql';
 
 const ACTORS_QUERY = /* GraphQL */ `
   query AdminActors {
@@ -16,6 +17,12 @@ const ACTORS_QUERY = /* GraphQL */ `
     wardUnits { id name }
   }
 `;
+
+const USERS_CHANGED_SUB = graphql(`
+  subscription AdminUsersRepoChanged {
+    repositoryChanged { entityType kind entityId }
+  }
+`);
 
 const ROLES = ['Nurse', 'Pharmacist', 'Admin'] as const;
 const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
@@ -33,7 +40,14 @@ export function UsersPage() {
   const [selectedRole, setSelectedRole] = useState<string>('Nurse');
 
   const { token } = useAuth();
-  const [{ data, fetching, error }] = useQuery({ query: ACTORS_QUERY });
+  const [{ data, fetching, error }, refetch] = useQuery({ query: ACTORS_QUERY });
+
+  function handleRepoChanged(_: unknown, event: { repositoryChanged?: { entityType: string } | null }) {
+    const t = event.repositoryChanged?.entityType;
+    if (t === 'Actor' || t === 'WardUnit') refetch({ requestPolicy: 'network-only' });
+    return undefined;
+  }
+  useSubscription({ query: USERS_CHANGED_SUB }, handleRepoChanged);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
