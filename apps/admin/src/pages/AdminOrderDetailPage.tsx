@@ -2,6 +2,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { PageHeader, OrderStatusBadge, Card, Spinner, formatDateTime } from '@meditrack/ui';
+import { useRefetchOn } from '@meditrack/client';
 
 const ORDER_DETAIL_QUERY = `
   query AdminOrderDetail($id: ID!) {
@@ -19,11 +20,12 @@ export function AdminOrderDetailPage() {
   const { orderId } = useParams();
   const navigate = useNavigate();
 
-  const [{ data, fetching, error }] = useQuery({
+  const [{ data, fetching, error }, refetch] = useQuery({
     query: ORDER_DETAIL_QUERY,
     variables: { id: orderId },
     requestPolicy: 'network-only',
   });
+  useRefetchOn('Order', () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;

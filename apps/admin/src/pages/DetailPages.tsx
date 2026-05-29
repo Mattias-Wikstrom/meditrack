@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { PageHeader, OrderStatusBadge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
-import { useAuth, createApiClient } from '@meditrack/client';
+import { useAuth, createApiClient, useRefetchOn } from '@meditrack/client';
 
 const dialogInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
@@ -40,6 +40,7 @@ export function UserDetailsPage() {
 
   const { token, actorId: currentActorId } = useAuth();
   const [{ data, fetching, error }, refetch] = useQuery({ query: ACTORS_QUERY });
+  useRefetchOn(['Actor', 'WardUnit'], () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -204,6 +205,7 @@ export function WardUnitDetailsPage() {
     query: WARD_UNIT_DETAIL_QUERY,
     variables: { id: wardUnitId },
   });
+  useRefetchOn(['WardUnit', 'Actor', 'Order'], () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
@@ -366,6 +368,7 @@ export function MedicationDetailsPage() {
     query: PRODUCT_DETAIL_QUERY,
     variables: { id: productId },
   });
+  useRefetchOn('MedicinalProduct', () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;

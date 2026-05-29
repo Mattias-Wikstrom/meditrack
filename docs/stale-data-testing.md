@@ -40,7 +40,7 @@ Stock level decreases when an order is delivered and increases when a product is
 | Admin app — Inventory page | `stockLevel` per product | Yes | Yes — `repositoryChanged` / graphcache |
 | Admin app — Inventory page | Below-threshold warning ⚠︎ | Yes | Yes — `repositoryChanged` / graphcache |
 | Admin app — Inventory page | Low stock count summary | Yes | Yes — `repositoryChanged` / graphcache |
-| Admin app — Product detail | `stockLevel`, `isBelowThreshold` | Yes | Yes — `repositoryChanged` / graphcache |
+| Admin app — Product detail | `stockLevel`, `isBelowThreshold` | Yes | Yes — `repositoryChanged` / `useRefetchOn` |
 | Pharmacy app — Deliver order screen | Stock level shown per product selection | Yes | Yes — `repositoryChanged` / graphcache |
 | CLI — `medications show` | `stock: N` per product | No (snapshot) | — |
 | CLI — `medications restock` output | New stock level | No (result of action) | — |
@@ -57,8 +57,9 @@ Order lines (the medications and quantities on a draft order) can be edited by t
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Nurse app — Order detail | Line items (medication, quantity) | Yes, until sent | Subscription `orderDraftUpdated` |
-| Admin app — Orders page | Medication names and line count | Yes, until sent | Yes — `repositoryChanged` / graphcache |
+| Nurse app — Order detail | Line items (medication, quantity) | Yes, until sent | Yes — `repositoryChanged` / `useRefetchOn` |
+| Admin app — Orders page | Medication names and line count | Yes, until sent | Yes — `repositoryChanged` / `useRefetchOn` |
+| Admin app — Order detail | Status badge, line items | Yes | Yes — `repositoryChanged` / `useRefetchOn` |
 | Pharmacy app — Deliver order screen | Order lines to fulfil | Yes, until confirmed | Yes — `repositoryChanged` / graphcache |
 
 ---
@@ -102,7 +103,9 @@ Actors can be created, updated, or deleted by an admin. Role and ward unit assig
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Admin app — Users page | Actor list with roles and ward | Rarely | Yes — `repositoryChanged` / graphcache |
+| Admin app — Users page | Actor list with roles and ward | Rarely | Yes — `repositoryChanged` / `useRefetchOn` |
+| Admin app — User detail | Role, ward unit assignment, recent activity | Rarely | Yes — `repositoryChanged` / `useRefetchOn` |
+| Admin app — Ward unit detail | Name, assigned nurses, orders | Rarely | Yes — `repositoryChanged` / `useRefetchOn` |
 
 **Remaining gap:** If an admin changes a nurse's ward unit assignment while the nurse is logged in, the nurse's session token still reflects the old `wardUnitId`. The nurse would need to log out and back in to pick up the new assignment. This is a session-level staleness that the repository change mechanism cannot address.
 
