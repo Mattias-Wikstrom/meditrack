@@ -13,6 +13,7 @@
  *                               deliver-order (only if delivery drops stock below threshold)
  *   medicinalProductUpdated  ← update-product
  */
+import 'dotenv/config';
 import { Command } from 'commander';
 import { readToken } from '../cli/auth/tokenStore';
 
