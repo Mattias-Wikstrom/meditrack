@@ -1,15 +1,10 @@
 // Used for /orders (pharmacist)
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useSubscription } from 'urql';
+import { useQuery } from 'urql';
 import { Card, OrderStatusBadge, Button, Spinner, LineList, formatDate } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
-
-const ORDER_CHANGED_SUB = graphql(`
-  subscription PharmacistOrderChanged {
-    repositoryChanged { entityType kind entityId }
-  }
-`);
+import { useRefetchOn } from '@meditrack/client';
 
 const ORDERS_QUERY = graphql(`
   query PharmacistOrders {
@@ -43,10 +38,7 @@ export function DashboardPage() {
   const ordersApi = useOrdersApi();
   const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
 
-  useSubscription({ query: ORDER_CHANGED_SUB }, (_, event) => {
-    if (event.repositoryChanged?.entityType === 'Order') refetch({ requestPolicy: 'network-only' });
-    return undefined;
-  });
+  useRefetchOn('Order', () => refetch({ requestPolicy: 'network-only' }));
 
   async function handleConfirm(orderId: string) {
     try {

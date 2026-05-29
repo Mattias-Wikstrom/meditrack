@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Button, Card, Spinner } from '@meditrack/ui';
-import { useAuth, createApiClient } from '@meditrack/client';
+import { useAuth, createApiClient, useRefetchOn } from '@meditrack/client';
 import { graphql } from '../gql';
 
 const WARD_UNITS_QUERY = graphql(`
@@ -29,6 +29,7 @@ export function WardUnitsPage() {
   const [idValue, setIdValue] = useState('');
   const [idTouched, setIdTouched] = useState(false);
   const [{ data, fetching, error }, refetch] = useQuery({ query: WARD_UNITS_QUERY, requestPolicy: 'cache-and-network' });
+  useRefetchOn('WardUnit', () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
-import { useAuth, createApiClient } from '@meditrack/client';
+import { useAuth, createApiClient, useRefetchOn } from '@meditrack/client';
 import { graphql } from '../gql';
 
 const MEDICATIONS_QUERY = graphql(`
@@ -36,7 +36,8 @@ export function InventoryPage() {
     searchParams.get('dir') === 'desc' ? 'desc' : 'asc'
   );
 
-  const [{ data, fetching, error }] = useQuery({ query: MEDICATIONS_QUERY, requestPolicy: 'cache-and-network' });
+  const [{ data, fetching, error }, refetch] = useQuery({ query: MEDICATIONS_QUERY, requestPolicy: 'cache-and-network' });
+  useRefetchOn('MedicinalProduct', () => refetch({ requestPolicy: 'network-only' }));
 
   function handleSort(key: SortKey) {
     if (key === sortKey) setSortDir(d => d === 'asc' ? 'desc' : 'asc');

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Button, Card, Spinner, RoleBadge, SortIcon } from '@meditrack/ui';
-import { useAuth, createApiClient } from '@meditrack/client';
+import { useAuth, createApiClient, useRefetchOn } from '@meditrack/client';
 
 const ACTORS_QUERY = /* GraphQL */ `
   query AdminActors {
@@ -33,7 +33,8 @@ export function UsersPage() {
   const [selectedRole, setSelectedRole] = useState<string>('Nurse');
 
   const { token } = useAuth();
-  const [{ data, fetching, error }] = useQuery({ query: ACTORS_QUERY });
+  const [{ data, fetching, error }, refetch] = useQuery({ query: ACTORS_QUERY });
+  useRefetchOn(['Actor', 'WardUnit'], () => refetch({ requestPolicy: 'network-only' }));
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');

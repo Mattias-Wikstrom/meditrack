@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
+import { useRefetchOn } from '@meditrack/client';
 import { Card, OrderStatusBadge, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
 import { graphql } from '../gql';
 
@@ -45,7 +46,8 @@ export function OrdersPage() {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const [{ data, fetching, error }] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
+  const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
+  useRefetchOn(['Order', 'WardUnit'], () => refetch({ requestPolicy: 'network-only' }));
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');

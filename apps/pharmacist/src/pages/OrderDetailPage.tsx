@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
+import { useRefetchOn } from '@meditrack/client';
 import { OrderStatusBadge, Button, Card, Spinner, PageHeader } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import type { ProductSelection } from '../api/orders';
@@ -214,6 +215,7 @@ export function OrderDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [productRefreshKey, setProductRefreshKey] = useState(0);
+  useRefetchOn('MedicinalProduct', () => setProductRefreshKey(k => k + 1));
 
   const order = data?.order;
 

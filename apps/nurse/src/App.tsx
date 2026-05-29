@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Provider, useQuery } from 'urql';
 import { AppShell, LoginPage, MyAccountPage, TabNav } from '@meditrack/ui';
-import { useAuth, createUrqlClient, RepositorySync } from '@meditrack/client';
+import { useAuth, createUrqlClient, RepositorySync, useRefetchOn } from '@meditrack/client';
 import { OverviewPage } from './pages/OverviewPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { NewOrderPage } from './pages/NewOrderPage';
@@ -19,8 +19,9 @@ function NurseShell({ token, actorId, wardUnitId, role }: { token: string; actor
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const [{ data }] = useQuery({ query: WARD_UNIT_NAME_QUERY, variables: { id: wardUnitId }, pause: !wardUnitId });
+  const [{ data }, refetch] = useQuery({ query: WARD_UNIT_NAME_QUERY, variables: { id: wardUnitId }, pause: !wardUnitId });
   const wardUnitName = data?.wardUnit?.name;
+  useRefetchOn('WardUnit', () => refetch({ requestPolicy: 'network-only' }));
 
   return (
     <AppShell

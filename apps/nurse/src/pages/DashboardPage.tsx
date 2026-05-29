@@ -1,9 +1,9 @@
 // Used for /orders (nurse)
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery, useSubscription } from 'urql';
+import { useQuery } from 'urql';
 import { OrderStatusBadge, Button, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
-import { useAuth } from '@meditrack/client';
+import { useAuth, useRefetchOn } from '@meditrack/client';
 import { graphql } from '../gql';
 
 const WARD_UNIT_ORDERS_QUERY = graphql(`
@@ -18,11 +18,6 @@ const WARD_UNIT_ORDERS_QUERY = graphql(`
   }
 `);
 
-const ORDER_DRAFT_CREATED_SUB = graphql(`
-  subscription NurseOrderDraftCreated {
-    orderDraftCreated { orderId }
-  }
-`);
 
 
 type SortKey = 'status' | 'lines' | 'createdAt';
@@ -101,8 +96,7 @@ export function DashboardPage() {
     requestPolicy: 'cache-and-network',
   });
 
-  function handleSub() { refetch({ requestPolicy: 'network-only' }); return undefined; }
-  useSubscription({ query: ORDER_DRAFT_CREATED_SUB }, handleSub);
+  useRefetchOn('Order', () => refetch({ requestPolicy: 'network-only' }));
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
