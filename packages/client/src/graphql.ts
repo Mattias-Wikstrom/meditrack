@@ -43,11 +43,17 @@ export function createUrqlClient(token: string, onUnauthenticated: () => void) {
               const listField: Record<string, string> = {
                 WardUnit: 'wardUnits',
                 Actor: 'actors',
-                Order: 'orders',
                 Medication: 'medications',
                 MedicinalProduct: 'medicinalProducts',
               };
               if (listField[entityType]) cache.invalidate('Query', listField[entityType]);
+
+              if (entityType === 'Order') {
+                cache.invalidate('Query', 'orders');
+                for (const status of ['Draft', 'Sent', 'Confirmed', 'Delivered']) {
+                  cache.invalidate('Query', 'orders', { status });
+                }
+              }
               cache.invalidate('Query', 'auditLog');
             },
           },
