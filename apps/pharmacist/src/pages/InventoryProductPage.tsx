@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { InventoryProductDetail, Spinner } from '@meditrack/ui';
 import { graphql } from '../gql';
-import { useAuth, createApiClient } from '@meditrack/client';
+import { useAuth, createApiClient, useRefetchOn } from '@meditrack/client';
 
 const PRODUCT_DETAIL_QUERY = graphql(`
   query PharmacistProductDetail($id: ID!) {
@@ -19,10 +19,11 @@ export function InventoryProductPage() {
   const { productId } = useParams();
   const { token } = useAuth();
 
-  const [{ data, fetching, error }] = useQuery({
+  const [{ data, fetching, error }, refetch] = useQuery({
     query: PRODUCT_DETAIL_QUERY,
     variables: { id: productId! },
   });
+  useRefetchOn('MedicinalProduct', () => refetch({ requestPolicy: 'network-only' }));
 
   async function handleRestock(quantity: number): Promise<string | null> {
     try {

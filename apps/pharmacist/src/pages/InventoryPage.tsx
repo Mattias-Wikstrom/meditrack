@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { Card, Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
 import { graphql } from '../gql';
-import { useAuth, createApiClient } from '@meditrack/client';
+import { useAuth, createApiClient, useRefetchOn } from '@meditrack/client';
 
 const INVENTORY_QUERY = graphql(`
   query PharmacistInventory {
@@ -81,7 +81,8 @@ export function InventoryPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const { token } = useAuth();
-  const [{ data, fetching, error }] = useQuery({ query: INVENTORY_QUERY });
+  const [{ data, fetching, error }, refetch] = useQuery({ query: INVENTORY_QUERY });
+  useRefetchOn('MedicinalProduct', () => refetch({ requestPolicy: 'network-only' }));
 
   function handleSort(key: SortKey) {
     if (key === sortKey) {

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'urql';
+import { useRefetchOn } from '@meditrack/client';
 import { Card, Spinner, formatDateTimePrecise } from '@meditrack/ui';
 import { graphql } from '../gql';
 
@@ -80,7 +81,8 @@ export function AuditPage() {
   const [actorFilter, setActorFilter] = useState('');
   const [actionFilter, setActionFilter] = useState('');
 
-  const [{ data, fetching, error }] = useQuery({ query: AUDIT_QUERY, requestPolicy: 'cache-and-network' });
+  const [{ data, fetching, error }, refetch] = useQuery({ query: AUDIT_QUERY, requestPolicy: 'cache-and-network' });
+  useRefetchOn(['Order', 'Actor', 'WardUnit', 'Medication', 'MedicinalProduct'], () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;

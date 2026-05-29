@@ -1,8 +1,8 @@
 // Used for / (nurse)
 import { Link } from 'react-router-dom';
-import { useQuery, useSubscription } from 'urql';
+import { useQuery } from 'urql';
 import { Card, Button, Spinner } from '@meditrack/ui';
-import { useAuth } from '@meditrack/client';
+import { useAuth, useRefetchOn } from '@meditrack/client';
 import { graphql } from '../gql';
 
 const OVERVIEW_QUERY = graphql(`
@@ -13,11 +13,6 @@ const OVERVIEW_QUERY = graphql(`
   }
 `);
 
-const ORDER_DRAFT_CREATED_SUB = graphql(`
-  subscription NurseOverviewDraftCreated {
-    orderDraftCreated { orderId }
-  }
-`);
 
 const STATUS_ORDER = ['Draft', 'Sent', 'Confirmed', 'Delivered'] as const;
 
@@ -49,8 +44,7 @@ export function OverviewPage() {
     requestPolicy: 'cache-and-network',
   });
 
-  function handleSub() { refetch({ requestPolicy: 'network-only' }); return undefined; }
-  useSubscription({ query: ORDER_DRAFT_CREATED_SUB }, handleSub);
+  useRefetchOn('Order', () => refetch({ requestPolicy: 'network-only' }));
 
   if (!wardUnitId) return <p className="text-red-600 text-sm">Error: Nurse account is not assigned to a ward unit.</p>;
   if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
