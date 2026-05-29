@@ -1,6 +1,6 @@
 import { graphql } from 'graphql';
-import { schema } from '../../../api/graphql/schema';
-import { GraphQLContext } from '../../../api/graphql/context';
+import { schema } from '../../../../api/graphql/schema';
+import { GraphQLContext } from '../../../../api/graphql/context';
 import { CliOutput } from '../CliOutput';
 
 export async function runGraphQL(

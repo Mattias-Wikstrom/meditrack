@@ -1,7 +1,7 @@
-import { WardUnitRepository } from '../../../domain/wardUnit/WardUnitRepository';
-import { CreateWardUnitUseCase } from '../../../domain/wardUnit/useCases/CreateWardUnitUseCase';
-import { UpdateWardUnitUseCase } from '../../../domain/wardUnit/useCases/UpdateWardUnitUseCase';
-import { DeleteWardUnitUseCase } from '../../../domain/wardUnit/useCases/DeleteWardUnitUseCase';
+import { WardUnitRepository } from '../../../../domain/wardUnit/WardUnitRepository';
+import { CreateWardUnitUseCase } from '../../../../domain/wardUnit/useCases/CreateWardUnitUseCase';
+import { UpdateWardUnitUseCase } from '../../../../domain/wardUnit/useCases/UpdateWardUnitUseCase';
+import { DeleteWardUnitUseCase } from '../../../../domain/wardUnit/useCases/DeleteWardUnitUseCase';
 import { CliOutput } from '../CliOutput';
 import { errorMessages } from '../errorMessages';
 

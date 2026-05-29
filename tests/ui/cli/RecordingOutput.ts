@@ -1,4 +1,4 @@
-import { CliOutput } from '../../../src/ui/cli/CliOutput';
+import { CliOutput } from '../../../src/ui/cli/mt-cli/CliOutput';
 
 export class ExitError extends Error {
   constructor(public readonly code: number) {

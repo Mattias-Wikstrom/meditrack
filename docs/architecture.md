@@ -23,9 +23,10 @@ meditrack/
 │   ├── infrastructure/ # Cross-cutting utilities (repository change observation)
 │   ├── api/            # GraphQL schema and resolvers
 │   └── ui/
-│       ├── cli/        # CLI entry point and commands
-│       ├── server/     # HTTP server, REST routes, wiring
-│       └── events/     # Dev tools: event spy and trigger scripts
+│       ├── cli/        # CLI tools
+│       │   ├── mt-cli/ # mt-cli entry point and commands
+│       │   └── events/ # Dev tools: event spy and trigger scripts
+│       └── server/     # HTTP server, REST routes, wiring
 ├── tests/              # Test suites
 ├── prisma/             # Database schema and migrations
 ├── docs/               # Documentation

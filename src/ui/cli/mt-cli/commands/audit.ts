@@ -1,4 +1,4 @@
-import { AuditRepository } from '../../../domain/audit/AuditRepository';
+import { AuditRepository } from '../../../../domain/audit/AuditRepository';
 import { CliOutput } from '../CliOutput';
 
 export async function listAudit(

@@ -16,9 +16,9 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "codegen": "graphql-codegen --config codegen.ts",
-    "mt-cli": "tsx src/ui/cli/mt-cli.ts",
+    "mt-cli": "tsx src/ui/cli/mt-cli/mt-cli.ts",
     "server": "tsx src/ui/server/server.ts",
-    "repos:spy": "tsx src/ui/events/repo-spy.ts"
+    "repos:spy": "tsx src/ui/cli/events/repo-spy.ts"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.0",

@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
-import { ActorRepository } from '../../../domain/actor/ActorRepository';
-import { CreateActorUseCase } from '../../../domain/actor/useCases/CreateActorUseCase';
-import { DeleteActorUseCase } from '../../../domain/actor/useCases/DeleteActorUseCase';
-import { CredentialsRepository } from '../../../domain/auth/CredentialsRepository';
-import { ActorRole } from '../../../domain/shared/ActorRole';
+import { ActorRepository } from '../../../../domain/actor/ActorRepository';
+import { CreateActorUseCase } from '../../../../domain/actor/useCases/CreateActorUseCase';
+import { DeleteActorUseCase } from '../../../../domain/actor/useCases/DeleteActorUseCase';
+import { CredentialsRepository } from '../../../../domain/auth/CredentialsRepository';
+import { ActorRole } from '../../../../domain/shared/ActorRole';
 import { CliOutput } from '../CliOutput';
 import { errorMessages } from '../errorMessages';
 

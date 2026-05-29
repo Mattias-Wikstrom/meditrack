@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { listMedications, showMedication } from '../../../src/ui/cli/commands/medications';
+import { listMedications, showMedication } from '../../../src/ui/cli/mt-cli/commands/medications';
 import { InMemoryMedicationRepository } from '../../../src/storage/inMemory/InMemoryMedicationRepository';
 import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';
 import { Medication } from '../../../src/domain/medication/Medication';

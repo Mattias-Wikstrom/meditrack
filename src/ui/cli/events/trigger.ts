@@ -15,7 +15,7 @@
  */
 import 'dotenv/config';
 import { Command } from 'commander';
-import { readToken } from '../cli/auth/tokenStore';
+import { readToken } from '../mt-cli/auth/tokenStore';
 
 // ---------------------------------------------------------------------------
 // HTTP helpers

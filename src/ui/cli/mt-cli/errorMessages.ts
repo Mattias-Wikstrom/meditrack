@@ -1,4 +1,4 @@
-import { ErrorCode } from '../../domain/shared/results/ErrorCode';
+import { ErrorCode } from '../../../domain/shared/results/ErrorCode';
 
 export const errorMessages: Record<ErrorCode, string> = {
   ActorNotFound: 'Actor not found. Check that --actor-id is correct.',

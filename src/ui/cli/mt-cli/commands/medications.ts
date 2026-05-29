@@ -1,14 +1,14 @@
-import { MedicationRepository } from '../../../domain/medication/MedicationRepository';
-import { MedicinalProductRepository } from '../../../domain/medication/MedicinalProductRepository';
-import { CreateMedicationUseCase } from '../../../domain/medication/useCases/CreateMedicationUseCase';
-import { UpdateMedicationUseCase } from '../../../domain/medication/useCases/UpdateMedicationUseCase';
-import { DeleteMedicationUseCase } from '../../../domain/medication/useCases/DeleteMedicationUseCase';
-import { CreateMedicinalProductUseCase } from '../../../domain/medication/useCases/CreateMedicinalProductUseCase';
-import { UpdateMedicinalProductUseCase } from '../../../domain/medication/useCases/UpdateMedicinalProductUseCase';
-import { DeleteMedicinalProductUseCase } from '../../../domain/medication/useCases/DeleteMedicinalProductUseCase';
-import { RestockUseCase } from '../../../domain/medication/useCases/RestockUseCase';
-import { MedicationForm } from '../../../domain/medication/MedicationForm';
-import { MedicationId, MedicinalProductId } from '../../../domain/shared/IdTypes';
+import { MedicationRepository } from '../../../../domain/medication/MedicationRepository';
+import { MedicinalProductRepository } from '../../../../domain/medication/MedicinalProductRepository';
+import { CreateMedicationUseCase } from '../../../../domain/medication/useCases/CreateMedicationUseCase';
+import { UpdateMedicationUseCase } from '../../../../domain/medication/useCases/UpdateMedicationUseCase';
+import { DeleteMedicationUseCase } from '../../../../domain/medication/useCases/DeleteMedicationUseCase';
+import { CreateMedicinalProductUseCase } from '../../../../domain/medication/useCases/CreateMedicinalProductUseCase';
+import { UpdateMedicinalProductUseCase } from '../../../../domain/medication/useCases/UpdateMedicinalProductUseCase';
+import { DeleteMedicinalProductUseCase } from '../../../../domain/medication/useCases/DeleteMedicinalProductUseCase';
+import { RestockUseCase } from '../../../../domain/medication/useCases/RestockUseCase';
+import { MedicationForm } from '../../../../domain/medication/MedicationForm';
+import { MedicationId, MedicinalProductId } from '../../../../domain/shared/IdTypes';
 import { CliOutput } from '../CliOutput';
 import { errorMessages } from '../errorMessages';
 

@@ -211,10 +211,10 @@ Authentication uses the stored CLI session by default (see `npm run mt-cli -- lo
 Subscribes to one or more named GraphQL subscriptions and prints each event as it arrives.
 
 ```sh
-npx tsx src/ui/events/spy.ts                             # all domain events
-npx tsx src/ui/events/spy.ts -- -e stockBelowThreshold  # specific events
-npx tsx src/ui/events/spy.ts -- -e stockBelowThreshold,productRestocked
-npx tsx src/ui/events/spy.ts -- --compact
+npx tsx src/ui/cli/events/spy.ts                             # all domain events
+npx tsx src/ui/cli/events/spy.ts -- -e stockBelowThreshold  # specific events
+npx tsx src/ui/cli/events/spy.ts -- -e stockBelowThreshold,productRestocked
+npx tsx src/ui/cli/events/spy.ts -- --compact
 ```
 
 Available event names (pass to `-e` as a comma-separated list):
@@ -235,16 +235,16 @@ manual testing. Events are always emitted as side effects of real business opera
 not injected directly.
 
 ```sh
-npx tsx src/ui/events/trigger.ts --help
+npx tsx src/ui/cli/events/trigger.ts --help
 
 # Examples:
-npx tsx src/ui/events/trigger.ts create-order --medication-id <id> --quantity 5
-npx tsx src/ui/events/trigger.ts send-order    --order-id <id>
-npx tsx src/ui/events/trigger.ts confirm-order --order-id <id>
-npx tsx src/ui/events/trigger.ts deliver-order --order-id <id> \
+npx tsx src/ui/cli/events/trigger.ts create-order --medication-id <id> --quantity 5
+npx tsx src/ui/cli/events/trigger.ts send-order    --order-id <id>
+npx tsx src/ui/cli/events/trigger.ts confirm-order --order-id <id>
+npx tsx src/ui/cli/events/trigger.ts deliver-order --order-id <id> \
   --product <medicationId>:<medicinalProductId>:<quantity>
-npx tsx src/ui/events/trigger.ts restock        --product-id <id> --quantity 10
-npx tsx src/ui/events/trigger.ts update-product --product-id <id> --stock-threshold 5
+npx tsx src/ui/cli/events/trigger.ts restock        --product-id <id> --quantity 10
+npx tsx src/ui/cli/events/trigger.ts update-product --product-id <id> --stock-threshold 5
 ```
 
 Event → action mapping:
@@ -278,4 +278,4 @@ Set `MEDITRACK_API_URL` to override the default `http://localhost:4000/api`.
    },
    ```
 5. Add the subscription field to `src/api/graphql/typeDefs.ts`.
-6. Add it to the `SUBSCRIPTIONS` map in `src/ui/events/spy.ts` so the spy tool picks it up.
+6. Add it to the `SUBSCRIPTIONS` map in `src/ui/cli/events/spy.ts` so the spy tool picks it up.

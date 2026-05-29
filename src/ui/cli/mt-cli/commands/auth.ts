@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaCredentialsRepository } from '../../../storage/prisma/PrismaCredentialsRepository';
-import { PrismaAuditRepository } from '../../../storage/prisma/PrismaAuditRepository';
-import { LoginUseCase } from '../../../domain/auth/LoginUseCase';
+import { PrismaCredentialsRepository } from '../../../../storage/prisma/PrismaCredentialsRepository';
+import { PrismaAuditRepository } from '../../../../storage/prisma/PrismaAuditRepository';
+import { LoginUseCase } from '../../../../domain/auth/LoginUseCase';
 import { storeToken } from '../auth/tokenStore';
 import { CliOutput } from '../CliOutput';
 

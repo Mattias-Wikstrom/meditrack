@@ -1,8 +1,8 @@
 import readline from 'readline';
 import { PrismaClient } from '@prisma/client';
-import { PrismaCredentialsRepository } from '../../../storage/prisma/PrismaCredentialsRepository';
-import { PrismaAuditRepository } from '../../../storage/prisma/PrismaAuditRepository';
-import { SetPasswordUseCase } from '../../../domain/auth/SetPasswordUseCase';
+import { PrismaCredentialsRepository } from '../../../../storage/prisma/PrismaCredentialsRepository';
+import { PrismaAuditRepository } from '../../../../storage/prisma/PrismaAuditRepository';
+import { SetPasswordUseCase } from '../../../../domain/auth/SetPasswordUseCase';
 import { CliOutput } from '../CliOutput';
 
 export async function passwd(prisma: PrismaClient, output: CliOutput, actorId: string): Promise<void> {

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from '../../../src/ui/cli/commands/orders';
+import { listOrders, createOrder, sendOrder, confirmOrder, deliverOrder } from '../../../src/ui/cli/mt-cli/commands/orders';
 import { InMemoryActorRepository } from '../../../src/storage/inMemory/InMemoryActorRepository';
 import { InMemoryOrderRepository } from '../../../src/storage/inMemory/InMemoryOrderRepository';
 import { InMemoryMedicinalProductRepository } from '../../../src/storage/inMemory/InMemoryMedicinalProductRepository';

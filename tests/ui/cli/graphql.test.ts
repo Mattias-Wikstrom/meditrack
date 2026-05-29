@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { runGraphQL } from '../../../src/ui/cli/commands/graphql';
+import { runGraphQL } from '../../../src/ui/cli/mt-cli/commands/graphql';
 import { createTestContext } from '../../helpers/createTestContext';
 import { RecordingOutput, ExitError } from './RecordingOutput';
 import { InMemoryWardUnitRepository } from '../../../src/storage/inMemory/InMemoryWardUnitRepository';
