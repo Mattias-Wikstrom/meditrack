@@ -118,7 +118,7 @@ export function UsersPage() {
                 <label className="block text-xs font-medium text-slate-600 mb-1">Password</label>
                 <input name="password" type="password" required className={inputCls} />
               </div>
-              {createError && <p className="text-xs text-red-600">{createError}</p>}
+              {createError && <p role="alert" className="text-xs text-red-600">{createError}</p>}
               <div className="flex gap-2 justify-end pt-1">
                 <Button type="button" variant="ghost" onClick={() => { setShowCreate(false); setCreateError(null); }}>Cancel</Button>
                 <Button type="submit">Create</Button>

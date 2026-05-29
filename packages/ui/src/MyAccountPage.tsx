@@ -72,12 +72,13 @@ export function MyAccountPage({ token, actorId, role, wardUnitName, onSuccess, o
           )}
         </div>
         {success ? (
-          <p className="text-green-600 text-sm">Password changed successfully.</p>
+          <p role="status" className="text-green-600 text-sm">Password changed successfully.</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Current password</label>
+              <label htmlFor="account-current-password" className="block text-sm font-medium text-slate-700 mb-1">Current password</label>
               <input
+                id="account-current-password"
                 type="password"
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
@@ -87,8 +88,9 @@ export function MyAccountPage({ token, actorId, role, wardUnitName, onSuccess, o
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">New password</label>
+              <label htmlFor="account-new-password" className="block text-sm font-medium text-slate-700 mb-1">New password</label>
               <input
+                id="account-new-password"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -98,8 +100,9 @@ export function MyAccountPage({ token, actorId, role, wardUnitName, onSuccess, o
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Confirm new password</label>
+              <label htmlFor="account-confirm-password" className="block text-sm font-medium text-slate-700 mb-1">Confirm new password</label>
               <input
+                id="account-confirm-password"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -108,7 +111,7 @@ export function MyAccountPage({ token, actorId, role, wardUnitName, onSuccess, o
                 autoComplete="new-password"
               />
             </div>
-            {error && <p className="text-red-600 text-sm">{error}</p>}
+            {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
             <Button type="submit" disabled={submitting} className="w-full">
               {submitting ? 'Saving…' : 'Change password'}
             </Button>

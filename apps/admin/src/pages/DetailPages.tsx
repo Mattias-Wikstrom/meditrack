@@ -149,7 +149,7 @@ export function UserDetailsPage() {
                   </select>
                 </div>
               )}
-              {modalError && <p className="text-xs text-red-600">{modalError}</p>}
+              {modalError && <p role="alert" className="text-xs text-red-600">{modalError}</p>}
               <div className="flex gap-2 justify-end pt-1">
                 <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
                 <Button type="submit">Save</Button>
@@ -167,7 +167,7 @@ export function UserDetailsPage() {
             <p className="text-sm text-slate-600 mb-4">
               Delete <strong>{actor.id}</strong>? This cannot be undone.
             </p>
-            {modalError && <p className="text-xs text-red-600 mb-3">{modalError}</p>}
+            {modalError && <p role="alert" className="text-xs text-red-600 mb-3">{modalError}</p>}
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDelete}>Delete</Button>
@@ -314,7 +314,7 @@ export function WardUnitDetailsPage() {
                 <label className="block text-xs font-medium text-slate-600 mb-1">Name</label>
                 <input name="name" defaultValue={unit.name} required className={dialogInputCls} />
               </div>
-              {modalError && <p className="text-xs text-red-600">{modalError}</p>}
+              {modalError && <p role="alert" className="text-xs text-red-600">{modalError}</p>}
               <div className="flex gap-2 justify-end pt-1">
                 <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
                 <Button type="submit">Save</Button>
@@ -332,7 +332,7 @@ export function WardUnitDetailsPage() {
             <p className="text-sm text-slate-600 mb-4">
               Delete <strong>{unit.name}</strong>? This cannot be undone. All assigned nurses must be reassigned first.
             </p>
-            {modalError && <p className="text-xs text-red-600 mb-3">{modalError}</p>}
+            {modalError && <p role="alert" className="text-xs text-red-600 mb-3">{modalError}</p>}
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDelete}>Delete</Button>
@@ -429,7 +429,7 @@ export function MedicationDetailsPage() {
                 <label className="block text-xs font-medium text-slate-600 mb-1">Minimum Threshold</label>
                 <input name="stockThreshold" type="number" min={0} defaultValue={product.stockThreshold} required className={productInputCls} />
               </div>
-              {modalError && <p className="text-xs text-red-600">{modalError}</p>}
+              {modalError && <p role="alert" className="text-xs text-red-600">{modalError}</p>}
               <div className="flex gap-2 justify-end pt-1">
                 <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
                 <Button type="submit">Save</Button>
@@ -447,7 +447,7 @@ export function MedicationDetailsPage() {
             <p className="text-sm text-slate-600 mb-4">
               Delete <strong>{product.productName}</strong>? This cannot be undone.
             </p>
-            {modalError && <p className="text-xs text-red-600 mb-3">{modalError}</p>}
+            {modalError && <p role="alert" className="text-xs text-red-600 mb-3">{modalError}</p>}
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDelete}>Delete</Button>

@@ -50,7 +50,7 @@ function RestockDialog({ productName, currentStock, onConfirm, onCancel, submitt
           New total: {currentStock + quantity}
         </p>
 
-        {error && <p className="text-xs text-red-600 mb-3">{error}</p>}
+        {error && <p role="alert" className="text-xs text-red-600 mb-3">{error}</p>}
 
         <div className="flex gap-3 justify-end">
           <Button variant="ghost" onClick={onCancel} disabled={submitting}>Cancel</Button>

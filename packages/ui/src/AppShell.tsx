@@ -33,6 +33,7 @@ export function AppShell({ appName, actorName, children, nav, context, onHome, o
             {onProfile ? (
               <button
                 onClick={onProfile}
+                aria-label={`My account (${actorName})`}
                 className="text-white/70 text-sm hover:text-white transition-colors"
               >
                 {actorName}

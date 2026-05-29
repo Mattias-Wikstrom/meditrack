@@ -50,7 +50,7 @@ function ConfirmView({ order, onConfirmed }: {
           ))}
         </tbody>
       </table>
-      {error && <p className="px-5 pb-4 text-xs text-red-600">{error}</p>}
+      {error && <p role="alert" className="px-5 pb-4 text-xs text-red-600">{error}</p>}
       <div className="px-5 py-4 border-t border-slate-100">
         <Button onClick={handleConfirm} disabled={submitting} className="w-full">
           {submitting ? 'Confirming…' : 'Confirm Order'}
@@ -331,7 +331,7 @@ export function OrderDetailPage() {
             ))}
           </Card>
 
-          {submitError && <p className="text-red-600 text-sm mb-4">{submitError}</p>}
+          {submitError && <p role="alert" className="text-red-600 text-sm mb-4">{submitError}</p>}
 
           <Button onClick={handleDeliver} disabled={submitting || !canDeliver} className="w-full">
             {submitting ? 'Delivering…' : 'Deliver Order'}

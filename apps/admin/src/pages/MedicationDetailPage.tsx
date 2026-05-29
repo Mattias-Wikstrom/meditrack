@@ -240,7 +240,7 @@ export function MedicationDetailPage() {
             <Field label="Strength">
               <input name="strength" defaultValue={medication.strength} required className={inputCls} />
             </Field>
-            {formError && <p className="text-xs text-red-600">{formError}</p>}
+            {formError && <p role="alert" className="text-xs text-red-600">{formError}</p>}
             <div className="flex gap-2 justify-end pt-1">
               <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
               <Button type="submit">Save</Button>
@@ -254,7 +254,7 @@ export function MedicationDetailPage() {
           <p className="text-sm text-slate-600 mb-4">
             Delete <strong>{medication.innName}</strong>? This cannot be undone. All products must be removed first.
           </p>
-          {formError && <p className="text-xs text-red-600 mb-3">{formError}</p>}
+          {formError && <p role="alert" className="text-xs text-red-600 mb-3">{formError}</p>}
           <div className="flex gap-2 justify-end">
             <Button variant="ghost" onClick={closeModal}>Cancel</Button>
             <Button variant="danger" onClick={handleDeleteMedication}>Delete</Button>
@@ -274,7 +274,7 @@ export function MedicationDetailPage() {
             <Field label="Minimum Threshold">
               <input name="stockThreshold" type="number" min={0} defaultValue={50} required className={inputCls} />
             </Field>
-            {formError && <p className="text-xs text-red-600">{formError}</p>}
+            {formError && <p role="alert" className="text-xs text-red-600">{formError}</p>}
             <div className="flex gap-2 justify-end pt-1">
               <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
               <Button type="submit">Add Product</Button>
@@ -292,7 +292,7 @@ export function MedicationDetailPage() {
             <Field label="Minimum Threshold">
               <input name="stockThreshold" type="number" min={0} defaultValue={modal.product.stockThreshold} required className={inputCls} />
             </Field>
-            {formError && <p className="text-xs text-red-600">{formError}</p>}
+            {formError && <p role="alert" className="text-xs text-red-600">{formError}</p>}
             <div className="flex gap-2 justify-end pt-1">
               <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
               <Button type="submit">Save</Button>
@@ -306,7 +306,7 @@ export function MedicationDetailPage() {
           <p className="text-sm text-slate-600 mb-4">
             Delete <strong>{modal.product.productName}</strong>? This cannot be undone.
           </p>
-          {formError && <p className="text-xs text-red-600 mb-3">{formError}</p>}
+          {formError && <p role="alert" className="text-xs text-red-600 mb-3">{formError}</p>}
           <div className="flex gap-2 justify-end">
             <Button variant="ghost" onClick={closeModal}>Cancel</Button>
             <Button variant="danger" onClick={() => handleDeleteProduct(modal.product.id)}>Delete</Button>

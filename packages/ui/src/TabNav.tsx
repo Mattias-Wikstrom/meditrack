@@ -13,7 +13,7 @@ interface TabNavProps {
 
 export function TabNav({ items }: TabNavProps) {
   return (
-    <nav className="flex gap-1">
+    <nav aria-label="Main navigation" className="flex gap-1">
       {items.map((item) => (
         <NavLink
           key={`${item.to}:${item.label}`}

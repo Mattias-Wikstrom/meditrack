@@ -123,14 +123,13 @@ export function NewOrderPage() {
       )}
 
       <div className="mb-10">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Medication to add</label>
-        <MedicationSearch onSelect={addLine} fetcher={fetcher} />
+        <MedicationSearch label="Medication to add" onSelect={addLine} fetcher={fetcher} />
         {lines.length > 0 && (
           <p className="mt-2 text-xs text-slate-400">Add additional medications by typing their names above.</p>
         )}
       </div>
 
-      {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+      {error && <p role="alert" className="text-red-600 text-sm mb-4">{error}</p>}
 
       <Button onClick={handleSend} disabled={busy || lines.length === 0} className="w-full">
         {sending ? 'Sending…' : 'Send Order'}

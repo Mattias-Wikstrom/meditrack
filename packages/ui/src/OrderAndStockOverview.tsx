@@ -46,7 +46,7 @@ function StatCard({ title, value, subtitle, danger = false, href }: {
     <Card className={`p-3 ${danger ? 'border-red-300' : ''}${href ? ' hover:bg-slate-50 transition-colors' : ''}`}>
       <div className="flex items-baseline justify-between">
         <span className={`text-2xl font-bold tabular-nums ${danger ? 'text-red-600' : 'text-slate-900'}`}>{value}</span>
-        {danger && <span className="text-red-400 text-sm">⚠</span>}
+        {danger && <span aria-hidden="true" className="text-red-400 text-sm">⚠</span>}
       </div>
       <p className="mt-0.5 text-sm font-medium text-slate-700">{title}</p>
       <p className="text-xs text-slate-400">{subtitle}</p>
@@ -72,7 +72,7 @@ export function OrderAndStockOverview({ products, orders, getProductHref, invent
       <div className="grid gap-3 grid-cols-2">
         <Card className={`p-3 ${lowStock.length > 0 ? 'border-red-300' : ''}`}>
           <h3 className={`text-sm font-semibold mb-0.5 ${lowStock.length > 0 ? 'text-red-600' : 'text-slate-800'}`}>
-            ⚠ Low Stock Alerts
+            <span aria-hidden="true">⚠ </span>Low Stock Alerts
           </h3>
           <p className="text-xs text-slate-500 mb-2">
             {lowStock.length} medication{lowStock.length === 1 ? '' : 's'} below minimum threshold

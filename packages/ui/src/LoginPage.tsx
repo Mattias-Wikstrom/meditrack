@@ -64,8 +64,9 @@ export function LoginPage({ role, appName, onLogin }: LoginPageProps) {
           className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">User</label>
+            <label htmlFor="login-user" className="block text-sm font-medium text-slate-700 mb-1">User</label>
             <select
+              id="login-user"
               value={actorId}
               onChange={(e) => setActorId(e.target.value)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
@@ -77,8 +78,9 @@ export function LoginPage({ role, appName, onLogin }: LoginPageProps) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <label htmlFor="login-password" className="block text-sm font-medium text-slate-700 mb-1">Password</label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -87,7 +89,7 @@ export function LoginPage({ role, appName, onLogin }: LoginPageProps) {
               autoComplete="current-password"
             />
           </div>
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
           <Button type="submit" disabled={submitting || !actorId} className="w-full">
             {submitting ? 'Signing in…' : 'Sign in'}
           </Button>
