@@ -1,5 +1,5 @@
 // Used for /orders/:id (pharmacist)
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { OrderStatusBadge, Button, Card, Spinner, PageHeader } from '@meditrack/ui';
@@ -91,15 +91,21 @@ function LineDeliverySection({
   line,
   splits,
   onChange,
+  refreshKey,
 }: {
   line: OrderLine;
   splits: Split[];
   onChange: (splits: Split[]) => void;
+  refreshKey: number;
 }) {
-  const [{ data }] = useQuery({
+  const [{ data }, reexecute] = useQuery({
     query: PRODUCTS_QUERY,
     variables: { medicationId: line.medicationId },
   });
+
+  useEffect(() => {
+    if (refreshKey > 0) reexecute({ requestPolicy: 'network-only' });
+  }, [refreshKey, reexecute]);
 
   const products = data?.medicinalProducts ?? [];
   const selectedSplits = splits.filter(s => s.medicinalProductId !== '');
@@ -207,6 +213,7 @@ export function OrderDetailPage() {
   const [{ data, fetching, error }] = useQuery({ query: ORDER_QUERY, variables: { id: id! }, requestPolicy: 'network-only' });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [productRefreshKey, setProductRefreshKey] = useState(0);
 
   const order = data?.order;
 
@@ -269,6 +276,7 @@ export function OrderDetailPage() {
       navigate('/orders');
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : 'Delivery failed');
+      setProductRefreshKey((k) => k + 1);
     } finally {
       setSubmitting(false);
     }
@@ -316,6 +324,7 @@ export function OrderDetailPage() {
                 line={line}
                 splits={getSplits(line.medicationId, line.quantity)}
                 onChange={(splits) => updateSplits(line.medicationId, splits)}
+                refreshKey={productRefreshKey}
               />
             ))}
           </Card>
