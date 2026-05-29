@@ -71,7 +71,7 @@ program
   .action(async (opts: ProgramOptions) => {
     const token = opts.token ?? readToken();
     if (!token) {
-      console.error('Not authenticated. Run: npm run cli login --actor-id <id> --password <password>');
+      console.error('Not authenticated. Run: npm run mt-cli -- login --actor-id <id> --password <password>');
       process.exit(1);
     }
 
@@ -138,7 +138,7 @@ program
               const raw = e['reason'];
               const reason = Buffer.isBuffer(raw) ? raw.toString() : String(raw ?? '');
               if (code === 4400 || code === 4401 || code === 4403 || code === 4500) {
-                console.error(`[${eventName}] auth rejected — re-run: npm run cli login`);
+                console.error(`[${eventName}] auth rejected — re-run: npm run mt-cli -- login`);
               } else {
                 console.error(`[${eventName}] connection closed (code ${String(code)}): ${reason}`);
               }

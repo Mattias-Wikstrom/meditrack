@@ -27,7 +27,7 @@ function getBaseUrl(): string {
 function getToken(explicitToken?: string): string {
   const token = explicitToken ?? readToken();
   if (!token) {
-    console.error('Not authenticated. Run: npm run cli login --actor-id <id> --password <password>');
+    console.error('Not authenticated. Run: npm run mt-cli -- login --actor-id <id> --password <password>');
     process.exit(1);
   }
   return token;

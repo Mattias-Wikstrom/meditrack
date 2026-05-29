@@ -85,14 +85,14 @@ const output = new ConsoleOutput();
 async function requireAuth(): Promise<{ actorId: string; wardUnitId?: string }> {
   const token = readToken();
   if (!token) {
-    output.error('Not logged in. Run: npm run cli -- login --actor-id <id> --password <password>');
+    output.error('Not logged in. Run: npm run mt-cli -- login --actor-id <id> --password <password>');
     process.exit(1);
   }
   try {
     const { actorId, wardUnitId } = await verifyToken(token);
     return { actorId, wardUnitId };
   } catch {
-    output.error('Session expired. Run: npm run cli -- login --actor-id <id> --password <password>');
+    output.error('Session expired. Run: npm run mt-cli -- login --actor-id <id> --password <password>');
     process.exit(1);
   }
 }
