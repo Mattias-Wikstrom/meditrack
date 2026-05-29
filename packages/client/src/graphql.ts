@@ -1,6 +1,5 @@
 import { createClient, fetchExchange, mapExchange, subscriptionExchange } from 'urql';
 import { cacheExchange } from '@urql/exchange-graphcache';
-import { gql } from '@urql/core';
 import { createClient as createWsClient } from 'graphql-ws';
 
 export function createUrqlClient(token: string, onUnauthenticated: () => void) {
@@ -29,19 +28,27 @@ export function createUrqlClient(token: string, onUnauthenticated: () => void) {
           Medication: (data) => (data as { id?: string }).id ?? null,
           Order: (data) => (data as { id?: string }).id ?? null,
           WardUnit: (data) => (data as { id?: string }).id ?? null,
-          User: (data) => (data as { id?: string }).id ?? null,
+          Actor: (data) => (data as { id?: string }).id ?? null,
+          AuditEvent: () => null,
         },
         updates: {
           Subscription: {
-            medicinalProductUpdated(result, _args, cache) {
-              const incoming = (result as { medicinalProductUpdated: unknown }).medicinalProductUpdated;
-              if (!incoming) return;
-              cache.writeFragment(
-                gql`fragment MedicinalProductCacheUpdate on MedicinalProduct {
-                  id productName stockLevel stockThreshold isBelowThreshold
-                }`,
-                incoming as Parameters<typeof cache.writeFragment>[1],
-              );
+            repositoryChanged(result, _args, cache) {
+              const event = (result as { repositoryChanged?: { entityType: string; kind: string; entityId: string } | null }).repositoryChanged;
+              if (!event) return;
+
+              const { entityType, entityId } = event;
+              cache.invalidate({ __typename: entityType, id: entityId });
+
+              const listField: Record<string, string> = {
+                WardUnit: 'wardUnits',
+                Actor: 'actors',
+                Order: 'orders',
+                Medication: 'medications',
+                MedicinalProduct: 'medicinalProducts',
+              };
+              if (listField[entityType]) cache.invalidate('Query', listField[entityType]);
+              cache.invalidate('Query', 'auditLog');
             },
           },
         },

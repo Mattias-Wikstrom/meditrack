@@ -1,7 +1,7 @@
 // Used for /orders/:id (pharmacist)
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useSubscription } from 'urql';
+import { useQuery } from 'urql';
 import { OrderStatusBadge, Button, Card, Spinner, PageHeader } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import type { ProductSelection } from '../api/orders';
@@ -68,12 +68,6 @@ const ORDER_QUERY = graphql(`
         medication { id innName }
       }
     }
-  }
-`);
-
-const STOCK_CHANGED_SUB = graphql(`
-  subscription PharmacistStockRepoChanged {
-    repositoryChanged { entityType kind entityId }
   }
 `);
 
@@ -220,12 +214,6 @@ export function OrderDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [productRefreshKey, setProductRefreshKey] = useState(0);
-
-  function handleStockChanged(_: unknown, event: { repositoryChanged?: { entityType: string } | null }) {
-    if (event.repositoryChanged?.entityType === 'MedicinalProduct') setProductRefreshKey(k => k + 1);
-    return undefined;
-  }
-  useSubscription({ query: STOCK_CHANGED_SUB }, handleStockChanged);
 
   const order = data?.order;
 

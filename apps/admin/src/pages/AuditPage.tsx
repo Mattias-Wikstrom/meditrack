@@ -1,15 +1,9 @@
 // Used for /audit (admin)
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery, useSubscription } from 'urql';
+import { useQuery } from 'urql';
 import { Card, Spinner, formatDateTimePrecise } from '@meditrack/ui';
 import { graphql } from '../gql';
-
-const AUDIT_CHANGED_SUB = graphql(`
-  subscription AdminAuditRepoChanged {
-    repositoryChanged { entityType kind entityId }
-  }
-`);
 
 const AUDIT_QUERY = graphql(`
   query AdminAuditLog {
@@ -86,10 +80,7 @@ export function AuditPage() {
   const [actorFilter, setActorFilter] = useState('');
   const [actionFilter, setActionFilter] = useState('');
 
-  const [{ data, fetching, error }, refetch] = useQuery({ query: AUDIT_QUERY, requestPolicy: 'cache-and-network' });
-
-  function handleSub() { refetch({ requestPolicy: 'network-only' }); return undefined; }
-  useSubscription({ query: AUDIT_CHANGED_SUB }, handleSub);
+  const [{ data, fetching, error }] = useQuery({ query: AUDIT_QUERY, requestPolicy: 'cache-and-network' });
 
   if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
   if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
