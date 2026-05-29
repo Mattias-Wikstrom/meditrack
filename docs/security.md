@@ -16,7 +16,7 @@ Known gaps:
   expires. Addressing this requires either shortening token lifetime or introducing a server-side
   denylist.
 - **Role cached in the token** — the actor's role is embedded in the JWT and trusted without a
-  database lookup. A role change in the database is not reflected until the actor's next login.
+  database lookup. A role change in the database is not reflected until the actor's next login. [Note: It may be best for multiple reasons to completely remove the ability to change the role of a user. It is confusing and it is not needed.]
 - **No brute-force protection** — the `POST /api/auth/login` endpoint has no rate limiting or
   account lockout. An attacker can try passwords without being slowed down.
 - **No password policy** — only empty passwords are rejected. There is no minimum length or
