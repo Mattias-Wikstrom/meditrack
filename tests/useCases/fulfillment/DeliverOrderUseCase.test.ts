@@ -155,4 +155,23 @@ describe('DeliverOrderUseCase', () => {
 
     expect((await medicinalProductRepo.findByMedicationId('med-1' as MedicationId))[0]?.stockLevel).toBe(stockBefore);
   });
+
+  it('fails with Conflict when stock changes concurrently between read and write', async () => {
+    const orderId = await createConfirmedOrder('med-1' as MedicationId, 5);
+
+    // Simulate a concurrent restock that changes the stock level just before our write commits.
+    const conflictTransactor = {
+      run: async <T>(work: (tx: any) => Promise<T>) => {
+        await medicinalProductRepo.adjustStock('prod-1' as MedicinalProductId, 8, 10);
+        return new InMemoryTransactor(orderRepo, medicinalProductRepo, auditRepo).run(work);
+      },
+    };
+    const conflictingDeliver = new DeliverOrderUseCase(actorRepo, orderRepo, medicinalProductRepo, conflictTransactor, eventBus);
+
+    const result = await conflictingDeliver.execute({ actorId: 'pharmacist-1', orderId, productSelections: selectProd1 });
+
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('Conflict');
+  });
 });

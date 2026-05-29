@@ -10,6 +10,7 @@ import { EventBus } from '../../../shared/eventContracts/EventBus';
 import { UseCaseResult, success, failure } from '../../../shared/results/UseCaseResult';
 import { OrderStatusAdvanced } from '../../events/OrderStatusAdvanced';
 import { OrderId } from '../../../shared/IdTypes';
+import { ConflictError } from '../../../shared/ConflictError';
 
 export interface ConfirmOrderInput {
   actorId: string;
@@ -43,13 +44,27 @@ export class ConfirmOrderUseCase {
     }
 
     const previousStatus = order.status;
+
+    try {
+      await this.transactor.run(async (tx) => {
+        await tx.orderRepository.advanceStatus(order.id, OrderStatus.Confirmed, previousStatus);
+        await tx.auditRepository.record({ actorId: input.actorId, action: 'OrderConfirmed', entityId: order.id, occurredAt: new Date() });
+      });
+    } catch (e) {
+      if (e instanceof ConflictError) {
+        // Another request modified the order before ours committed. Re-read to find out what happened.
+        const current = await this.orderRepository.findById(input.orderId);
+        if (current?.status === OrderStatus.Confirmed) {
+          // Someone else confirmed it concurrently — the goal is achieved, no need to re-publish.
+          order.status = OrderStatus.Confirmed;
+          return success(order);
+        }
+        return failure('InvalidStatusTransition');
+      }
+      throw e;
+    }
+
     order.status = OrderStatus.Confirmed;
-
-    await this.transactor.run(async (tx) => {
-      await tx.orderRepository.save(order);
-      await tx.auditRepository.record({ actorId: input.actorId, action: 'OrderConfirmed', entityId: order.id, occurredAt: new Date() });
-    });
-
     await this.eventBus.publish(new OrderStatusAdvanced(input.actorId, order.id, previousStatus, OrderStatus.Confirmed));
     return success(order);
   }

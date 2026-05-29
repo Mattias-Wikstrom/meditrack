@@ -141,6 +141,7 @@ export const typeDefs = /* GraphQL */ `
     SelectionQuantityMismatch
     InsufficientStock
     InvalidQuantity
+    Conflict
   }
 
   type Actor {

@@ -4,6 +4,7 @@ import { OrderLine } from '../../domain/order/OrderLine';
 import { OrderRepository } from '../../domain/order/OrderRepository';
 import { OrderStatus } from '../../domain/order/OrderStatus';
 import { MedicationId, OrderId, WardUnitId } from '../../domain/shared/IdTypes';
+import { ConflictError } from '../../domain/shared/ConflictError';
 
 type OrderLineRow = {
   medicationId: string;
@@ -84,5 +85,13 @@ export class PrismaOrderRepository implements OrderRepository {
         })),
       });
     }
+  }
+
+  async advanceStatus(id: OrderId, newStatus: OrderStatus, expectedStatus: OrderStatus): Promise<void> {
+    const { count } = await this.prisma.order.updateMany({
+      where: { id, status: expectedStatus },
+      data: { status: newStatus },
+    });
+    if (count === 0) throw new ConflictError();
   }
 }

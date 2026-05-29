@@ -16,6 +16,7 @@ import { OrderMustBeConfirmed } from '../../rules/OrderMustBeConfirmed';
 import { DeliveryCoversOrder } from '../../rules/DeliveryCoversOrder';
 import { SufficientStock } from '../../rules/SufficientStock';
 import { ErrorInfo } from '../../../shared/results/ErrorInfo';
+import { ConflictError } from '../../../shared/ConflictError';
 
 // The pharmacist is picking stock off the shelf. They're telling the system: "to fulfil this order, I'm taking these specific products, in these quantities."
 
@@ -101,25 +102,38 @@ export class DeliverOrderUseCase {
       return failures(errors);
     }
 
-    // All reads and validation passed. Run writes + audit atomically.
-    const thresholdEvents: StockBelowThreshold[] = [];
+    // Pre-compute the stock changes so we can check thresholds after the transaction.
+    // previousLevel is captured here so it remains stable even if the in-memory object
+    // is mutated by a concurrent operation before our transaction commits.
+    const lineUpdates = plan.resolvedLines.map((line) => ({
+      line,
+      previousLevel: line.product.stockLevel,
+      newLevel: line.product.stockLevel - line.quantity,
+      wasBelowThreshold: line.product.isBelowThreshold,
+    }));
 
-    await this.transactor.run(async (tx) => {
-      for (const line of plan.resolvedLines) {
-        const wasBelowThreshold = line.product.isBelowThreshold;
-
-        line.product.stockLevel = line.product.stockLevel - line.quantity;
-        await tx.medicinalProductRepository.save(line.product);
-
-        if (line.product.isBelowThreshold && !wasBelowThreshold) {
-          thresholdEvents.push(new StockBelowThreshold(input.actorId, line.product));
+    try {
+      await this.transactor.run(async (tx) => {
+        for (const { line, previousLevel, newLevel } of lineUpdates) {
+          await tx.medicinalProductRepository.adjustStock(line.product.id, newLevel, previousLevel);
         }
-      }
+        await tx.orderRepository.advanceStatus(order.id, OrderStatus.Delivered, order.status);
+        await tx.auditRepository.record({ actorId: input.actorId, action: 'OrderDelivered', entityId: order.id, occurredAt: new Date() });
+      });
+    } catch (e) {
+      if (e instanceof ConflictError) return failure('Conflict');
+      throw e;
+    }
 
-      order.status = OrderStatus.Delivered;
-      await tx.orderRepository.save(order);
-      await tx.auditRepository.record({ actorId: input.actorId, action: 'OrderDelivered', entityId: order.id, occurredAt: new Date() });
-    });
+    // Update in-memory objects and collect threshold events after the transaction commits.
+    const thresholdEvents: StockBelowThreshold[] = [];
+    for (const { line, newLevel, wasBelowThreshold } of lineUpdates) {
+      line.product.stockLevel = newLevel;
+      if (line.product.isBelowThreshold && !wasBelowThreshold) {
+        thresholdEvents.push(new StockBelowThreshold(input.actorId, line.product));
+      }
+    }
+    order.status = OrderStatus.Delivered;
 
     // Publish real-time notification events after the transaction commits.
     for (const ev of thresholdEvents) {

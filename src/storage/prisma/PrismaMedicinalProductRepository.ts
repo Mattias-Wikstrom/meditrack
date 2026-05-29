@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { MedicinalProduct } from '../../domain/medication/MedicinalProduct';
 import { MedicinalProductRepository } from '../../domain/medication/MedicinalProductRepository';
 import { MedicationId, MedicinalProductId } from '../../domain/shared/IdTypes';
+import { ConflictError } from '../../domain/shared/ConflictError';
 
 type MedicinalProductRow = {
   id: string;
@@ -55,6 +56,14 @@ export class PrismaMedicinalProductRepository implements MedicinalProductReposit
         stockThreshold: product.stockThreshold,
       },
     });
+  }
+
+  async adjustStock(id: MedicinalProductId, newLevel: number, expectedLevel: number): Promise<void> {
+    const { count } = await this.prisma.medicinalProduct.updateMany({
+      where: { id, stockLevel: expectedLevel },
+      data: { stockLevel: newLevel },
+    });
+    if (count === 0) throw new ConflictError();
   }
 
   async delete(id: MedicinalProductId): Promise<void> {

@@ -10,6 +10,7 @@ import { RestockRule } from '../rules/interfaces/RestockRule';
 import { RestockQuantityPositive } from '../rules/RestockQuantityPositive';
 import { ProductRestocked } from '../events/ProductRestocked';
 import { ErrorInfo } from '../../shared/results/ErrorInfo';
+import { ConflictError } from '../../shared/ConflictError';
 
 export interface RestockInput {
   actorId: string;
@@ -41,23 +42,33 @@ export class RestockUseCase {
     }
     if (errors.length > 0) return failures(errors);
 
-    const product = await this.medicinalProductRepository.findById(input.medicinalProductId);
-    if (product === undefined) return failure('MedicinalProductNotFound');
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const product = await this.medicinalProductRepository.findById(input.medicinalProductId);
+      if (product === undefined) return failure('MedicinalProductNotFound');
 
-    product.stockLevel = product.stockLevel + input.quantity;
+      const previousLevel = product.stockLevel;
+      const newLevel = previousLevel + input.quantity;
 
-    await this.transactor.run(async (tx) => {
-      await tx.medicinalProductRepository.save(product);
-      await tx.auditRepository.record({
-        actorId: input.actorId,
-        action: 'ProductRestocked',
-        entityId: product.id,
-        occurredAt: new Date(),
-      });
-    });
+      try {
+        await this.transactor.run(async (tx) => {
+          await tx.medicinalProductRepository.adjustStock(product.id, newLevel, previousLevel);
+          await tx.auditRepository.record({
+            actorId: input.actorId,
+            action: 'ProductRestocked',
+            entityId: product.id,
+            occurredAt: new Date(),
+          });
+        });
+      } catch (e) {
+        if (e instanceof ConflictError) continue;
+        throw e;
+      }
 
-    await this.eventBus.publish(new ProductRestocked(input.actorId, product));
+      product.stockLevel = newLevel;
+      await this.eventBus.publish(new ProductRestocked(input.actorId, product));
+      return success(product);
+    }
 
-    return success(product);
+    return failure('Conflict');
   }
 }

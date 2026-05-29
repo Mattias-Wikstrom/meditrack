@@ -1,6 +1,7 @@
 import { MedicinalProduct } from '../../domain/medication/MedicinalProduct';
 import { MedicinalProductRepository } from '../../domain/medication/MedicinalProductRepository';
 import { MedicationId, MedicinalProductId } from '../../domain/shared/IdTypes';
+import { ConflictError } from '../../domain/shared/ConflictError';
 
 export class InMemoryMedicinalProductRepository implements MedicinalProductRepository {
   private readonly store = new Map<MedicinalProductId, MedicinalProduct>();
@@ -19,6 +20,13 @@ export class InMemoryMedicinalProductRepository implements MedicinalProductRepos
 
   async save(product: MedicinalProduct): Promise<void> {
     this.store.set(product.id, product);
+  }
+
+  async adjustStock(id: MedicinalProductId, newLevel: number, expectedLevel: number): Promise<void> {
+    const stored = this.store.get(id);
+    if (stored === undefined) throw new Error(`MedicinalProduct ${id} not found`);
+    if (stored.stockLevel !== expectedLevel) throw new ConflictError();
+    stored.stockLevel = newLevel;
   }
 
   async delete(id: MedicinalProductId): Promise<void> {

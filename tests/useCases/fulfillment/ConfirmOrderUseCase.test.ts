@@ -115,4 +115,43 @@ describe('ConfirmOrderUseCase', () => {
     if (confirmResult.successful) return;
     expect(confirmResult.errors[0]?.code).toBe('InvalidStatusTransition');
   });
+
+  it('succeeds when a concurrent request already confirmed the order', async () => {
+    const orderId = await createSentOrder();
+
+    // Simulate a concurrent confirm completing just before our write commits.
+    const conflictTransactor = {
+      run: async <T>(work: (tx: any) => Promise<T>) => {
+        await orderRepo.advanceStatus(orderId, OrderStatus.Confirmed, OrderStatus.Sent);
+        return new InMemoryTransactor(orderRepo, new InMemoryMedicinalProductRepository(), auditRepo).run(work);
+      },
+    };
+    const conflictingConfirm = new ConfirmOrderUseCase(actorRepo, orderRepo, conflictTransactor, eventBus);
+
+    const result = await conflictingConfirm.execute({ actorId: 'pharmacist-1', orderId });
+
+    expect(result.successful).toBe(true);
+    if (!result.successful) return;
+    expect(result.value.status).toBe(OrderStatus.Confirmed);
+  });
+
+  it('fails with InvalidStatusTransition when a conflict leaves the order in an unexpected state', async () => {
+    const orderId = await createSentOrder();
+
+    // Simulate a concurrent action that moves the order past Confirmed entirely.
+    const conflictTransactor = {
+      run: async <T>(work: (tx: any) => Promise<T>) => {
+        await orderRepo.advanceStatus(orderId, OrderStatus.Confirmed, OrderStatus.Sent);
+        await orderRepo.advanceStatus(orderId, OrderStatus.Delivered, OrderStatus.Confirmed);
+        return new InMemoryTransactor(orderRepo, new InMemoryMedicinalProductRepository(), auditRepo).run(work);
+      },
+    };
+    const conflictingConfirm = new ConfirmOrderUseCase(actorRepo, orderRepo, conflictTransactor, eventBus);
+
+    const result = await conflictingConfirm.execute({ actorId: 'pharmacist-1', orderId });
+
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('InvalidStatusTransition');
+  });
 });

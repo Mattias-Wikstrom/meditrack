@@ -105,4 +105,43 @@ describe('SendOrderUseCase', () => {
     if (result.successful) return;
     expect(result.errors[0]?.code).toBe('InvalidStatusTransition');
   });
+
+  it('succeeds when a concurrent request already sent the order', async () => {
+    const orderId = await createDraftOrder();
+
+    // Simulate a concurrent send completing just before our write commits.
+    const conflictTransactor = {
+      run: async <T>(work: (tx: any) => Promise<T>) => {
+        await orderRepo.advanceStatus(orderId, OrderStatus.Sent, OrderStatus.Draft);
+        return new InMemoryTransactor(orderRepo, new InMemoryMedicinalProductRepository(), auditRepo).run(work);
+      },
+    };
+    const conflictingSend = new SendOrderUseCase(actorRepo, orderRepo, conflictTransactor, eventBus);
+
+    const result = await conflictingSend.execute({ actorId: 'nurse-1', orderId });
+
+    expect(result.successful).toBe(true);
+    if (!result.successful) return;
+    expect(result.value.status).toBe(OrderStatus.Sent);
+  });
+
+  it('fails with InvalidStatusTransition when a conflict leaves the order in an unexpected state', async () => {
+    const orderId = await createDraftOrder();
+
+    // Simulate a concurrent action that moves the order past Sent entirely.
+    const conflictTransactor = {
+      run: async <T>(work: (tx: any) => Promise<T>) => {
+        await orderRepo.advanceStatus(orderId, OrderStatus.Sent, OrderStatus.Draft);
+        await orderRepo.advanceStatus(orderId, OrderStatus.Confirmed, OrderStatus.Sent);
+        return new InMemoryTransactor(orderRepo, new InMemoryMedicinalProductRepository(), auditRepo).run(work);
+      },
+    };
+    const conflictingSend = new SendOrderUseCase(actorRepo, orderRepo, conflictTransactor, eventBus);
+
+    const result = await conflictingSend.execute({ actorId: 'nurse-1', orderId });
+
+    expect(result.successful).toBe(false);
+    if (result.successful) return;
+    expect(result.errors[0]?.code).toBe('InvalidStatusTransition');
+  });
 });
