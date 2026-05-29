@@ -13,12 +13,6 @@ const OVERVIEW_QUERY = graphql(`
   }
 `);
 
-const ORDER_STATUS_SUB = graphql(`
-  subscription NurseOverviewStatusChanged {
-    orderStatusChanged { orderId from to }
-  }
-`);
-
 const ORDER_DRAFT_CREATED_SUB = graphql(`
   subscription NurseOverviewDraftCreated {
     orderDraftCreated { orderId }
@@ -56,7 +50,6 @@ export function OverviewPage() {
   });
 
   function handleSub() { refetch({ requestPolicy: 'network-only' }); return undefined; }
-  useSubscription({ query: ORDER_STATUS_SUB }, handleSub);
   useSubscription({ query: ORDER_DRAFT_CREATED_SUB }, handleSub);
 
   if (!wardUnitId) return <p className="text-red-600 text-sm">Error: Nurse account is not assigned to a ward unit.</p>;

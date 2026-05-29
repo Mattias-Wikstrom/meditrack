@@ -1,6 +1,6 @@
 // Used for /orders (pharmacist)
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useSubscription } from 'urql';
+import { useQuery } from 'urql';
 import { Card, OrderStatusBadge, Button, Spinner, LineList, formatDate } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
@@ -22,11 +22,6 @@ const ORDERS_QUERY = graphql(`
   }
 `);
 
-const ORDER_STATUS_SUB = graphql(`
-  subscription PharmacistOrderStatusChanged {
-    orderStatusChanged { orderId from to }
-  }
-`);
 
 function CountOrderStatusBadge({ n }: { n: number }) {
   if (n === 0) return null;
@@ -41,11 +36,6 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const ordersApi = useOrdersApi();
   const [{ data, fetching, error }, refetch] = useQuery({ query: ORDERS_QUERY, requestPolicy: 'cache-and-network' });
-
-  useSubscription({ query: ORDER_STATUS_SUB }, () => {
-    refetch({ requestPolicy: 'network-only' });
-    return undefined;
-  });
 
   async function handleConfirm(orderId: string) {
     try {
