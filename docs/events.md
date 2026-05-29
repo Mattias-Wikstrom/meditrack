@@ -178,20 +178,42 @@ Use case
 
 ---
 
-## Spy tools
+## `event-watcher` — spy tool
 
-Two CLI tools let you observe live events from a running server without modifying application code.
+Observes live events from a running server without modifying application code. Two subcommands cover the two event streams:
 
-### `repos:spy` — repository change spy
+### `event-watcher domain` — domain events
+
+Subscribes to one or more named GraphQL subscriptions and prints each event as it arrives.
+
+```sh
+npm run event-watcher -- domain                              # all domain events
+npm run event-watcher -- domain -e stockBelowThreshold      # specific events
+npm run event-watcher -- domain -e stockBelowThreshold,productRestocked
+npm run event-watcher -- domain --compact
+```
+
+Available event names (pass to `-e` as a comma-separated list):
+
+| Name | Description |
+|---|---|
+| `orderDraftCreated` | New draft order created |
+| `orderDraftUpdated` | Draft order lines changed |
+| `orderStatusChanged` | Order advanced to next status |
+| `stockBelowThreshold` | Stock fell below threshold |
+| `productRestocked` | Units added to stock |
+| `medicinalProductUpdated` | Any `MedicinalProduct` field changed |
+
+### `event-watcher repos` — repository change events
 
 Subscribes to the `repositoryChanged` GraphQL subscription and prints every entity save or delete.
 
 ```sh
-npm run repos:spy                            # watch all entity types
-npm run repos:spy -- -e MedicinalProduct     # filter to one type
-npm run repos:spy -- -e MedicinalProduct,Order
-npm run repos:spy -- --compact               # single-line JSON output
-npm run repos:spy -- --url ws://host:4000/graphql --token <jwt>
+npm run event-watcher -- repos                               # watch all entity types
+npm run event-watcher -- repos -e MedicinalProduct          # filter to one type
+npm run event-watcher -- repos -e MedicinalProduct,Order
+npm run event-watcher -- repos --compact                     # single-line JSON output
+npm run event-watcher -- repos --url ws://host:4000/graphql --token <jwt>
 ```
 
 Output example:
@@ -205,28 +227,6 @@ Output example:
 ```
 
 Authentication uses the stored CLI session by default (see `npm run mt-cli -- login`).
-
-### `events-spy` — domain event spy
-
-Subscribes to one or more named GraphQL subscriptions and prints each event as it arrives.
-
-```sh
-npx tsx src/ui/cli/events/spy.ts                             # all domain events
-npx tsx src/ui/cli/events/spy.ts -- -e stockBelowThreshold  # specific events
-npx tsx src/ui/cli/events/spy.ts -- -e stockBelowThreshold,productRestocked
-npx tsx src/ui/cli/events/spy.ts -- --compact
-```
-
-Available event names (pass to `-e` as a comma-separated list):
-
-| Name | Description |
-|---|---|
-| `orderDraftCreated` | New draft order created |
-| `orderDraftUpdated` | Draft order lines changed |
-| `orderStatusChanged` | Order advanced to next status |
-| `stockBelowThreshold` | Stock fell below threshold |
-| `productRestocked` | Units added to stock |
-| `medicinalProductUpdated` | Any `MedicinalProduct` field changed |
 
 ### `events-trigger` — trigger events via the REST API
 
@@ -278,4 +278,4 @@ Set `MEDITRACK_API_URL` to override the default `http://localhost:4000/api`.
    },
    ```
 5. Add the subscription field to `src/api/graphql/typeDefs.ts`.
-6. Add it to the `SUBSCRIPTIONS` map in `src/ui/cli/events/spy.ts` so the spy tool picks it up.
+6. Add it to the `SUBSCRIPTIONS` map in `src/ui/cli/events/event-watcher.ts` so the `event-watcher domain` tool picks it up.

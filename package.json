@@ -18,9 +18,8 @@
     "codegen": "graphql-codegen --config codegen.ts",
     "mt-cli": "tsx src/ui/cli/mt-cli/mt-cli.ts",
     "server": "tsx src/ui/server/server.ts",
-    "events:spy": "tsx src/ui/cli/events/spy.ts",
-    "events:trigger": "tsx src/ui/cli/events/trigger.ts",
-    "repos:spy": "tsx src/ui/cli/events/repo-spy.ts"
+    "event-watcher": "tsx src/ui/cli/events/event-watcher.ts",
+    "events:trigger": "tsx src/ui/cli/events/trigger.ts"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.0",
