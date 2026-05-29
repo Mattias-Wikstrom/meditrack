@@ -5,6 +5,7 @@ import { useQuery, useClient } from 'urql';
 import { OrderStatusBadge, MedicationSearch, Button, Card, Spinner, PageHeader, formatDateTime } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
+import { useRefetchOn } from '@meditrack/client';
 import { graphql } from '../gql';
 
 const ORDER_QUERY = graphql(`
@@ -35,11 +36,12 @@ export function NurseOrderDetailPage() {
   const urqlClient = useClient();
   const ordersApi = useOrdersApi();
 
-  const [{ data, fetching }] = useQuery({
+  const [{ data, fetching }, refetch] = useQuery({
     query: ORDER_QUERY,
     variables: { id: orderId! },
     requestPolicy: 'cache-and-network',
   });
+  useRefetchOn('Order', () => refetch({ requestPolicy: 'network-only' }));
 
   const [lines, setLines] = useState<Line[]>([]);
   const [initialized, setInitialized] = useState(false);
