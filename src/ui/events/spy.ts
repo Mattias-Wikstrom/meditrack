@@ -140,6 +140,8 @@ program
               const detail = reason ? `: ${reason}` : '';
               if (code === 4400 || code === 4401 || code === 4403 || code === 4500) {
                 console.error(`[${eventName}] Connection rejected (${String(code)})${detail}`);
+                cleanup();
+                process.exit(1);
               } else {
                 console.error(`[${eventName}] connection closed (code ${String(code)})${detail}`);
               }
