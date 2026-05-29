@@ -24,17 +24,6 @@ const ORDER_DRAFT_CREATED_SUB = graphql(`
   }
 `);
 
-const ORDER_DRAFT_UPDATED_SUB = graphql(`
-  subscription NurseOrderDraftUpdated {
-    orderDraftUpdated { orderId }
-  }
-`);
-
-const ORDER_STATUS_SUB = graphql(`
-  subscription NurseOrderStatusChanged {
-    orderStatusChanged { orderId from to }
-  }
-`);
 
 type SortKey = 'status' | 'lines' | 'createdAt';
 type SortDir = 'asc' | 'desc';
@@ -114,8 +103,6 @@ export function DashboardPage() {
 
   function handleSub() { refetch({ requestPolicy: 'network-only' }); return undefined; }
   useSubscription({ query: ORDER_DRAFT_CREATED_SUB }, handleSub);
-  useSubscription({ query: ORDER_DRAFT_UPDATED_SUB }, handleSub);
-  useSubscription({ query: ORDER_STATUS_SUB }, handleSub);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
