@@ -105,12 +105,8 @@ program
             const raw = e['reason'];
             const reason = Buffer.isBuffer(raw) ? raw.toString() : String(raw ?? '');
             const detail = reason ? `: ${reason}` : '';
-            if (code === 4401) {
-              console.error(`Not authenticated${detail} — run: npm run mt-cli -- login --actor-id <id> --password <password>`);
-            } else if (code === 4403) {
-              console.error(`Access denied${detail}`);
-            } else if (code === 4400 || code === 4500) {
-              console.error(`Connection rejected (${String(code)})${detail} — if your session expired, run: npm run mt-cli -- login`);
+            if (code === 4400 || code === 4401 || code === 4403 || code === 4500) {
+              console.error(`Connection rejected (${String(code)})${detail}`);
             } else {
               console.error(`connection closed (code ${String(code)})${detail}`);
             }
