@@ -6,14 +6,22 @@ The general test pattern is: open the screen, trigger the change from a second s
 
 ---
 
+## General update mechanism
+
+All three apps mount a `RepositorySync` component (from `@meditrack/client`) that holds open a `repositoryChanged` WebSocket subscription. The server emits one event for every entity saved or deleted. On each event, `@urql/exchange-graphcache` automatically invalidates the affected entity and its list query, causing any active urql query that references that entity to refetch.
+
+This means most stale-data cases are handled automatically without page-level subscription code. The exceptions are noted below.
+
+---
+
 ## Order status
 
 Order status progresses through: `Draft → Sent → Confirmed → Delivered`.
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Admin app — Orders page | Status badge per order | Yes | Subscription `orderStatusChanged` |
-| Admin app — Orders page filter | Count of orders per status | Yes | Subscription `orderStatusChanged` |
+| Admin app — Orders page | Status badge per order | Yes | Yes — `repositoryChanged` / graphcache |
+| Admin app — Orders page filter | Count of orders per status | Yes | Yes — `repositoryChanged` / graphcache |
 | Nurse app — Overview page | Order count by status | Yes | Subscription `orderStatusChanged` |
 | Nurse app — Overview page | Order cards | Yes | Subscriptions `orderStatusChanged`, `orderDraftCreated` |
 | CLI — `orders list` | Status column | No (snapshot) | — |
@@ -29,11 +37,11 @@ Stock level decreases when an order is delivered and increases when a product is
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Admin app — Inventory page | `stockLevel` per product | Yes | Subscription `medicinalProductUpdated` |
-| Admin app — Inventory page | Below-threshold warning ⚠︎ | Yes | Subscription `medicinalProductUpdated` |
-| Admin app — Inventory page | Low stock count summary | Yes | Subscription `medicinalProductUpdated` |
-| Admin app — Product detail | `stockLevel`, `isBelowThreshold` | Yes | Subscription `medicinalProductUpdated` |
-| Pharmacy app — Deliver order screen | Stock level shown per product selection | Yes | Not verified — **this was the failing case** |
+| Admin app — Inventory page | `stockLevel` per product | Yes | Yes — `repositoryChanged` / graphcache |
+| Admin app — Inventory page | Below-threshold warning ⚠︎ | Yes | Yes — `repositoryChanged` / graphcache |
+| Admin app — Inventory page | Low stock count summary | Yes | Yes — `repositoryChanged` / graphcache |
+| Admin app — Product detail | `stockLevel`, `isBelowThreshold` | Yes | Yes — `repositoryChanged` / graphcache |
+| Pharmacy app — Deliver order screen | Stock level shown per product selection | Yes | Yes — `repositoryChanged` / graphcache |
 | CLI — `medications show` | `stock: N` per product | No (snapshot) | — |
 | CLI — `medications restock` output | New stock level | No (result of action) | — |
 
@@ -50,10 +58,8 @@ Order lines (the medications and quantities on a draft order) can be edited by t
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
 | Nurse app — Order detail | Line items (medication, quantity) | Yes, until sent | Subscription `orderDraftUpdated` |
-| Admin app — Orders page | Medication names and line count | Yes, until sent | No subscription for line changes in admin |
-| Pharmacy app — Deliver order screen | Order lines to fulfil | Yes, until confirmed | Not verified |
-
-**Risk:** A pharmacist loads an order to deliver. The nurse edits the order (which should not be possible once sent, but worth verifying) or the system shows line data from a stale cache.
+| Admin app — Orders page | Medication names and line count | Yes, until sent | Yes — `repositoryChanged` / graphcache |
+| Pharmacy app — Deliver order screen | Order lines to fulfil | Yes, until confirmed | Yes — `repositoryChanged` / graphcache |
 
 ---
 
@@ -63,9 +69,9 @@ These change rarely (admin action required) but they can change.
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Admin app — Inventory page | `productName` | Rarely | Subscription `medicinalProductUpdated` |
-| Admin app — Inventory page | `stockThreshold` | Rarely | Subscription `medicinalProductUpdated` |
-| Pharmacy app — Deliver order screen | `productName` in product selector | Rarely | Not verified |
+| Admin app — Inventory page | `productName` | Rarely | Yes — `repositoryChanged` / graphcache |
+| Admin app — Inventory page | `stockThreshold` | Rarely | Yes — `repositoryChanged` / graphcache |
+| Pharmacy app — Deliver order screen | `productName` in product selector | Rarely | Yes — `repositoryChanged` / graphcache |
 | CLI — `medications show` | `productName` | No (snapshot) | — |
 
 ---
@@ -82,9 +88,10 @@ Ward unit names can be changed by an admin via `UpdateWardUnitUseCase`.
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Admin app — Users page | Ward unit name alongside each nurse | Rarely | No subscription |
-| Admin app — Orders page | Ward unit name per order | Rarely | No subscription |
-| Nurse app — Overview page | Ward unit context | Rarely | No subscription |
+| Nurse app — Header | Ward unit name (app context) | Rarely | Yes — `repositoryChanged` / graphcache |
+| Admin app — Users page | Ward unit name alongside each nurse | Rarely | Yes — `repositoryChanged` / graphcache |
+| Admin app — Orders page | Ward unit name per order | Rarely | Yes — `repositoryChanged` / graphcache |
+| Nurse app — Overview page | Ward unit context | Rarely | Yes — `repositoryChanged` / graphcache |
 | CLI — `ward-units list` | Ward unit name | No (snapshot) | — |
 
 ---
@@ -95,9 +102,9 @@ Actors can be created, updated, or deleted by an admin. Role and ward unit assig
 
 | Where shown | What is displayed | Can change while viewing? | Real-time update? |
 |---|---|---|---|
-| Admin app — Users page | Actor list with roles and ward | Rarely | No subscription |
+| Admin app — Users page | Actor list with roles and ward | Rarely | Yes — `repositoryChanged` / graphcache |
 
-**Risk:** An admin changes another actor's role or ward assignment while a second admin is viewing the list. Low likelihood, low severity.
+**Remaining gap:** If an admin changes a nurse's ward unit assignment while the nurse is logged in, the nurse's session token still reflects the old `wardUnitId`. The nurse would need to log out and back in to pick up the new assignment. This is a session-level staleness that the repository change mechanism cannot address.
 
 ---
 
@@ -107,7 +114,7 @@ Append-only. Existing entries never change. New entries appear while viewing.
 
 | Where shown | Real-time update? |
 |---|---|
-| Admin app — Audit page | No subscription — page must be refreshed manually to see new entries |
+| Admin app — Audit page | Yes — any `repositoryChanged` event invalidates `auditLog` (every write produces an audit entry, even though `AuditRepository` itself is not observed) |
 
 ---
 
@@ -115,11 +122,11 @@ Append-only. Existing entries never change. New entries appear while viewing.
 
 | Screen | Risk | Mechanism in place? |
 |---|---|---|
-| Pharmacy app — Deliver order | Stock may be stale at time of delivery | No — **failing case** |
-| Admin app — Inventory page | Stock level and threshold warning | Yes — `medicinalProductUpdated` subscription |
-| Admin app — Orders page | Order status | Yes — `orderStatusChanged` subscription |
+| Pharmacy app — Deliver order | Stock may be stale at time of delivery | Yes — `repositoryChanged` / graphcache |
+| Admin app — Inventory page | Stock level and threshold warning | Yes — `repositoryChanged` / graphcache |
+| Admin app — Orders page | Order status, lines, ward unit name | Yes — `repositoryChanged` / graphcache |
 | Nurse app — Overview page | Order status and counts | Yes — `orderStatusChanged` subscription |
-| Admin app — Users page | Actor list, roles, ward assignments | No — manual refresh required |
-| Admin app — Orders page / Nurse app | Ward unit name shown alongside orders | No — manual refresh required |
-| Admin app — Audit page | New audit entries | No — manual refresh required |
+| Admin app — Users page | Actor list, roles, ward assignments | Yes — `repositoryChanged` / graphcache |
+| Admin app — Orders page / Nurse app | Ward unit name shown alongside orders | Yes — `repositoryChanged` / graphcache |
+| Admin app — Audit page | New audit entries | Yes — `repositoryChanged` / graphcache |
 | CLI (all commands) | All data | No — all CLI output is a point-in-time snapshot |
