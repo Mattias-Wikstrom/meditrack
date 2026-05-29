@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Provider } from 'urql';
 import { AppShell, LoginPage, MyAccountPage, TabNav } from '@meditrack/ui';
-import { useAuth, createUrqlClient } from '@meditrack/client';
+import { useAuth, createUrqlClient, RepositorySync } from '@meditrack/client';
 import { OrdersPage } from './pages/OrdersPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { UsersPage } from './pages/UsersPage';
@@ -12,7 +12,6 @@ import { UserDetailsPage, WardUnitDetailsPage, MedicationDetailsPage } from './p
 import { MedicationDetailPage } from './pages/MedicationDetailPage';
 import { AdminOrderDetailPage } from './pages/AdminOrderDetailPage';
 import { OverviewPage } from './pages/OverviewPage';
-import { StockSync } from './StockSync';
 
 function AdminNav() {
   return (
@@ -41,7 +40,7 @@ export function App() {
 
   return (
     <Provider value={urqlClient}>
-      <StockSync />
+      <RepositorySync />
       <AppShell
         appName="Admin"
         actorName={actorId!}
