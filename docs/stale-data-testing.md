@@ -2,7 +2,7 @@
 
 Any screen that reads data from the database can display a value that has since been changed by another user or another operation. This document lists every such case across all apps, what can change, and whether a real-time update mechanism is already in place.
 
-The general test pattern is: open the screen, trigger the change from a second session or more directly via a REST API or the CLI, then verify the first screen either updates automatically or shows a clear indication that data has changed.
+The general test pattern is: open the screen, trigger the change from a second session or more directly via a REST API (using the CLI does not work; it is connected to the database but not to the event system), then verify the first screen either updates automatically or shows a clear indication that data has changed.
 
 ---
 
