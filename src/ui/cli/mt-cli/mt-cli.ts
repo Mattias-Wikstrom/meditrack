@@ -378,7 +378,7 @@ program
     await runGraphQL(context, output, query, variables);
   });
 
-console.warn('NOTE: mt-cli reads/writes the database directly. It does not connect to the event system — live UI clients will not receive real-time updates for changes made here.\n');
+console.warn('\nIMPORTANT NOTE:\nWhile mt-cli uses the database directly, it does NOT connect to the event system.\nLive UI clients will not receive real-time updates for changes made through this command.\n\n');
 
 program.parseAsync().catch((err: unknown) => {
   output.error(`Unexpected error: ${err instanceof Error ? err.message : String(err)}`);
