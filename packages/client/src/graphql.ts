@@ -30,6 +30,7 @@ export function createUrqlClient(token: string, onUnauthenticated: () => void) {
           WardUnit: (data) => (data as { id?: string }).id ?? null,
           Actor: (data) => (data as { id?: string }).id ?? null,
           AuditEvent: () => null,
+          OrderLine: () => null,
         },
         updates: {
           Subscription: {
