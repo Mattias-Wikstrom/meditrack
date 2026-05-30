@@ -158,7 +158,7 @@ function LineDeliverySection({
             <select
               value={split.medicinalProductId}
               onChange={(e) => updateSplit(i, { medicinalProductId: e.target.value })}
-              className="flex-1 rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+              className="flex-1 rounded-lg border border-[var(--border-2)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
             >
               <option value="">Select product…</option>
               {products.map((p) => (
