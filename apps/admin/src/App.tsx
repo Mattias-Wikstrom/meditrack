@@ -45,6 +45,7 @@ export function App() {
         appName="Admin"
         actorName={actorId!}
         nav={<AdminNav />}
+        appRole={role ?? undefined}
         onHome={() => navigate('/')}
         onProfile={() => navigate('/me')}
         onLogout={logout}

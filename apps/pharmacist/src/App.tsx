@@ -40,6 +40,7 @@ export function App() {
         appName="Pharmacy"
         actorName={actorId!}
         nav={<PharmacistNav />}
+        appRole={role ?? undefined}
         onHome={() => navigate('/')}
         onProfile={() => navigate('/me')}
         onLogout={logout}

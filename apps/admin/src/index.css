@@ -3,6 +3,55 @@
 @tailwind utilities;
 
 :root {
+  /* legacy Tailwind aliases */
   --color-accent: #4338CA;
   --color-accent-light: #E0E7FF;
+
+  /* surfaces */
+  --bg:           #f5f6f9;
+  --bg-tint:      #eef1f6;
+  --surface:      #ffffff;
+  --surface-2:    #fbfcfd;
+  --border:       #e7eaf0;
+  --border-2:     #dde1ea;
+  --border-strong:#cfd5e0;
+
+  /* ink scale */
+  --ink:   #1d2530;
+  --text:  #3b4554;
+  --muted: #6c7686;
+  --faint: #99a2b1;
+
+  /* accent (default: admin purple) */
+  --accent:        #5a52d4;
+  --accent-deep:   #473fb8;
+  --accent-soft:   #eeedfd;
+  --accent-soft-2: #e3e1fb;
+  --accent-ink:    #3f38ac;
+
+  /* order status */
+  --st-draft-bg: #eceff4; --st-draft-fg: #5b6573;
+  --st-sent-bg:  #e7f1fd; --st-sent-fg:  #1f5fc0;
+  --st-conf-bg:  #fbf0d8; --st-conf-fg:  #956510;
+  --st-deliv-bg: #e4f3ea; --st-deliv-fg: #1d7a45;
+
+  /* danger / ok */
+  --danger:    #cf3d33;
+  --danger-bg: #fcebe9;
+  --danger-fg: #b03228;
+  --ok:        #1d7a45;
+
+  /* shape & shadow */
+  --r-card: 14px;
+  --r-ctrl: 10px;
+  --r-pill: 999px;
+  --shadow-sm:   0 1px 2px rgba(22,32,52,.05);
+  --shadow-card: 0 1px 2px rgba(22,32,52,.04), 0 10px 26px -14px rgba(22,32,52,.16);
+  --shadow-pop:  0 12px 40px -10px rgba(22,32,52,.28);
+  --maxw: 1120px;
 }
+
+/* role-based accent overrides */
+[data-role="nurse"]       { --accent: #2563c9; --accent-deep: #1d4ea3; --accent-soft: #eaf2fd; --accent-soft-2: #dbe9fc; --accent-ink: #1b4894; }
+[data-role="pharmacist"]  { --accent: #138069; --accent-deep: #0e6553; --accent-soft: #e7f4f0; --accent-soft-2: #d2ebe3; --accent-ink: #0c5a49; }
+[data-role="admin"]       { --accent: #5a52d4; --accent-deep: #473fb8; --accent-soft: #eeedfd; --accent-soft-2: #e3e1fb; --accent-ink: #3f38ac; }

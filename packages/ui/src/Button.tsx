@@ -2,7 +2,7 @@
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'ghost' | 'danger' | 'soft';
   size?: 'sm' | 'md';
 }
 
@@ -13,6 +13,7 @@ export function Button({ variant = 'primary', size = 'md', className = '', child
     primary: 'bg-accent text-white hover:bg-accent/90',
     ghost: 'text-slate-600 hover:bg-slate-100',
     danger: 'bg-red-500 text-white hover:bg-red-600',
+    soft: 'bg-[var(--accent-soft)] text-[var(--accent-ink)] hover:bg-[var(--accent-soft-2)]',
   };
   return (
     <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...props}>

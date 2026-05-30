@@ -7,14 +7,15 @@ interface AppShellProps {
   children: React.ReactNode;
   nav?: React.ReactNode;
   context?: string;
+  appRole?: string;
   onHome?: () => void;
   onProfile?: () => void;
   onLogout?: () => void;
 }
 
-export function AppShell({ appName, actorName, children, nav, context, onHome, onProfile, onLogout }: AppShellProps) {
+export function AppShell({ appName, actorName, children, nav, context, appRole, onHome, onProfile, onLogout }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="min-h-screen bg-slate-50 font-sans" data-role={appRole}>
       <header className="bg-accent shadow-sm">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">

@@ -28,6 +28,7 @@ function NurseShell({ token, actorId, wardUnitId, role }: { token: string; actor
       appName="Nurse Station"
       actorName={actorId}
       context={wardUnitName}
+      appRole={role}
       onHome={() => navigate('/')}
       onProfile={() => navigate('/me')}
       onLogout={logout}
