@@ -26,12 +26,11 @@ export function StockAlerts() {
   if (alerts.length === 0) return null;
 
   return (
-    <div className="mb-6 space-y-2">
+    <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
       {alerts.map(alert => (
-        <div key={alert.id} className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 flex items-center justify-between">
+        <div key={alert.id} className="stock-toast">
           <span>{alert.message}</span>
           <button
-            className="ml-3 text-red-500 hover:text-red-700"
             onClick={() => setAlerts(current => current.filter(a => a.id !== alert.id))}
             aria-label="Dismiss alert"
           >

@@ -1,4 +1,3 @@
-// Can be used as a '/me' page in all the apps
 import React, { useState } from 'react';
 import { Button } from './Button';
 import { Card } from './Card';
@@ -52,67 +51,57 @@ export function MyAccountPage({ token, actorId, role, wardUnitName, onSuccess, o
   }
 
   return (
-    <div className="max-w-sm">
-      {onCancel && (
-        <BackButton onClick={onCancel} className="mb-4 inline-block" />
-      )}
-      <h1 className="text-xl font-semibold text-slate-800 mb-6">My Account</h1>
-      <Card className="p-6">
-        <div className="mb-6 space-y-1">
-          <p className="text-sm text-slate-500">
-            Signed in as <span className="font-medium text-slate-700">{actorId}</span>
-          </p>
-          <p className="text-sm text-slate-500">
-            Role: <span className="font-medium text-slate-700">{role}</span>
-          </p>
-          {wardUnitName && (
-            <p className="text-sm text-slate-500">
-              Ward unit: <span className="font-medium text-slate-700">{wardUnitName}</span>
-            </p>
-          )}
+    <div className="stack" style={{ maxWidth: 520 }}>
+      {onCancel && <BackButton onClick={onCancel} />}
+      <h1 className="h1">My Account</h1>
+      <Card className="card-pad">
+        <div style={{ marginBottom: 18, lineHeight: 1.9 }}>
+          <div className="subtle">Signed in as <strong style={{ color: 'var(--ink)' }}>{actorId}</strong></div>
+          <div className="subtle">Role · <strong style={{ color: 'var(--ink)' }}>{role}</strong></div>
+          {wardUnitName && <div className="subtle">Ward unit · <strong style={{ color: 'var(--ink)' }}>{wardUnitName}</strong></div>}
         </div>
         {success ? (
-          <p role="status" className="text-green-600 text-sm">Password changed successfully.</p>
+          <p role="status" className="success-text">Password changed successfully.</p>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="account-current-password" className="block text-sm font-medium text-slate-700 mb-1">Current password</label>
+          <form onSubmit={handleSubmit}>
+            <div className="field">
+              <label htmlFor="account-current-password" className="label">Current password</label>
               <input
                 id="account-current-password"
                 type="password"
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                className="input"
                 required
                 autoComplete="current-password"
               />
             </div>
-            <div>
-              <label htmlFor="account-new-password" className="block text-sm font-medium text-slate-700 mb-1">New password</label>
+            <div className="field">
+              <label htmlFor="account-new-password" className="label">New password</label>
               <input
                 id="account-new-password"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                className="input"
                 required
                 autoComplete="new-password"
               />
             </div>
-            <div>
-              <label htmlFor="account-confirm-password" className="block text-sm font-medium text-slate-700 mb-1">Confirm new password</label>
+            <div className="field">
+              <label htmlFor="account-confirm-password" className="label">Confirm new password</label>
               <input
                 id="account-confirm-password"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                className="input"
                 required
                 autoComplete="new-password"
               />
             </div>
-            {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
-            <Button type="submit" disabled={submitting} className="w-full">
+            {error && <p role="alert" className="error-text" style={{ marginBottom: 14 }}>{error}</p>}
+            <Button type="submit" disabled={submitting} className="btn-block">
               {submitting ? 'Saving…' : 'Change password'}
             </Button>
           </form>

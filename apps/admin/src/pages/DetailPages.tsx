@@ -1,23 +1,15 @@
-// Used for /ward-units/:wardUnitId, /users/:userId, /inventory/:productId (admin)
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { PageHeader, OrderStatusBadge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
+import { OrderStatusBadge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
 import { useAuth, createApiClient, useRefetchOn } from '@meditrack/client';
 
-const dialogInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
-
-// ── shared helpers ────────────────────────────────────────────────────────────
+const ROLES = ['Nurse', 'Pharmacist', 'Admin'] as const;
 
 function NotFound({ kind, to }: { kind: string; to: string }) {
-  return (
-    <p className="text-sm text-slate-500">
-      No {kind} found.{' '}
-      <a className="text-accent hover:underline" href={to}>Back to list</a>.
-    </p>
-  );
+  const navigate = useNavigate();
+  return <p className="subtle">No {kind} found. <button className="linkbtn" onClick={() => navigate(to)}>Back to list</button></p>;
 }
-
 
 // ── UserDetailsPage ───────────────────────────────────────────────────────────
 
@@ -28,8 +20,6 @@ const ACTORS_QUERY = `
     auditLog { actorId action entityId occurredAt }
   }
 `;
-
-const ROLES = ['Nurse', 'Pharmacist', 'Admin'] as const;
 
 export function UserDetailsPage() {
   const navigate = useNavigate();
@@ -42,8 +32,8 @@ export function UserDetailsPage() {
   const [{ data, fetching, error }, refetch] = useQuery({ query: ACTORS_QUERY });
   useRefetchOn(['Actor', 'WardUnit'], () => refetch({ requestPolicy: 'network-only' }));
 
-  if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (fetching) return <Spinner />;
+  if (error) return <p className="error-text">Error: {error.message}</p>;
 
   const actor = data?.actors.find((a: { id: string }) => a.id === userId);
   if (!actor) return <NotFound kind="user" to="/users" />;
@@ -55,11 +45,7 @@ export function UserDetailsPage() {
     .filter((e: { actorId: string }) => e.actorId === userId)
     .slice(0, 20);
 
-  function openEdit() {
-    setEditRole(actor.role);
-    setModalError(null);
-    setModal('edit');
-  }
+  function openEdit() { setEditRole(actor.role); setModalError(null); setModal('edit'); }
 
   async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -70,8 +56,7 @@ export function UserDetailsPage() {
         role: fd.get('role') as string,
         wardUnitId: wardUnitId || null,
       });
-      setModal(null);
-      setModalError(null);
+      setModal(null); setModalError(null);
       refetch({ requestPolicy: 'network-only' });
     } catch (err) {
       setModalError(err instanceof Error ? err.message : 'Failed to update user');
@@ -89,68 +74,64 @@ export function UserDetailsPage() {
 
   return (
     <>
-      <PageHeader onBack={() => navigate('/users')} actions={
-        <>
+      <div className="row" style={{ marginBottom: 16 }}>
+        <button className="backlink" onClick={() => navigate('/users')} style={{ marginBottom: 0 }}>← Users</button>
+        <div className="row" style={{ marginLeft: 'auto', gap: 8 }}>
           <Button variant="ghost" size="sm" onClick={openEdit}>Edit</Button>
           {userId !== currentActorId && (
             <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
           )}
-        </>
-      } />
-      <h1 className="text-xl font-semibold text-slate-800 mb-6">{actor.id}</h1>
+        </div>
+      </div>
 
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-2">Account</h2>
+      <h1 className="h1" style={{ marginBottom: 24 }}>{actor.id}</h1>
+
+      <div className="grid-2">
+        <Card className="card-pad">
+          <h2 className="h2" style={{ marginBottom: 16 }}>Account</h2>
           <InfoRow label="Role"><RoleBadge role={actor.role} /></InfoRow>
           <InfoRow label="Ward Unit">
             {actor.wardUnit
-              ? <Link to={`/ward-units/${actor.wardUnitId}`} className="text-accent hover:underline">{actor.wardUnit.name}</Link>
-              : <span className="text-slate-300">—</span>}
+              ? <Link to={`/ward-units/${actor.wardUnitId}`} className="link-cell">{actor.wardUnit.name}</Link>
+              : <span style={{ color: 'var(--faint)' }}>—</span>}
           </InfoRow>
         </Card>
 
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-3">Recent Activity</h2>
-          {recentActivity.length === 0
-            ? <p className="text-sm text-slate-400">No recorded activity.</p>
-            : (
-              <div className="space-y-2">
-                {recentActivity.map((e: { action: string; entityId: string; occurredAt: string }, i: number) => (
-                  <div key={i} className="flex justify-between text-sm border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                    <span className="text-slate-600">{e.action}</span>
-                    <span className="text-slate-400 tabular-nums">{formatDate(e.occurredAt)}</span>
-                  </div>
-                ))}
-              </div>
-            )
-          }
+        <Card className="card-pad">
+          <h2 className="h2" style={{ marginBottom: 16 }}>Recent Activity</h2>
+          {recentActivity.length === 0 ? (
+            <div className="subtle">No recorded activity.</div>
+          ) : recentActivity.map((e: { action: string; entityId: string; occurredAt: string }, i: number) => (
+            <div key={i} className="defrow">
+              <span className="k" style={{ fontSize: 13 }}>{e.action}</span>
+              <span className="mono" style={{ fontSize: 12.5, color: 'var(--faint)' }}>{formatDate(e.occurredAt)}</span>
+            </div>
+          ))}
         </Card>
       </div>
 
       {modal === 'edit' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-4">Edit User</h2>
-            <form onSubmit={handleUpdate} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Role</label>
-                <select name="role" value={editRole} onChange={e => setEditRole(e.target.value)} className={dialogInputCls}>
+        <div className="scrim" onMouseDown={() => setModal(null)}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Edit User</h3>
+            <form onSubmit={handleUpdate}>
+              <div className="field">
+                <label className="label">Role</label>
+                <select name="role" value={editRole} onChange={e => setEditRole(e.target.value)} className="select">
                   {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
               {editRole === 'Nurse' && (
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Ward Unit</label>
-                  <select name="wardUnitId" defaultValue={actor.wardUnitId ?? ''} className={dialogInputCls}>
+                <div className="field">
+                  <label className="label">Ward Unit</label>
+                  <select name="wardUnitId" defaultValue={actor.wardUnitId ?? ''} className="select">
                     <option value="">— None —</option>
                     {wardUnits.map((u: WardUnit) => <option key={u.id} value={u.id}>{u.name}</option>)}
                   </select>
                 </div>
               )}
-              {modalError && <p role="alert" className="text-xs text-red-600">{modalError}</p>}
-              <div className="flex gap-2 justify-end pt-1">
+              {modalError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{modalError}</p>}
+              <div className="modal-actions">
                 <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
                 <Button type="submit">Save</Button>
               </div>
@@ -160,15 +141,12 @@ export function UserDetailsPage() {
       )}
 
       {modal === 'confirmDelete' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-2">Delete User</h2>
-            <p className="text-sm text-slate-600 mb-4">
-              Delete <strong>{actor.id}</strong>? This cannot be undone.
-            </p>
-            {modalError && <p role="alert" className="text-xs text-red-600 mb-3">{modalError}</p>}
-            <div className="flex gap-2 justify-end">
+        <div className="scrim" onMouseDown={() => setModal(null)}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Delete User</h3>
+            <div className="msub">Delete <strong>{actor.id}</strong>? This cannot be undone.</div>
+            {modalError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{modalError}</p>}
+            <div className="modal-actions">
               <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDelete}>Delete</Button>
             </div>
@@ -207,15 +185,13 @@ export function WardUnitDetailsPage() {
   });
   useRefetchOn(['WardUnit', 'Actor', 'Order'], () => refetch({ requestPolicy: 'network-only' }));
 
-  if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (fetching) return <Spinner />;
+  if (error) return <p className="error-text">Error: {error.message}</p>;
 
   const unit = data?.wardUnit;
   if (!unit) return <NotFound kind="ward unit" to="/ward-units" />;
 
-  const nurses = (data?.actors ?? []).filter(
-    (a: { wardUnitId?: string }) => a.wardUnitId === wardUnitId
-  );
+  const nurses = (data?.actors ?? []).filter((a: { wardUnitId?: string }) => a.wardUnitId === wardUnitId);
   const orders = [...(unit.orders ?? [])].sort(
     (a: { createdAt: string }, b: { createdAt: string }) => b.createdAt.localeCompare(a.createdAt)
   );
@@ -224,11 +200,8 @@ export function WardUnitDetailsPage() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     try {
-      await createApiClient(token!).patch(`/ward-units/${wardUnitId}`, {
-        name: fd.get('name') as string,
-      });
-      setModal(null);
-      setModalError(null);
+      await createApiClient(token!).patch(`/ward-units/${wardUnitId}`, { name: fd.get('name') as string });
+      setModal(null); setModalError(null);
       refetch({ requestPolicy: 'network-only' });
     } catch (err) {
       setModalError(err instanceof Error ? err.message : 'Failed to update ward unit');
@@ -246,76 +219,58 @@ export function WardUnitDetailsPage() {
 
   return (
     <>
-      <PageHeader onBack={() => navigate('/ward-units')} actions={
-        <>
+      <div className="row" style={{ marginBottom: 16 }}>
+        <button className="backlink" onClick={() => navigate('/ward-units')} style={{ marginBottom: 0 }}>← Ward Units</button>
+        <div className="row" style={{ marginLeft: 'auto', gap: 8 }}>
           <Button variant="ghost" size="sm" onClick={() => { setModalError(null); setModal('edit'); }}>Edit</Button>
           <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
-        </>
-      } />
-      <h1 className="text-xl font-semibold text-slate-800 mb-1">{unit.name}</h1>
-      <p className="text-xs text-slate-400 font-mono mb-6">{unit.id}</p>
+        </div>
+      </div>
 
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-3 mb-4">
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-3">
-            Nurses
-            <span className="ml-2 text-sm font-normal text-slate-400">{nurses.length}</span>
+      <div style={{ marginBottom: 24 }}>
+        <h1 className="h1">{unit.name}</h1>
+        <div className="subtle mono" style={{ marginTop: 4, fontSize: 12.5 }}>{unit.id}</div>
+      </div>
+
+      <div className="grid-2-wide">
+        <Card className="card-pad">
+          <h2 className="h2" style={{ marginBottom: 16 }}>
+            Nurses <span style={{ color: 'var(--faint)', fontWeight: 500, fontSize: 14, marginLeft: 6 }}>{nurses.length}</span>
           </h2>
-          {nurses.length === 0
-            ? <p className="text-sm text-slate-400">No nurses assigned.</p>
-            : nurses.map((n: { id: string }) => (
-                <Link key={n.id} to={`/users/${n.id}`} className="block py-1.5 border-b border-slate-100 last:border-0 text-sm text-accent hover:underline">
-                  {n.id}
-                </Link>
-              ))
-          }
+          {nurses.length === 0 ? (
+            <div className="subtle">No nurses assigned.</div>
+          ) : nurses.map((n: { id: string }) => (
+            <Link key={n.id} to={`/users/${n.id}`} className="link-cell" style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>{n.id}</Link>
+          ))}
         </Card>
 
-        <Card className="p-5 col-span-2">
-          <h2 className="text-base font-semibold text-slate-700 mb-3">
-            Orders
-            <span className="ml-2 text-sm font-normal text-slate-400">{orders.length}</span>
-          </h2>
-          {orders.length === 0
-            ? <p className="text-sm text-slate-400">No orders yet.</p>
-            : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-left">
-                    <th className="pb-2 font-medium text-slate-500">Created</th>
-                    <th className="pb-2 font-medium text-slate-500">Status</th>
-                    <th className="pb-2 font-medium text-slate-500">Medications</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.map((o: { id: string; status: string; createdAt: string; lines: { medicationId: string; medication?: { innName: string } | null; quantity: number }[] }) => (
-                    <tr key={o.id} onClick={() => navigate(`/orders/${o.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
-                      <td className="py-2 pr-4 text-slate-500 whitespace-nowrap">{formatDate(o.createdAt)}</td>
-                      <td className="py-2 pr-4"><OrderStatusBadge status={o.status} /></td>
-                      <td className="py-2 text-slate-600">
-                        {o.lines.map(l => l.medication?.innName ?? l.medicationId).join(', ')}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )
-          }
+        <Card className="card-pad" style={{ paddingTop: 6, paddingBottom: 6 }}>
+          <div className="card-hd" style={{ padding: '16px 0', border: 'none' }}>
+            <h2 className="h2">Orders <span style={{ color: 'var(--faint)', fontWeight: 500, fontSize: 14, marginLeft: 6 }}>{orders.length}</span></h2>
+          </div>
+          {orders.length === 0 ? (
+            <div className="empty" style={{ paddingTop: 20, paddingBottom: 24 }}>No orders yet.</div>
+          ) : orders.map((o: { id: string; status: string; createdAt: string; lines: { medicationId: string; medication?: { innName: string } | null; quantity: number }[] }) => (
+            <div key={o.id} className="line" style={{ cursor: 'pointer' }} onClick={() => navigate(`/orders/${o.id}`)}>
+              <div>
+                <div className="lname">{o.lines.map(l => l.medication?.innName ?? l.medicationId).join(', ')}</div>
+                <div className="lmeta">{formatDate(o.createdAt)}</div>
+              </div>
+              <OrderStatusBadge status={o.status} />
+            </div>
+          ))}
         </Card>
       </div>
 
       {modal === 'edit' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-4">Edit Ward Unit</h2>
-            <form onSubmit={handleUpdate} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Name</label>
-                <input name="name" defaultValue={unit.name} required className={dialogInputCls} />
-              </div>
-              {modalError && <p role="alert" className="text-xs text-red-600">{modalError}</p>}
-              <div className="flex gap-2 justify-end pt-1">
+        <div className="scrim" onMouseDown={() => setModal(null)}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Edit Ward Unit</h3>
+            <form onSubmit={handleUpdate}>
+              <div className="field"><label className="label">Name</label>
+                <input name="name" defaultValue={unit.name} required className="input" /></div>
+              {modalError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{modalError}</p>}
+              <div className="modal-actions">
                 <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
                 <Button type="submit">Save</Button>
               </div>
@@ -325,15 +280,12 @@ export function WardUnitDetailsPage() {
       )}
 
       {modal === 'confirmDelete' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-2">Delete Ward Unit</h2>
-            <p className="text-sm text-slate-600 mb-4">
-              Delete <strong>{unit.name}</strong>? This cannot be undone. All assigned nurses must be reassigned first.
-            </p>
-            {modalError && <p role="alert" className="text-xs text-red-600 mb-3">{modalError}</p>}
-            <div className="flex gap-2 justify-end">
+        <div className="scrim" onMouseDown={() => setModal(null)}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Delete Ward Unit</h3>
+            <div className="msub">Delete <strong>{unit.name}</strong>? This cannot be undone. All assigned nurses must be reassigned first.</div>
+            {modalError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{modalError}</p>}
+            <div className="modal-actions">
               <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDelete}>Delete</Button>
             </div>
@@ -344,7 +296,7 @@ export function WardUnitDetailsPage() {
   );
 }
 
-// ── MedicationDetailsPage ─────────────────────────────────────────────────────
+// ── MedicationDetailsPage (product detail) ────────────────────────────────────
 
 const PRODUCT_DETAIL_QUERY = `
   query AdminProductDetail($id: ID!) {
@@ -354,8 +306,6 @@ const PRODUCT_DETAIL_QUERY = `
     }
   }
 `;
-
-const productInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
 export function MedicationDetailsPage() {
   const navigate = useNavigate();
@@ -370,8 +320,8 @@ export function MedicationDetailsPage() {
   });
   useRefetchOn('MedicinalProduct', () => refetch({ requestPolicy: 'network-only' }));
 
-  if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (fetching) return <Spinner />;
+  if (error) return <p className="error-text">Error: {error.message}</p>;
 
   const product = data?.medicinalProduct;
   if (!product) return <NotFound kind="medication product" to="/inventory" />;
@@ -384,8 +334,7 @@ export function MedicationDetailsPage() {
         productName: fd.get('productName') as string,
         stockThreshold: parseInt(fd.get('stockThreshold') as string),
       });
-      setModal(null);
-      setModalError(null);
+      setModal(null); setModalError(null);
       refetch({ requestPolicy: 'network-only' });
     } catch (err) {
       setModalError(err instanceof Error ? err.message : 'Failed to update product');
@@ -416,21 +365,16 @@ export function MedicationDetailsPage() {
       />
 
       {modal === 'edit' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-4">Edit Product</h2>
-            <form onSubmit={handleUpdate} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Product Name</label>
-                <input name="productName" defaultValue={product.productName} required className={productInputCls} />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Minimum Threshold</label>
-                <input name="stockThreshold" type="number" min={0} defaultValue={product.stockThreshold} required className={productInputCls} />
-              </div>
-              {modalError && <p role="alert" className="text-xs text-red-600">{modalError}</p>}
-              <div className="flex gap-2 justify-end pt-1">
+        <div className="scrim" onMouseDown={() => setModal(null)}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Edit Product</h3>
+            <form onSubmit={handleUpdate}>
+              <div className="field"><label className="label">Product Name</label>
+                <input name="productName" defaultValue={product.productName} required className="input" /></div>
+              <div className="field"><label className="label">Minimum Threshold</label>
+                <input name="stockThreshold" type="number" min={0} defaultValue={product.stockThreshold} required className="input" /></div>
+              {modalError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{modalError}</p>}
+              <div className="modal-actions">
                 <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
                 <Button type="submit">Save</Button>
               </div>
@@ -440,15 +384,12 @@ export function MedicationDetailsPage() {
       )}
 
       {modal === 'confirmDelete' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-2">Delete Product</h2>
-            <p className="text-sm text-slate-600 mb-4">
-              Delete <strong>{product.productName}</strong>? This cannot be undone.
-            </p>
-            {modalError && <p role="alert" className="text-xs text-red-600 mb-3">{modalError}</p>}
-            <div className="flex gap-2 justify-end">
+        <div className="scrim" onMouseDown={() => setModal(null)}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Delete Product</h3>
+            <div className="msub">Delete <strong>{product.productName}</strong>? This cannot be undone.</div>
+            {modalError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{modalError}</p>}
+            <div className="modal-actions">
               <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDelete}>Delete</Button>
             </div>

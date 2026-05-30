@@ -1,4 +1,3 @@
-// Login page that can be used to get a common login UI in all the apps
 import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
 
@@ -12,10 +11,11 @@ interface Actor {
 interface LoginPageProps {
   role: string;
   appName?: string;
+  appRole?: string;
   onLogin: (token: string) => void;
 }
 
-export function LoginPage({ role, appName, onLogin }: LoginPageProps) {
+export function LoginPage({ role, appName, appRole, onLogin }: LoginPageProps) {
   const [actors, setActors] = useState<Actor[]>([]);
   const [actorId, setActorId] = useState('');
   const [password, setPassword] = useState('');
@@ -52,48 +52,52 @@ export function LoginPage({ role, appName, onLogin }: LoginPageProps) {
     }
   }
 
+  const displayName = appName ?? role;
+
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-      <div className="w-full max-w-sm px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-slate-800">MediTrack</h1>
-          <p className="text-slate-500 text-sm mt-1">{appName ?? role} sign in</p>
+    <div data-role={appRole} className="login-wrap">
+      <div className="login-card">
+        <div className="login-brand">
+          <div className="logo">MediTrack</div>
+          <div className="sub">{displayName} sign in</div>
         </div>
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4"
-        >
-          <div>
-            <label htmlFor="login-user" className="block text-sm font-medium text-slate-700 mb-1">User</label>
-            <select
-              id="login-user"
-              value={actorId}
-              onChange={(e) => setActorId(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
-              required
-            >
-              {actors.map((a) => (
-                <option key={a.id} value={a.id}>{a.id}</option>
-              ))}
-            </select>
+        <div className="card">
+          <div className="login-accent" />
+          <div className="card-pad">
+            <form onSubmit={handleSubmit}>
+              <div className="field">
+                <label htmlFor="login-user" className="label">User</label>
+                <select
+                  id="login-user"
+                  value={actorId}
+                  onChange={(e) => setActorId(e.target.value)}
+                  className="select"
+                  required
+                >
+                  {actors.map((a) => (
+                    <option key={a.id} value={a.id}>{a.id}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="login-password" className="label">Password</label>
+                <input
+                  id="login-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input"
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+              {error && <p role="alert" className="error-text" style={{ marginBottom: 14 }}>{error}</p>}
+              <Button type="submit" disabled={submitting || !actorId} className="btn-block" style={{ marginTop: 4 }}>
+                {submitting ? 'Signing in…' : 'Sign in'}
+              </Button>
+            </form>
           </div>
-          <div>
-            <label htmlFor="login-password" className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-            <input
-              id="login-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
-              required
-              autoComplete="current-password"
-            />
-          </div>
-          {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
-          <Button type="submit" disabled={submitting || !actorId} className="w-full">
-            {submitting ? 'Signing in…' : 'Sign in'}
-          </Button>
-        </form>
+        </div>
       </div>
     </div>
   );

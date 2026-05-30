@@ -1,8 +1,7 @@
-// Used for /orders/:orderId (nurse)
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useClient } from 'urql';
-import { OrderStatusBadge, MedicationSearch, Button, Card, Spinner, PageHeader, formatDateTime } from '@meditrack/ui';
+import { OrderStatusBadge, MedicationSearch, Button, Card, Spinner, formatDateTime } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { useRefetchOn } from '@meditrack/client';
@@ -52,11 +51,10 @@ export function NurseOrderDetailPage() {
   const order = data?.order;
   const isDraft = order?.status === 'Draft';
 
-  // Populate lines once the order arrives from the server
   useEffect(() => {
     if (order && !initialized) {
       setLines(
-        order.lines.map(l => ({
+        order.lines.map((l: { medicationId: string; quantity: number; medication?: { innName: string; strength: string } | null }) => ({
           medicationId: l.medicationId,
           innName: l.medication?.innName ?? l.medicationId,
           strength: l.medication?.strength ?? '',
@@ -117,71 +115,71 @@ export function NurseOrderDetailPage() {
     }
   }
 
-  if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (!order) return <p className="text-red-600 text-sm p-4">Order not found.</p>;
+  if (fetching && !data) return <Spinner />;
+  if (!order) return <p className="error-text" style={{ padding: 16 }}>Order not found.</p>;
 
   const busy = saving || sending;
 
   return (
-    <div className="max-w-xl">
-      <PageHeader
-        onBack={() => navigate('/orders')}
-        className="mb-2"
-        actions={saving ? <span className="text-xs text-slate-400">Saving…</span> : undefined}
-      >
-        <h1 className="text-xl font-semibold text-slate-800">Order</h1>
-        <OrderStatusBadge status={order.status} />
-      </PageHeader>
+    <div className="stack" style={{ maxWidth: 760 }}>
+      <button className="backlink" onClick={() => navigate('/orders')}>← Orders</button>
 
-      <p className="text-xs text-slate-400 mb-6">{order.wardUnit?.name ?? order.wardUnitId} · {formatDateTime(order.createdAt)}</p>
+      <div>
+        <div className="row" style={{ gap: 14, marginBottom: 6 }}>
+          <h1 className="h1">Order</h1>
+          <OrderStatusBadge status={order.status} />
+          {saving && <span className="subtle">Saving…</span>}
+        </div>
+        <div className="subtle">{order.wardUnit?.name ?? order.wardUnitId} · {formatDateTime(order.createdAt)}</div>
+      </div>
 
       {lines.length > 0 ? (
-        <Card className="mb-6 divide-y divide-slate-100">
+        <Card className="card-pad" style={{ paddingTop: 6, paddingBottom: 6 }}>
           {lines.map(line => (
-            <div key={line.medicationId} className="flex items-center gap-3 px-4 py-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 truncate">{line.innName}</p>
-                <p className="text-xs text-slate-400">{line.strength}</p>
+            <div key={line.medicationId} className="line">
+              <div>
+                <div className="lname">{line.innName}</div>
+                <div className="lmeta">{line.strength}</div>
               </div>
               {isDraft ? (
-                <>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => updateQty(line.medicationId, line.quantity - 1)} className="w-7 h-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center justify-center text-sm">−</button>
-                    <span className="w-8 text-center text-sm font-medium text-slate-700">{line.quantity}</span>
-                    <button onClick={() => updateQty(line.medicationId, line.quantity + 1)} className="w-7 h-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center justify-center text-sm">+</button>
+                <div className="row">
+                  <div className="stepper">
+                    <button onClick={() => updateQty(line.medicationId, line.quantity - 1)}>–</button>
+                    <span className="v">{line.quantity}</span>
+                    <button onClick={() => updateQty(line.medicationId, line.quantity + 1)}>+</button>
                   </div>
-                  <button onClick={() => removeLine(line.medicationId)} className="text-slate-300 hover:text-red-400 transition-colors ml-1 text-lg leading-none">×</button>
-                </>
+                  <button className="iconbtn" onClick={() => removeLine(line.medicationId)} aria-label="Remove">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 6l12 12"/><path d="M18 6L6 18"/>
+                    </svg>
+                  </button>
+                </div>
               ) : (
-                <span className="text-sm text-slate-600 shrink-0">× {line.quantity}</span>
+                <span className="fulfil">×{line.quantity}</span>
               )}
             </div>
           ))}
         </Card>
       ) : (
-        <p className="text-slate-400 text-sm mb-6 text-center py-8">No medications added yet.</p>
+        <div className="empty">No medications added yet.</div>
       )}
 
       {isDraft && (
-        <div className="mb-10">
+        <div>
           <MedicationSearch label="Medication to add" onSelect={addLine} fetcher={fetcher} />
-          {lines.length > 0 && (
-            <p className="mt-2 text-xs text-slate-400">Add additional medications by typing their names above.</p>
-          )}
+          {lines.length > 0 && <div className="hint">Add more medications by searching above.</div>}
         </div>
       )}
 
-      {error && <p role="alert" className="text-red-600 text-sm mb-4">{error}</p>}
+      {error && <p role="alert" className="error-text">{error}</p>}
 
       {isDraft && (
-        <Button onClick={handleSend} disabled={busy || lines.length === 0} className="w-full">
+        <Button className="btn-block" onClick={handleSend} disabled={busy || lines.length === 0}>
           {sending ? 'Sending…' : 'Send Order'}
         </Button>
       )}
 
-      <p className="mt-10 text-xs text-slate-300">
-        Order id: <span className="font-mono">{order.id}</span>
-      </p>
+      <div className="subtle mono" style={{ fontSize: 12.5, marginTop: 24 }}>Order ID · {order.id}</div>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-// Used for /audit (admin)
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'urql';
@@ -17,64 +16,30 @@ const AUDIT_QUERY = graphql(`
   }
 `);
 
-const ACTION_STYLES: Record<string, string> = {
-  DraftOrderCreated:  'bg-slate-100 text-slate-600',
-  OrderSent:          'bg-blue-100 text-blue-700',
-  OrderConfirmed:     'bg-amber-100 text-amber-700',
-  OrderDelivered:     'bg-green-100 text-green-700',
-  ActorLoggedIn:      'bg-teal-100 text-teal-700',
-  ActorLoginFailed:   'bg-red-100 text-red-700',
-  PasswordChanged:    'bg-purple-100 text-purple-700',
-  ProductRestocked:   'bg-indigo-100 text-indigo-700',
-  ActorCreated:       'bg-teal-100 text-teal-700',
-  ActorUpdated:       'bg-blue-100 text-blue-700',
-  ActorDeleted:       'bg-red-100 text-red-700',
-  WardUnitCreated:          'bg-teal-100 text-teal-700',
-  WardUnitUpdated:          'bg-blue-100 text-blue-700',
-  WardUnitDeleted:          'bg-red-100 text-red-700',
-  MedicationCreated:        'bg-teal-100 text-teal-700',
-  MedicationUpdated:        'bg-blue-100 text-blue-700',
-  MedicationDeleted:        'bg-red-100 text-red-700',
-  MedicinalProductCreated:  'bg-teal-100 text-teal-700',
-  MedicinalProductUpdated:  'bg-blue-100 text-blue-700',
-  MedicinalProductDeleted:  'bg-red-100 text-red-700',
-};
-
-function ActionBadge({ action }: { action: string }) {
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ACTION_STYLES[action] ?? 'bg-gray-100 text-gray-600'}`}>
-      {action}
-    </span>
-  );
+function actionCls(action: string): string {
+  if (action.endsWith('Created'))      return 'action-created';
+  if (action.endsWith('Updated'))      return 'action-updated';
+  if (action.endsWith('Deleted'))      return 'action-deleted';
+  if (action.includes('LoggedIn') || action.includes('Login')) return 'action-login';
+  if (action === 'OrderDelivered')     return 'action-delivered';
+  if (action.includes('Order'))        return 'action-order';
+  if (action.includes('Password'))     return 'action-password';
+  if (action.includes('Restocked'))    return 'action-restock';
+  return 'action-default';
 }
 
-function toEntityDetailsRoute(action: string, entityId: string): string | null {
-  switch (action) {
-    case 'ActorCreated':
-    case 'ActorUpdated':
-    case 'ActorLoggedIn':
-    case 'ActorLoginFailed':
-    case 'PasswordChanged':
-      return `/users/${entityId}`;
-    case 'WardUnitCreated':
-    case 'WardUnitUpdated':
-      return `/ward-units/${entityId}`;
-    case 'MedicationCreated':
-    case 'MedicationUpdated':
-      return `/inventory/${entityId}`;
-    case 'MedicinalProductCreated':
-    case 'MedicinalProductUpdated':
-      return `/inventory/products/${entityId}`;
-    case 'ProductRestocked':
-      return `/inventory/${entityId}`;
-    case 'DraftOrderCreated':
-    case 'OrderSent':
-    case 'OrderConfirmed':
-    case 'OrderDelivered':
-      return `/orders/${entityId}`;
-    default:
-      return null;
-  }
+function toEntityRoute(action: string, entityId: string): string | null {
+  if (['ActorCreated','ActorUpdated','ActorLoggedIn','ActorLoginFailed','PasswordChanged'].includes(action))
+    return `/users/${entityId}`;
+  if (['WardUnitCreated','WardUnitUpdated'].includes(action))
+    return `/ward-units/${entityId}`;
+  if (['MedicationCreated','MedicationUpdated','ProductRestocked'].includes(action))
+    return `/inventory/${entityId}`;
+  if (['MedicinalProductCreated','MedicinalProductUpdated'].includes(action))
+    return `/inventory/products/${entityId}`;
+  if (['DraftOrderCreated','OrderSent','OrderConfirmed','OrderDelivered'].includes(action))
+    return `/orders/${entityId}`;
+  return null;
 }
 
 export function AuditPage() {
@@ -84,37 +49,38 @@ export function AuditPage() {
   const [{ data, fetching, error }, refetch] = useQuery({ query: AUDIT_QUERY, requestPolicy: 'cache-and-network' });
   useRefetchOn(['Order', 'Actor', 'WardUnit', 'Medication', 'MedicinalProduct'], () => refetch({ requestPolicy: 'network-only' }));
 
-  if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (fetching && !data) return <Spinner />;
+  if (error) return <p className="error-text">Error: {error.message}</p>;
 
-  const entries = data?.auditLog ?? [];
-
+  type AuditEntry = { actorId: string; action: string; entityId: string; occurredAt: string };
+  const entries: AuditEntry[] = data?.auditLog ?? [];
   const q = actorFilter.toLowerCase().trim();
-  const filtered = entries.filter(e =>
+  const filtered = entries.filter((e: AuditEntry) =>
     (!q || e.actorId.toLowerCase().includes(q)) &&
     (!actionFilter || e.action === actionFilter)
   );
-
-  const allActions = Array.from(new Set(entries.map(e => e.action))).sort();
+  const allActions: string[] = Array.from(new Set(entries.map((e: AuditEntry) => e.action))).sort();
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">
+    <div className="stack">
+      <div className="h-row">
+        <h1 className="h1">
           Audit Log
-          <span className="ml-2 text-sm font-normal text-slate-400">{filtered.length}</span>
+          <span style={{ color: 'var(--faint)', fontWeight: 500, fontSize: 20, marginLeft: 10 }}>{filtered.length}</span>
         </h1>
-        <div className="flex gap-3">
+        <div className="row" style={{ gap: 10 }}>
           <input
             value={actorFilter}
             onChange={e => setActorFilter(e.target.value)}
             placeholder="Filter by user…"
-            className="w-44 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+            className="input"
+            style={{ width: 180 }}
           />
           <select
             value={actionFilter}
             onChange={e => setActionFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+            className="select"
+            style={{ width: 'auto', minWidth: 160 }}
           >
             <option value="">All actions</option>
             {allActions.map(a => <option key={a} value={a}>{a}</option>)}
@@ -122,42 +88,42 @@ export function AuditPage() {
         </div>
       </div>
 
-      <Card className="overflow-hidden">
-        <table className="w-full text-sm">
+      <Card>
+        <table className="tbl">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left">
-              <th className="px-4 py-3 font-medium text-slate-600 whitespace-nowrap">Timestamp</th>
-              <th className="px-4 py-3 font-medium text-slate-600">User</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Action</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Entity ID</th>
+            <tr>
+              <th className="no-sort">Timestamp</th>
+              <th className="no-sort">User</th>
+              <th className="no-sort">Action</th>
+              <th className="no-sort">Entity ID</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((e, i) => {
-              const detailsRoute = toEntityDetailsRoute(e.action, e.entityId);
+              const route = toEntityRoute(e.action, e.entityId);
               return (
-              <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap tabular-nums">{formatDateTimePrecise(e.occurredAt)}</td>
-                <td className="px-4 py-3 font-medium">
-                  <Link to={`/users/${e.actorId}`} className="text-slate-800 hover:text-accent hover:underline">{e.actorId}</Link>
-                </td>
-                <td className="px-4 py-3"><ActionBadge action={e.action} /></td>
-                <td className="px-4 py-3 font-mono text-xs">
-                  {detailsRoute ? (
-                    <Link to={detailsRoute} className="text-accent hover:underline">
-                      {e.entityId}
-                    </Link>
-                  ) : (
-                    <span className="text-slate-400">{e.entityId}</span>
-                  )}
-                </td>
-              </tr>
+                <tr key={i}>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    <span className="mono" style={{ fontSize: 13 }}>{formatDateTimePrecise(e.occurredAt)}</span>
+                  </td>
+                  <td>
+                    <Link to={`/users/${e.actorId}`} className="link-cell">{e.actorId}</Link>
+                  </td>
+                  <td>
+                    <span className={`badge ${actionCls(e.action)}`}>{e.action}</span>
+                  </td>
+                  <td>
+                    {route ? (
+                      <Link to={route} className="link-cell mono" style={{ fontSize: 12.5 }}>{e.entityId}</Link>
+                    ) : (
+                      <span className="mono minicode">{e.entityId}</span>
+                    )}
+                  </td>
+                </tr>
               );
             })}
             {filtered.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-12 text-center text-slate-400">No audit events found.</td>
-              </tr>
+              <tr><td colSpan={4}><div className="empty">No audit events found.</div></td></tr>
             )}
           </tbody>
         </table>

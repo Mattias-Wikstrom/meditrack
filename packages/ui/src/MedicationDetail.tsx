@@ -1,4 +1,3 @@
-// Used for generic things such as 'Paracetamol' as opposed to specific products such as 'Alvedon'
 import { Link } from 'react-router-dom';
 import { PageHeader } from './PageHeader';
 import { Card } from './Card';
@@ -24,64 +23,54 @@ export interface MedicationDetailProps {
   medication: MedicationDetailData;
   products: MedicationDetailProduct[];
   onBack: () => void;
-  /** If provided, product names in the table become links to this href */
   getProductHref?: (productId: string) => string;
 }
 
-
 export function MedicationDetail({ medication, products, onBack, getProductHref }: MedicationDetailProps) {
   return (
-    <div>
+    <div className="stack">
       <PageHeader onBack={onBack} />
-      <h1 className="text-xl font-semibold text-slate-800 mb-1">{medication.innName}</h1>
-      <p className="text-xs text-slate-400 font-mono mb-6">{medication.atcCode}</p>
+      <div>
+        <h1 className="h1">{medication.innName}</h1>
+        <div className="subtle mono" style={{ marginTop: 4, fontSize: 12.5 }}>{medication.atcCode}</div>
+      </div>
 
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 mb-4">
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-2">Medication</h2>
+      <div className="grid-2">
+        <Card className="card-pad">
+          <h2 className="h2" style={{ marginBottom: 16 }}>Medication</h2>
           <InfoRow label="INN Name">{medication.innName}</InfoRow>
-          <InfoRow label="ATC Code">
-            <span className="font-mono text-xs">{medication.atcCode}</span>
-          </InfoRow>
+          <InfoRow label="ATC Code"><span className="mono" style={{ fontSize: 13 }}>{medication.atcCode}</span></InfoRow>
           <InfoRow label="Form">{medication.form}</InfoRow>
-          <InfoRow label="Strength">
-            <span className="font-mono text-xs">{medication.strength}</span>
-          </InfoRow>
+          <InfoRow label="Strength"><span className="mono" style={{ fontSize: 13 }}>{medication.strength}</span></InfoRow>
         </Card>
 
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-2">
-            Products
-            <span className="ml-2 text-sm font-normal text-slate-400">{products.length}</span>
+        <Card className="card-pad">
+          <h2 className="h2" style={{ marginBottom: 16 }}>
+            Products <span style={{ color: 'var(--faint)', fontWeight: 500, fontSize: 14, marginLeft: 6 }}>{products.length}</span>
           </h2>
           {products.length === 0 ? (
-            <p className="text-sm text-slate-400">No products registered.</p>
+            <div className="empty" style={{ padding: '20px 0' }}>No products registered.</div>
           ) : (
-            <table className="w-full text-sm">
+            <table className="tbl">
               <thead>
-                <tr className="border-b border-slate-200 text-left">
-                  <th className="pb-2 font-medium text-slate-500">Product</th>
-                  <th className="pb-2 font-medium text-slate-500 text-right">Stock</th>
-                  <th className="pb-2 font-medium text-slate-500 text-right">Min</th>
+                <tr>
+                  <th className="no-sort">Product</th>
+                  <th className="no-sort num">Stock</th>
+                  <th className="no-sort num">Min</th>
                 </tr>
               </thead>
               <tbody>
                 {products.map(p => (
-                  <tr key={p.id} className="border-b border-slate-100 last:border-0">
-                    <td className="py-2 pr-4">
+                  <tr key={p.id}>
+                    <td>
                       {getProductHref ? (
-                        <Link to={getProductHref(p.id)} className="text-accent hover:underline">
-                          {p.productName}
-                        </Link>
-                      ) : (
-                        p.productName
-                      )}
+                        <Link to={getProductHref(p.id)} className="link-cell">{p.productName}</Link>
+                      ) : p.productName}
                     </td>
-                    <td className={`py-2 pr-4 text-right font-medium tabular-nums ${p.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
-                      {p.stockLevel}
-                      {p.isBelowThreshold && <span className="ml-1 text-xs">⚠</span>}
+                    <td className={`num ${p.isBelowThreshold ? 'stock-low' : 'stock-ok'}`}>
+                      {p.stockLevel}{p.isBelowThreshold && <span style={{ marginLeft: 4, fontSize: 11 }}>⚠</span>}
                     </td>
-                    <td className="py-2 text-right text-slate-400 tabular-nums">{p.stockThreshold}</td>
+                    <td className="num" style={{ color: 'var(--muted)' }}>{p.stockThreshold}</td>
                   </tr>
                 ))}
               </tbody>

@@ -7,10 +7,10 @@ export function PageHeader({ onBack, children, actions, className }: {
   className?: string;
 }) {
   return (
-    <div className={`flex items-center gap-3 mb-4${className ? ` ${className}` : ''}`}>
-      <BackButton onClick={onBack} />
-      {children}
-      {actions && <div className="ml-auto flex gap-2">{actions}</div>}
+    <div className={`row${className ? ' ' + className : ''}`} style={{ marginBottom: children || actions ? 8 : 0 }}>
+      <BackButton onClick={onBack} style={{ marginBottom: 0 }} />
+      {children && <div className="row" style={{ gap: 12, flex: 1 }}>{children}</div>}
+      {actions && <div className="row" style={{ marginLeft: 'auto', gap: 8 }}>{actions}</div>}
     </div>
   );
 }

@@ -1,8 +1,7 @@
-// Used for /inventory (admin)
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Card, Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
+import { Button, Spinner, SortIcon, sortProducts } from '@meditrack/ui';
 import { useAuth, createApiClient, useRefetchOn } from '@meditrack/client';
 import { graphql } from '../gql';
 
@@ -16,13 +15,11 @@ const MEDICATIONS_QUERY = graphql(`
 `);
 
 const FORMS = ['Tablet', 'Capsule', 'Injection', 'Solution', 'Cream', 'Drops', 'Inhaler'] as const;
-const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
 type SortKey = 'medication' | 'product' | 'stock';
 type SortDir = 'asc' | 'desc';
 
 export function InventoryPage() {
-  const navigate = useNavigate();
   const { token } = useAuth();
   const [searchParams] = useSearchParams();
   const [showCreate, setShowCreate] = useState(false);
@@ -44,12 +41,12 @@ export function InventoryPage() {
     else { setSortKey(key); setSortDir('asc'); }
   }
 
-  if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (fetching && !data) return <Spinner />;
+  if (error) return <p className="error-text">Error: {error.message}</p>;
 
-  const products = data?.medicinalProducts ?? [];
+  type Product = { id: string; productName: string; stockLevel: number; stockThreshold: number; isBelowThreshold: boolean; medication?: { id: string; innName: string; atcCode: string; form: string; strength: string } | null };
+  const products: Product[] = data?.medicinalProducts ?? [];
   const lowStockCount = products.filter(p => p.isBelowThreshold).length;
-
   const q = search.toLowerCase();
   const filtered = q
     ? products.filter(p =>
@@ -58,14 +55,10 @@ export function InventoryPage() {
         p.medication?.atcCode.toLowerCase().includes(q)
       )
     : products;
-
   const sorted = sortProducts(filtered, sortKey, sortDir);
 
   const th = (label: string, key: SortKey, align: 'left' | 'right' = 'left') => (
-    <th
-      className={`px-4 py-3 font-medium text-slate-600 cursor-pointer select-none hover:text-slate-900 whitespace-nowrap ${align === 'right' ? 'text-right' : ''}`}
-      onClick={() => handleSort(key)}
-    >
+    <th className={align === 'right' ? 'ar' : ''} onClick={() => handleSort(key)}>
       {label}<SortIcon active={sortKey === key} dir={sortDir} />
     </th>
   );
@@ -74,7 +67,7 @@ export function InventoryPage() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     try {
-      const medication = await createApiClient(token!).post<{ id: string }>('/medications', {
+      await createApiClient(token!).post<{ id: string }>('/medications', {
         innName: fd.get('innName') as string,
         atcCode: fd.get('atcCode') as string,
         form: fd.get('form') as string,
@@ -82,40 +75,83 @@ export function InventoryPage() {
       });
       setShowCreate(false);
       setCreateError(null);
-      navigate(`/medications/${medication.id}`);
+      refetch({ requestPolicy: 'network-only' });
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : 'Failed to create medication');
     }
   }
 
   return (
-    <div>
+    <div className="stack">
+      <div className="h-row">
+        <h1 className="h1">
+          Inventory
+          {lowStockCount > 0 && <span style={{ marginLeft: 12 }}><span className="badge danger-soft">{lowStockCount} below threshold</span></span>}
+        </h1>
+        <div className="row" style={{ gap: 10 }}>
+          <div className="search" style={{ width: 240 }}>
+            <span className="ico">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+              </svg>
+            </span>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" className="input" />
+          </div>
+          <Button onClick={() => { setShowCreate(true); setCreateError(null); }}>+ New Medication</Button>
+        </div>
+      </div>
+
+      <div className="card">
+        <table className="tbl">
+          <thead>
+            <tr>
+              {th('Medication', 'medication')}
+              <th className="no-sort">ATC</th>
+              <th className="no-sort">Form</th>
+              {th('Product', 'product')}
+              {th('Stock', 'stock', 'right')}
+              <th className="no-sort ar">Min</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map(p => (
+              <tr key={p.id}>
+                <td>
+                  {p.medication
+                    ? <Link to={`/medications/${p.medication.id}`} className="link-cell">{p.medication.innName}</Link>
+                    : '—'}
+                </td>
+                <td><span className="mono minicode">{p.medication?.atcCode ?? '—'}</span></td>
+                <td>{p.medication?.form ?? '—'}</td>
+                <td><Link to={`/inventory/${p.id}`} className="link-cell" style={{ fontWeight: 500 }}>{p.productName}</Link></td>
+                <td className={`num ${p.isBelowThreshold ? 'stock-low' : 'stock-ok'}`}>
+                  {p.stockLevel}{p.isBelowThreshold && <span style={{ marginLeft: 4, fontSize: 11 }}>⚠</span>}
+                </td>
+                <td className="ar" style={{ color: 'var(--muted)' }}>{p.stockThreshold}</td>
+              </tr>
+            ))}
+            {sorted.length === 0 && (
+              <tr><td colSpan={6}><div className="empty">{q ? 'No results.' : 'No products in inventory.'}</div></td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => { setShowCreate(false); setCreateError(null); }} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-4">New Medication</h2>
-            <form onSubmit={handleCreateMedication} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">INN Name</label>
-                <input name="innName" required placeholder="e.g. Paracetamol" className={inputCls} />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">ATC Code</label>
-                <input name="atcCode" required placeholder="e.g. N02BE01" className={inputCls} />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Form</label>
-                <select name="form" className={inputCls}>
-                  {FORMS.map(f => <option key={f} value={f}>{f}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Strength</label>
-                <input name="strength" required placeholder="e.g. 500 mg" className={inputCls} />
-              </div>
-              {createError && <p role="alert" className="text-xs text-red-600">{createError}</p>}
-              <div className="flex gap-2 justify-end pt-1">
+        <div className="scrim" onMouseDown={() => { setShowCreate(false); setCreateError(null); }}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>New Medication</h3>
+            <form onSubmit={handleCreateMedication}>
+              <div className="field"><label className="label">INN Name</label>
+                <input name="innName" required placeholder="e.g. Paracetamol" className="input" /></div>
+              <div className="field"><label className="label">ATC Code</label>
+                <input name="atcCode" required placeholder="e.g. N02BE01" className="input" /></div>
+              <div className="field"><label className="label">Form</label>
+                <select name="form" className="select">{FORMS.map(f => <option key={f} value={f}>{f}</option>)}</select></div>
+              <div className="field"><label className="label">Strength</label>
+                <input name="strength" required placeholder="e.g. 500 mg" className="input" /></div>
+              {createError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{createError}</p>}
+              <div className="modal-actions">
                 <Button type="button" variant="ghost" onClick={() => { setShowCreate(false); setCreateError(null); }}>Cancel</Button>
                 <Button type="submit">Create</Button>
               </div>
@@ -123,69 +159,6 @@ export function InventoryPage() {
           </div>
         </div>
       )}
-
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">
-          Inventory
-          {lowStockCount > 0 && (
-            <span className="ml-3 text-sm font-normal text-red-600">
-              ⚠ {lowStockCount} below threshold
-            </span>
-          )}
-        </h1>
-        <div className="flex gap-3">
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search medication or product…"
-            className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
-          />
-          <Button onClick={() => { setShowCreate(true); setCreateError(null); }}>+ New Medication</Button>
-        </div>
-      </div>
-
-      <Card className="overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left">
-              {th('Medication', 'medication')}
-              <th className="px-4 py-3 font-medium text-slate-600">ATC Code</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Form</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Strength</th>
-              {th('Product', 'product')}
-              {th('Stock', 'stock', 'right')}
-              <th className="px-4 py-3 font-medium text-slate-600 text-right">Min</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map(p => (
-              <tr key={p.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-slate-800">
-                  {p.medication
-                    ? <Link to={`/medications/${p.medication.id}`} className="text-accent hover:underline">{p.medication.innName}</Link>
-                    : '—'}
-                </td>
-                <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.atcCode ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-600">{p.medication?.form ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.strength ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-600"><Link to={`/inventory/${p.id}`} className="text-accent hover:underline">{p.productName}</Link></td>
-                <td className={`px-4 py-3 text-right font-medium tabular-nums ${p.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
-                  {p.stockLevel}
-                  {p.isBelowThreshold && <span className="ml-1 text-xs">⚠</span>}
-                </td>
-                <td className="px-4 py-3 text-right text-slate-400 tabular-nums">{p.stockThreshold}</td>
-              </tr>
-            ))}
-            {sorted.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-slate-400">
-                  {q ? 'No results.' : 'No products in inventory.'}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </Card>
     </div>
   );
 }

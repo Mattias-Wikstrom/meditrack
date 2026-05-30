@@ -1,8 +1,7 @@
-// Used for /orders (nurse)
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { OrderStatusBadge, Button, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
+import { OrderStatusBadge, Spinner, LineList, STATUS_RANK, formatDate, SortIcon } from '@meditrack/ui';
 import { useAuth, useRefetchOn } from '@meditrack/client';
 import { graphql } from '../gql';
 
@@ -18,8 +17,6 @@ const WARD_UNIT_ORDERS_QUERY = graphql(`
   }
 `);
 
-
-
 type SortKey = 'status' | 'lines' | 'createdAt';
 type SortDir = 'asc' | 'desc';
 
@@ -33,54 +30,11 @@ type OrderRow = {
 function sortOrders(orders: OrderRow[], key: SortKey, dir: SortDir): OrderRow[] {
   return [...orders].sort((a, b) => {
     let cmp = 0;
-    switch (key) {
-      case 'lines':     cmp = a.lines.length - b.lines.length; break;
-      case 'createdAt': cmp = a.createdAt.localeCompare(b.createdAt); break;
-      case 'status':    cmp = (STATUS_RANK[a.status] ?? 0) - (STATUS_RANK[b.status] ?? 0); break;
-    }
+    if (key === 'lines')     cmp = a.lines.length - b.lines.length;
+    if (key === 'createdAt') cmp = a.createdAt.localeCompare(b.createdAt);
+    if (key === 'status')    cmp = (STATUS_RANK[a.status] ?? 0) - (STATUS_RANK[b.status] ?? 0);
     return dir === 'asc' ? cmp : -cmp;
   });
-}
-
-function OrderTable({ orders, sortKey, sortDir, onSort, onRowClick, sortable = true }: {
-  orders: OrderRow[];
-  sortKey: SortKey;
-  sortDir: SortDir;
-  onSort: (key: SortKey) => void;
-  onRowClick: (id: string) => void;
-  sortable?: boolean;
-}) {
-  const cols: { key: SortKey; label: string }[] = [
-    { key: 'createdAt', label: 'Created' },
-    { key: 'status',    label: 'Status' },
-    { key: 'lines',     label: 'Medications' },
-  ];
-  return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="border-b border-slate-200">
-          {cols.map(c => (
-            <th key={c.key}
-              onClick={sortable ? () => onSort(c.key) : undefined}
-              className={`text-left py-2 px-4 font-medium text-slate-500 select-none whitespace-nowrap ${sortable ? 'cursor-pointer' : ''}`}>
-              {c.label}
-              {sortable && <SortIcon active={sortKey === c.key} dir={sortDir} />}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {orders.map(order => (
-          <tr key={order.id} onClick={() => onRowClick(order.id)}
-            className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer transition-colors">
-            <td className="py-2.5 px-4 align-top text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
-            <td className="py-2.5 px-4 align-top"><OrderStatusBadge status={order.status} /></td>
-            <td className="py-2.5 px-4 align-top"><LineList lines={order.lines} limit={3} /></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
 }
 
 export function DashboardPage() {
@@ -88,6 +42,7 @@ export function DashboardPage() {
   const { wardUnitId } = useAuth();
   const [sortKey, setSortKey] = useState<SortKey>('createdAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [showDelivered, setShowDelivered] = useState(false);
 
   const [{ data, fetching, error }, refetch] = useQuery({
     query: WARD_UNIT_ORDERS_QUERY,
@@ -103,38 +58,81 @@ export function DashboardPage() {
     else { setSortKey(key); setSortDir('asc'); }
   }
 
-  if (!wardUnitId) return <p className="text-red-600 text-sm">Error: Nurse account is not assigned to a ward unit.</p>;
-  if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (!wardUnitId) return <p className="error-text">Error: Nurse account is not assigned to a ward unit.</p>;
+  if (fetching && !data) return <Spinner />;
+  if (error) return <p className="error-text">Error: {error.message}</p>;
 
   const all = data?.wardUnit?.orders ?? [];
-  const active    = sortOrders(all.filter(o => o.status !== 'Delivered'), sortKey, sortDir);
-  const delivered = sortOrders(all.filter(o => o.status === 'Delivered'), 'createdAt', 'desc');
+  const active    = sortOrders(all.filter((o: OrderRow) => o.status !== 'Delivered'), sortKey, sortDir);
+  const delivered = sortOrders(all.filter((o: OrderRow) => o.status === 'Delivered'), 'createdAt', 'desc');
+
+  const th = (label: string, key: SortKey) => (
+    <th onClick={() => toggleSort(key)}>
+      {label}<SortIcon active={sortKey === key} dir={sortDir} />
+    </th>
+  );
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">Orders</h1>
-        <Link to="/orders/new"><Button>+ New Order</Button></Link>
+    <div className="stack">
+      <div className="h-row">
+        <h1 className="h1">Orders</h1>
+        <Link to="/orders/new" className="btn btn-primary">+ New Order</Link>
       </div>
 
-      {active.length === 0 ? (
-        <p className="text-slate-400 text-sm text-center py-16">No active orders. Create one to get started.</p>
-      ) : (
-        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-          <OrderTable orders={active} sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} onRowClick={id => navigate(`/orders/${id}`)} />
-        </div>
-      )}
+      <div className="card">
+        {active.length === 0 ? (
+          <div className="empty">No active orders. <Link to="/orders/new" className="linkbtn">Create one</Link> to get started.</div>
+        ) : (
+          <table className="tbl">
+            <thead>
+              <tr>
+                {th('Created', 'createdAt')}
+                {th('Status', 'status')}
+                {th('Medications', 'lines')}
+              </tr>
+            </thead>
+            <tbody>
+              {active.map(order => (
+                <tr key={order.id} className="clickable" onClick={() => navigate(`/orders/${order.id}`)}>
+                  <td style={{ whiteSpace: 'nowrap' }}>{formatDate(order.createdAt)}</td>
+                  <td><OrderStatusBadge status={order.status} /></td>
+                  <td><LineList lines={order.lines} limit={3} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
 
       {delivered.length > 0 && (
-        <details className="mt-6">
-          <summary className="cursor-pointer text-sm text-slate-400 hover:text-slate-600 transition-colors select-none">
-            Delivered ({delivered.length})
-          </summary>
-          <div className="mt-2 bg-white rounded-lg border border-slate-200 overflow-hidden opacity-60">
-            <OrderTable orders={delivered} sortKey='createdAt' sortDir='desc' onSort={() => {}} onRowClick={id => navigate(`/orders/${id}`)} sortable={false} />
-          </div>
-        </details>
+        <>
+          <button className="collapse-hd" onClick={() => setShowDelivered(v => !v)}>
+            <span className={`caret${showDelivered ? ' open' : ''}`}>›</span>
+            Delivered <span style={{ color: 'var(--faint)' }}>({delivered.length})</span>
+          </button>
+          {showDelivered && (
+            <div className="card" style={{ opacity: .7 }}>
+              <table className="tbl">
+                <thead>
+                  <tr>
+                    <th className="no-sort">Created</th>
+                    <th className="no-sort">Status</th>
+                    <th className="no-sort">Medications</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {delivered.map(order => (
+                    <tr key={order.id} className="clickable" onClick={() => navigate(`/orders/${order.id}`)}>
+                      <td style={{ whiteSpace: 'nowrap' }}>{formatDate(order.createdAt)}</td>
+                      <td><OrderStatusBadge status={order.status} /></td>
+                      <td><LineList lines={order.lines} limit={3} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

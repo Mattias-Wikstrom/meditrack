@@ -1,4 +1,3 @@
-// Used for a product like 'Alvedon' as opposed to something generic such as 'Paracetamol'
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from './PageHeader';
@@ -24,18 +23,10 @@ export interface InventoryProduct {
 export interface InventoryProductDetailProps {
   product: InventoryProduct;
   onBack: () => void;
-  /** Buttons rendered to the right of the back button in the header row */
   actions?: React.ReactNode;
-  /**
-   * If provided, a Restock section is rendered inside the Stock card.
-   * The callback receives the quantity to add and should return null on
-   * success or an error message string on failure.
-   */
   onRestock?: (quantity: number) => Promise<string | null>;
-  /** If provided, the INN name becomes a link to this href */
   getMedicationHref?: (medicationId: string) => string;
 }
-
 
 export function InventoryProductDetail({ product, onBack, actions, onRestock, getMedicationHref }: InventoryProductDetailProps) {
   const [qty, setQty] = useState(1);
@@ -56,72 +47,68 @@ export function InventoryProductDetail({ product, onBack, actions, onRestock, ge
   }
 
   return (
-    <div>
+    <div className="stack">
       <PageHeader onBack={onBack} actions={actions} />
-      <h1 className="text-xl font-semibold text-slate-800 mb-1">{product.productName}</h1>
-      <p className="text-xs text-slate-400 font-mono mb-6">{product.id}</p>
+      <div>
+        <h1 className="h1">{product.productName}</h1>
+        <div className="subtle mono" style={{ marginTop: 4, fontSize: 12.5 }}>{product.id}</div>
+      </div>
 
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-2">Medication</h2>
+      <div className="grid-2">
+        <Card className="card-pad">
+          <h2 className="h2" style={{ marginBottom: 16 }}>Medication</h2>
           <InfoRow label="INN Name">
             {product.medication
               ? getMedicationHref
-                ? <Link to={getMedicationHref(product.medication.id)} className="text-accent hover:underline">{product.medication.innName}</Link>
+                ? <Link to={getMedicationHref(product.medication.id)} className="link-cell">{product.medication.innName}</Link>
                 : product.medication.innName
               : '—'}
           </InfoRow>
           <InfoRow label="ATC Code">
-            <span className="font-mono text-xs">{product.medication?.atcCode ?? '—'}</span>
+            <span className="mono" style={{ fontSize: 13 }}>{product.medication?.atcCode ?? '—'}</span>
           </InfoRow>
           <InfoRow label="Form">{product.medication?.form ?? '—'}</InfoRow>
           <InfoRow label="Strength">
-            <span className="font-mono text-xs">{product.medication?.strength ?? '—'}</span>
+            <span className="mono" style={{ fontSize: 13 }}>{product.medication?.strength ?? '—'}</span>
           </InfoRow>
         </Card>
 
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-2">Stock</h2>
+        <Card className="card-pad">
+          <h2 className="h2" style={{ marginBottom: 16 }}>Stock</h2>
           <InfoRow label="Current level">
-            <span className={`font-semibold tabular-nums ${product.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
-              {product.stockLevel}
-              {product.isBelowThreshold && ' ⚠'}
+            <span className={product.isBelowThreshold ? 'stock-low' : 'stock-ok'}>
+              {product.stockLevel}{product.isBelowThreshold ? ' ⚠' : ''}
             </span>
           </InfoRow>
           <InfoRow label="Minimum threshold">{product.stockThreshold}</InfoRow>
           <InfoRow label="Status">
             {product.isBelowThreshold
-              ? <span className="text-red-600 font-medium">Below threshold</span>
-              : <span className="text-green-600 font-medium">Adequate</span>
-            }
+              ? <span style={{ color: 'var(--danger)', fontWeight: 600 }}>Below threshold</span>
+              : <span style={{ color: 'var(--ok)', fontWeight: 600 }}>Adequate</span>}
           </InfoRow>
 
           {onRestock && (
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <h3 className="text-sm font-medium text-slate-700 mb-3">Restock</h3>
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs text-slate-500 mb-1">Units to add</label>
+            <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+              <h2 className="h2" style={{ marginBottom: 14 }}>Restock</h2>
+              <div className="row" style={{ alignItems: 'flex-end', gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <label className="label">Units to add</label>
                   <input
                     type="number"
                     min={1}
                     value={qty}
-                    onChange={e => {
-                      setSuccess(false);
-                      setQty(Math.max(1, parseInt(e.target.value) || 1));
-                    }}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                    onChange={e => { setSuccess(false); setQty(Math.max(1, parseInt(e.target.value) || 1)); }}
+                    className="input"
+                    style={{ width: '100%' }}
                   />
-                  <p className="text-xs text-slate-400 mt-1">New total: {product.stockLevel + qty}</p>
+                  <div className="hint">New total: {product.stockLevel + qty}</div>
                 </div>
-                <div className="pt-5">
-                  <Button onClick={handleRestock} disabled={submitting}>
-                    {submitting ? 'Saving…' : '+ Add stock'}
-                  </Button>
-                </div>
+                <Button onClick={handleRestock} disabled={submitting}>
+                  {submitting ? 'Saving…' : '+ Add stock'}
+                </Button>
               </div>
-              {error   && <p className="text-xs text-red-600 mt-2">{error}</p>}
-              {success && <p className="text-xs text-green-600 mt-2">Stock updated successfully.</p>}
+              {error   && <p className="error-text" style={{ marginTop: 8 }}>{error}</p>}
+              {success && <p className="success-text" style={{ marginTop: 8 }}>Stock updated successfully.</p>}
             </div>
           )}
         </Card>

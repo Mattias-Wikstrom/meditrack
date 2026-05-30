@@ -1,6 +1,4 @@
-// Used in /orders/new (nurse) to search and add medications to an order
 import { useState, useEffect, useRef, useId } from 'react';
-import { Spinner } from './Spinner';
 
 export interface MedicationOption {
   id: string;
@@ -27,6 +25,7 @@ export function MedicationSearch({ onSelect, label = 'Search medications', place
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
+  const inputId = listboxId + '-input';
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -81,12 +80,15 @@ export function MedicationSearch({ onSelect, label = 'Search medications', place
 
   const optionId = (i: number) => `${listboxId}-option-${i}`;
 
-  const inputId = listboxId + '-input';
-
   return (
-    <div ref={containerRef} className="relative">
-      <label htmlFor={inputId} className="block text-sm font-medium text-slate-700 mb-2">{label}</label>
-      <div className="relative">
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      <label htmlFor={inputId} className="label">{label}</label>
+      <div className="search">
+        <span className="ico">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+          </svg>
+        </span>
         <input
           ref={inputRef}
           id={inputId}
@@ -101,30 +103,43 @@ export function MedicationSearch({ onSelect, label = 'Search medications', place
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition"
+          className="input"
         />
-        {loading && <Spinner className="absolute right-3 top-2.5 h-4 w-4" aria-hidden="true" />}
+        {loading && (
+          <span style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)' }} aria-hidden="true">
+            <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+          </span>
+        )}
       </div>
       <ul
         id={listboxId}
         role="listbox"
         aria-label={label}
-        className={`absolute z-20 mt-1 w-full bg-white rounded-lg border border-slate-200 shadow-lg overflow-hidden ${open ? '' : 'hidden'}`}
+        style={{ display: open ? undefined : 'none', position: 'absolute', zIndex: 20, top: 'calc(100% + 8px)', left: 0, right: 0 }}
+        className="card"
       >
         {results.map((med, i) => (
-          <li
-            key={med.id}
-            id={optionId(i)}
-            role="option"
-            aria-selected={i === activeIndex}
-          >
+          <li key={med.id} id={optionId(i)} role="option" aria-selected={i === activeIndex}>
             <button
               type="button"
               onMouseDown={() => handleSelect(med)}
-              className={`w-full text-left px-4 py-3 transition-colors ${i === activeIndex ? 'bg-accent-light' : 'hover:bg-accent-light'}`}
+              style={{
+                width: '100%', textAlign: 'left', padding: '12px 14px',
+                borderRadius: 9, cursor: 'pointer', display: 'flex',
+                justifyContent: 'space-between', alignItems: 'center',
+                background: i === activeIndex ? 'var(--accent-soft)' : 'transparent',
+                border: 'none', fontFamily: 'inherit',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-soft)')}
+              onMouseLeave={e => i !== activeIndex && (e.currentTarget.style.background = 'transparent')}
             >
-              <p className="text-sm font-medium text-slate-800">{med.innName} <span className="text-slate-400 font-normal">{med.strength}</span></p>
-              <p className="text-xs text-slate-400 mt-0.5">{med.atcCode} · {med.form}</p>
+              <div>
+                <span className="medname">{med.innName}</span> <span className="subtle">{med.strength}</span>
+                <div className="minicode mono">{med.atcCode} · {med.form}</div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14"/><path d="M5 12h14"/>
+              </svg>
             </button>
           </li>
         ))}

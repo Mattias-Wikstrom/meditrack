@@ -1,29 +1,26 @@
-// Shared utility components (RoleBadge, InfoRow, LineList, SortIcon) and date/time formatting helpers
-const ROLE_STYLES: Record<string, string> = {
-  Nurse:      'bg-blue-100 text-blue-700',
-  Pharmacist: 'bg-purple-100 text-purple-700',
-  Admin:      'bg-amber-100 text-amber-700',
+import type { OrderLineSummary } from './OrderCard';
+import type { InventoryProduct } from './InventoryProductDetail';
+
+const ROLE_CLS: Record<string, string> = {
+  Nurse:      'role-nurse',
+  Pharmacist: 'role-pharmacist',
+  Admin:      'role-admin',
 };
 
 export function RoleBadge({ role }: { role: string }) {
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ROLE_STYLES[role] ?? 'bg-slate-100 text-slate-600'}`}>
-      {role}
-    </span>
+    <span className={`badge ${ROLE_CLS[role] ?? 'soft'}`}>{role}</span>
   );
 }
 
 export function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex justify-between items-start py-2.5 border-b border-slate-100 last:border-0 text-sm">
-      <span className="text-slate-500 shrink-0 mr-4">{label}</span>
-      <span className="text-slate-800 text-right">{children}</span>
+    <div className="defrow">
+      <span className="k">{label}</span>
+      <span className="v">{children}</span>
     </div>
   );
 }
-
-import type { OrderLineSummary } from './OrderCard';
-import type { InventoryProduct } from './InventoryProductDetail';
 
 export function sortProducts(
   products: InventoryProduct[],
@@ -50,41 +47,36 @@ export function LineList({ lines, limit }: { lines: OrderLineSummary[]; limit?: 
   const shown = limit !== undefined ? lines.slice(0, limit) : lines;
   const extra = limit !== undefined ? Math.max(0, lines.length - limit) : 0;
   return (
-    <div className="space-y-0.5">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {shown.map(l => (
-        <div key={l.medicationId} className="flex items-baseline gap-1.5">
-          <span className="text-slate-700">{l.medication?.innName ?? l.medicationId}</span>
-          <span className="text-slate-400 text-xs">×{l.quantity}</span>
+        <div key={l.medicationId}>
+          <span className="medname">{l.medication?.innName ?? l.medicationId}</span>
+          {' '}
+          <span className="subtle mono">×{l.quantity}</span>
         </div>
       ))}
-      {extra > 0 && <div className="text-slate-400 text-xs">+{extra} more</div>}
+      {extra > 0 && <div style={{ color: 'var(--faint)', fontSize: 12.5 }}>+{extra} more</div>}
     </div>
   );
 }
 
 export function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  return (
-    <span className={`ml-1 text-xs ${active ? 'text-slate-700' : 'invisible'}`}>
-      {dir === 'asc' ? '↑' : '↓'}
-    </span>
-  );
+  if (!active) return null;
+  return <span style={{ marginLeft: 5, fontSize: 11, color: 'var(--text)' }}>{dir === 'asc' ? '↑' : '↓'}</span>;
 }
 
-/** "1 Jan, 13:05" — day/month/time, no year */
 export function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-GB', {
     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
   });
 }
 
-/** "1 Jan 2024, 13:05" — day/month/year/time */
 export function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
   });
 }
 
-/** "1 Jan 2024, 13:05:30" — full timestamp with seconds, for audit logs */
 export function formatDateTimePrecise(iso: string) {
   return new Date(iso).toLocaleString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric',

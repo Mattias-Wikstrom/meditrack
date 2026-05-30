@@ -1,8 +1,7 @@
-// Used for /medications/:medicationId (admin)
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { Button, Card, PageHeader, Spinner, InfoRow } from '@meditrack/ui';
+import { Button, Card, Spinner, InfoRow } from '@meditrack/ui';
 import { useAuth, createApiClient } from '@meditrack/client';
 import { graphql } from '../gql';
 
@@ -29,29 +28,6 @@ type ModalState =
   | { type: 'editProduct'; product: Product }
   | { type: 'confirmDeleteProduct'; product: Product };
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
-
-function DialogShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-        <h2 className="text-base font-semibold text-slate-800 mb-4">{title}</h2>
-        {children}
-      </div>
-    </div>
-  );
-}
-
 export function MedicationDetailPage() {
   const navigate = useNavigate();
   const { medicationId } = useParams();
@@ -64,48 +40,35 @@ export function MedicationDetailPage() {
     variables: { id: medicationId },
   });
 
-  if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (fetching) return <Spinner />;
+  if (error) return <p className="error-text">Error: {error.message}</p>;
 
   const medication = data?.medication;
   if (!medication) return (
-    <p className="text-sm text-slate-500">
-      Medication not found.{' '}
-      <a className="text-accent hover:underline" href="/inventory">Back to inventory</a>.
-    </p>
+    <p className="subtle">Medication not found. <button className="linkbtn" onClick={() => navigate('/inventory')}>Back to inventory</button></p>
   );
 
   const products: Product[] = data?.medicinalProducts ?? [];
 
-  function closeModal() {
-    setModal(null);
-    setFormError(null);
-  }
+  function closeModal() { setModal(null); setFormError(null); }
 
   async function handleUpdateMedication(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     try {
       await createApiClient(token!).patch(`/medications/${medicationId}`, {
-        innName: fd.get('innName') as string,
-        atcCode: fd.get('atcCode') as string,
-        form: fd.get('form') as string,
-        strength: fd.get('strength') as string,
+        innName: fd.get('innName') as string, atcCode: fd.get('atcCode') as string,
+        form: fd.get('form') as string, strength: fd.get('strength') as string,
       });
-      closeModal();
-      refetch({ requestPolicy: 'network-only' });
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to update medication');
-    }
+      closeModal(); refetch({ requestPolicy: 'network-only' });
+    } catch (err) { setFormError(err instanceof Error ? err.message : 'Failed to update medication'); }
   }
 
   async function handleDeleteMedication() {
     try {
       await createApiClient(token!).del(`/medications/${medicationId}`);
       navigate('/inventory');
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to delete medication');
-    }
+    } catch (err) { setFormError(err instanceof Error ? err.message : 'Failed to delete medication'); }
   }
 
   async function handleCreateProduct(e: React.FormEvent<HTMLFormElement>) {
@@ -117,11 +80,8 @@ export function MedicationDetailPage() {
         stockLevel: parseInt(fd.get('stockLevel') as string),
         stockThreshold: parseInt(fd.get('stockThreshold') as string),
       });
-      closeModal();
-      refetch({ requestPolicy: 'network-only' });
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to add product');
-    }
+      closeModal(); refetch({ requestPolicy: 'network-only' });
+    } catch (err) { setFormError(err instanceof Error ? err.message : 'Failed to add product'); }
   }
 
   async function handleUpdateProduct(e: React.FormEvent<HTMLFormElement>, productId: string) {
@@ -132,86 +92,71 @@ export function MedicationDetailPage() {
         productName: fd.get('productName') as string,
         stockThreshold: parseInt(fd.get('stockThreshold') as string),
       });
-      closeModal();
-      refetch({ requestPolicy: 'network-only' });
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to update product');
-    }
+      closeModal(); refetch({ requestPolicy: 'network-only' });
+    } catch (err) { setFormError(err instanceof Error ? err.message : 'Failed to update product'); }
   }
 
   async function handleDeleteProduct(productId: string) {
     try {
       await createApiClient(token!).del(`/products/${productId}`);
-      closeModal();
-      refetch({ requestPolicy: 'network-only' });
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to delete product');
-    }
+      closeModal(); refetch({ requestPolicy: 'network-only' });
+    } catch (err) { setFormError(err instanceof Error ? err.message : 'Failed to delete product'); }
   }
 
   return (
-    <div>
-      <PageHeader onBack={() => navigate('/inventory')} actions={
-        <>
+    <div className="stack">
+      <div className="row" style={{ marginBottom: 8 }}>
+        <button className="backlink" onClick={() => navigate('/inventory')} style={{ marginBottom: 0 }}>← Inventory</button>
+        <div className="row" style={{ marginLeft: 'auto', gap: 8 }}>
           <Button variant="ghost" size="sm" onClick={() => { setFormError(null); setModal({ type: 'editMedication' }); }}>Edit</Button>
           <Button variant="danger" size="sm" onClick={() => { setFormError(null); setModal({ type: 'confirmDeleteMedication' }); }}>Delete</Button>
-        </>
-      } />
-
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">{medication.innName}</h1>
-        <p className="text-xs text-slate-400 font-mono mt-0.5">{medication.atcCode}</p>
+        </div>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 mb-6">
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-2">Details</h2>
+      <div>
+        <h1 className="h1">{medication.innName}</h1>
+        <div className="subtle mono" style={{ marginTop: 4, fontSize: 12.5 }}>{medication.atcCode}</div>
+      </div>
+
+      <div className="grid-2">
+        <Card className="card-pad">
+          <h2 className="h2" style={{ marginBottom: 16 }}>Details</h2>
           <InfoRow label="INN Name">{medication.innName}</InfoRow>
-          <InfoRow label="ATC Code"><span className="font-mono text-xs">{medication.atcCode}</span></InfoRow>
+          <InfoRow label="ATC Code"><span className="mono" style={{ fontSize: 13 }}>{medication.atcCode}</span></InfoRow>
           <InfoRow label="Form">{medication.form}</InfoRow>
-          <InfoRow label="Strength"><span className="font-mono text-xs">{medication.strength}</span></InfoRow>
+          <InfoRow label="Strength"><span className="mono" style={{ fontSize: 13 }}>{medication.strength}</span></InfoRow>
         </Card>
 
-        <Card className="p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-slate-700">
-              Products <span className="ml-1 text-sm font-normal text-slate-400">{products.length}</span>
-            </h2>
-            <Button size="sm" onClick={() => { setFormError(null); setModal({ type: 'addProduct' }); }}>
-              + Add Product
-            </Button>
+        <Card className="card-pad">
+          <div className="row" style={{ marginBottom: 16 }}>
+            <h2 className="h2">Products <span style={{ color: 'var(--faint)', fontWeight: 500, fontSize: 14, marginLeft: 6 }}>{products.length}</span></h2>
+            <div style={{ marginLeft: 'auto' }}>
+              <Button size="sm" onClick={() => { setFormError(null); setModal({ type: 'addProduct' }); }}>+ Add Product</Button>
+            </div>
           </div>
           {products.length === 0 ? (
-            <p className="text-sm text-slate-400">No products registered.</p>
+            <div className="empty" style={{ padding: '20px 0' }}>No products registered.</div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-left">
-                  <th className="pb-2 font-medium text-slate-500">Product</th>
-                  <th className="pb-2 font-medium text-slate-500 text-right">Stock</th>
-                  <th className="pb-2 font-medium text-slate-500 text-right">Min</th>
-                  <th className="pb-2" />
-                </tr>
-              </thead>
+            <table className="tbl">
+              <thead><tr>
+                <th className="no-sort">Product</th>
+                <th className="no-sort num">Stock</th>
+                <th className="no-sort num">Min</th>
+                <th className="no-sort ar" />
+              </tr></thead>
               <tbody>
                 {products.map(p => (
-                  <tr key={p.id} className="border-b border-slate-100 last:border-0">
-                    <td className="py-2 pr-2">
-                      <Link to={`/inventory/${p.id}`} className="text-accent hover:underline">{p.productName}</Link>
+                  <tr key={p.id}>
+                    <td><Link to={`/inventory/${p.id}`} className="link-cell">{p.productName}</Link></td>
+                    <td className={`num ${p.isBelowThreshold ? 'stock-low' : 'stock-ok'}`}>
+                      {p.stockLevel}{p.isBelowThreshold && <span style={{ marginLeft: 4, fontSize: 11 }}>⚠</span>}
                     </td>
-                    <td className={`py-2 pr-2 text-right tabular-nums font-medium ${p.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
-                      {p.stockLevel}{p.isBelowThreshold && <span className="ml-1 text-xs">⚠</span>}
-                    </td>
-                    <td className="py-2 pr-2 text-right text-slate-400 tabular-nums">{p.stockThreshold}</td>
-                    <td className="py-2 text-right">
-                      <button
-                        className="text-xs text-slate-400 hover:text-accent mr-2 transition-colors"
-                        onClick={() => { setFormError(null); setModal({ type: 'editProduct', product: p }); }}
-                      >Edit</button>
-                      <button
-                        className="text-xs text-slate-400 hover:text-red-500 transition-colors"
-                        onClick={() => { setFormError(null); setModal({ type: 'confirmDeleteProduct', product: p }); }}
-                      >Delete</button>
+                    <td className="num" style={{ color: 'var(--muted)' }}>{p.stockThreshold}</td>
+                    <td className="ar">
+                      <button className="linkbtn" style={{ fontSize: 13, marginRight: 10 }}
+                        onClick={() => { setFormError(null); setModal({ type: 'editProduct', product: p }); }}>Edit</button>
+                      <button className="linkbtn danger" style={{ fontSize: 13 }}
+                        onClick={() => { setFormError(null); setModal({ type: 'confirmDeleteProduct', product: p }); }}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -221,97 +166,87 @@ export function MedicationDetailPage() {
         </Card>
       </div>
 
-      {/* ── Modals ─────────────────────────────────────────────────────────── */}
-
       {modal?.type === 'editMedication' && (
-        <DialogShell title="Edit Medication" onClose={closeModal}>
-          <form onSubmit={handleUpdateMedication} className="space-y-3">
-            <Field label="INN Name">
-              <input name="innName" defaultValue={medication.innName} required className={inputCls} />
-            </Field>
-            <Field label="ATC Code">
-              <input name="atcCode" defaultValue={medication.atcCode} required className={inputCls} />
-            </Field>
-            <Field label="Form">
-              <select name="form" defaultValue={medication.form} className={inputCls}>
-                {FORMS.map(f => <option key={f} value={f}>{f}</option>)}
-              </select>
-            </Field>
-            <Field label="Strength">
-              <input name="strength" defaultValue={medication.strength} required className={inputCls} />
-            </Field>
-            {formError && <p role="alert" className="text-xs text-red-600">{formError}</p>}
-            <div className="flex gap-2 justify-end pt-1">
-              <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
-              <Button type="submit">Save</Button>
-            </div>
-          </form>
-        </DialogShell>
+        <div className="scrim" onMouseDown={closeModal}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Edit Medication</h3>
+            <form onSubmit={handleUpdateMedication}>
+              <div className="field"><label className="label">INN Name</label><input name="innName" defaultValue={medication.innName} required className="input" /></div>
+              <div className="field"><label className="label">ATC Code</label><input name="atcCode" defaultValue={medication.atcCode} required className="input" /></div>
+              <div className="field"><label className="label">Form</label>
+                <select name="form" defaultValue={medication.form} className="select">{FORMS.map(f => <option key={f} value={f}>{f}</option>)}</select></div>
+              <div className="field"><label className="label">Strength</label><input name="strength" defaultValue={medication.strength} required className="input" /></div>
+              {formError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{formError}</p>}
+              <div className="modal-actions">
+                <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
+                <Button type="submit">Save</Button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {modal?.type === 'confirmDeleteMedication' && (
-        <DialogShell title="Delete Medication" onClose={closeModal}>
-          <p className="text-sm text-slate-600 mb-4">
-            Delete <strong>{medication.innName}</strong>? This cannot be undone. All products must be removed first.
-          </p>
-          {formError && <p role="alert" className="text-xs text-red-600 mb-3">{formError}</p>}
-          <div className="flex gap-2 justify-end">
-            <Button variant="ghost" onClick={closeModal}>Cancel</Button>
-            <Button variant="danger" onClick={handleDeleteMedication}>Delete</Button>
+        <div className="scrim" onMouseDown={closeModal}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Delete Medication</h3>
+            <div className="msub">Delete <strong>{medication.innName}</strong>? This cannot be undone. All products must be removed first.</div>
+            {formError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{formError}</p>}
+            <div className="modal-actions">
+              <Button variant="ghost" onClick={closeModal}>Cancel</Button>
+              <Button variant="danger" onClick={handleDeleteMedication}>Delete</Button>
+            </div>
           </div>
-        </DialogShell>
+        </div>
       )}
 
       {modal?.type === 'addProduct' && (
-        <DialogShell title="Add Product" onClose={closeModal}>
-          <form onSubmit={handleCreateProduct} className="space-y-3">
-            <Field label="Product Name">
-              <input name="productName" required placeholder="e.g. Alvedon 500 mg" className={inputCls} />
-            </Field>
-            <Field label="Initial Stock">
-              <input name="stockLevel" type="number" min={0} defaultValue={0} required className={inputCls} />
-            </Field>
-            <Field label="Minimum Threshold">
-              <input name="stockThreshold" type="number" min={0} defaultValue={50} required className={inputCls} />
-            </Field>
-            {formError && <p role="alert" className="text-xs text-red-600">{formError}</p>}
-            <div className="flex gap-2 justify-end pt-1">
-              <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
-              <Button type="submit">Add Product</Button>
-            </div>
-          </form>
-        </DialogShell>
+        <div className="scrim" onMouseDown={closeModal}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Add Product</h3>
+            <form onSubmit={handleCreateProduct}>
+              <div className="field"><label className="label">Product Name</label><input name="productName" required placeholder="e.g. Alvedon 500 mg" className="input" /></div>
+              <div className="field"><label className="label">Initial Stock</label><input name="stockLevel" type="number" min={0} defaultValue={0} required className="input" /></div>
+              <div className="field"><label className="label">Minimum Threshold</label><input name="stockThreshold" type="number" min={0} defaultValue={50} required className="input" /></div>
+              {formError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{formError}</p>}
+              <div className="modal-actions">
+                <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
+                <Button type="submit">Add Product</Button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {modal?.type === 'editProduct' && (
-        <DialogShell title="Edit Product" onClose={closeModal}>
-          <form onSubmit={(e) => handleUpdateProduct(e, modal.product.id)} className="space-y-3">
-            <Field label="Product Name">
-              <input name="productName" defaultValue={modal.product.productName} required className={inputCls} />
-            </Field>
-            <Field label="Minimum Threshold">
-              <input name="stockThreshold" type="number" min={0} defaultValue={modal.product.stockThreshold} required className={inputCls} />
-            </Field>
-            {formError && <p role="alert" className="text-xs text-red-600">{formError}</p>}
-            <div className="flex gap-2 justify-end pt-1">
-              <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
-              <Button type="submit">Save</Button>
-            </div>
-          </form>
-        </DialogShell>
+        <div className="scrim" onMouseDown={closeModal}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Edit Product</h3>
+            <form onSubmit={(e) => handleUpdateProduct(e, modal.product.id)}>
+              <div className="field"><label className="label">Product Name</label><input name="productName" defaultValue={modal.product.productName} required className="input" /></div>
+              <div className="field"><label className="label">Minimum Threshold</label><input name="stockThreshold" type="number" min={0} defaultValue={modal.product.stockThreshold} required className="input" /></div>
+              {formError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{formError}</p>}
+              <div className="modal-actions">
+                <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
+                <Button type="submit">Save</Button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {modal?.type === 'confirmDeleteProduct' && (
-        <DialogShell title="Delete Product" onClose={closeModal}>
-          <p className="text-sm text-slate-600 mb-4">
-            Delete <strong>{modal.product.productName}</strong>? This cannot be undone.
-          </p>
-          {formError && <p role="alert" className="text-xs text-red-600 mb-3">{formError}</p>}
-          <div className="flex gap-2 justify-end">
-            <Button variant="ghost" onClick={closeModal}>Cancel</Button>
-            <Button variant="danger" onClick={() => handleDeleteProduct(modal.product.id)}>Delete</Button>
+        <div className="scrim" onMouseDown={closeModal}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Delete Product</h3>
+            <div className="msub">Delete <strong>{modal.product.productName}</strong>? This cannot be undone.</div>
+            {formError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{formError}</p>}
+            <div className="modal-actions">
+              <Button variant="ghost" onClick={closeModal}>Cancel</Button>
+              <Button variant="danger" onClick={() => handleDeleteProduct(modal.product.id)}>Delete</Button>
+            </div>
           </div>
-        </DialogShell>
+        </div>
       )}
     </div>
   );

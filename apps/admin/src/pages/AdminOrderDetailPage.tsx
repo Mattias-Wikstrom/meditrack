@@ -1,7 +1,6 @@
-// Used for /orders/:orderId (admin)
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'urql';
-import { PageHeader, OrderStatusBadge, Card, Spinner, formatDateTime } from '@meditrack/ui';
+import { OrderStatusBadge, Card, Spinner, formatDateTime } from '@meditrack/ui';
 import { useRefetchOn } from '@meditrack/client';
 
 const ORDER_DETAIL_QUERY = `
@@ -27,60 +26,52 @@ export function AdminOrderDetailPage() {
   });
   useRefetchOn('Order', () => refetch({ requestPolicy: 'network-only' }));
 
-  if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (fetching) return <Spinner />;
+  if (error) return <p className="error-text">Error: {error.message}</p>;
 
   const order = data?.order;
   if (!order) return (
-    <p className="text-sm text-slate-500">
-      Order not found.{' '}
-      <a className="text-accent hover:underline" href="/orders">Back to list</a>.
-    </p>
+    <p className="subtle">Order not found. <button className="linkbtn" onClick={() => navigate('/orders')}>Back to list</button></p>
   );
 
   return (
-    <div className="max-w-xl">
-      <PageHeader onBack={() => navigate('/orders')} className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">
-          Order <span className="font-mono text-base">{order.id.slice(0, 8)}…</span>
-        </h1>
-        <OrderStatusBadge status={order.status} />
-      </PageHeader>
+    <div className="stack" style={{ maxWidth: 760 }}>
+      <button className="backlink" onClick={() => navigate('/orders')}>← Orders</button>
 
-      <Card className="p-5 mb-4">
-        <dl className="text-sm space-y-0">
-          <div className="flex justify-between items-baseline py-2.5 border-b border-slate-100">
-            <dt className="text-slate-500">Ward Unit</dt>
-            <dd>
-              <Link to={`/ward-units/${order.wardUnitId}`} className="text-accent hover:underline">
-                {order.wardUnit?.name ?? order.wardUnitId}
-              </Link>
-            </dd>
-          </div>
-          <div className="flex justify-between items-baseline py-2.5 border-b border-slate-100">
-            <dt className="text-slate-500">Created</dt>
-            <dd className="text-slate-700">{formatDateTime(order.createdAt)}</dd>
-          </div>
-          <div className="flex justify-between items-baseline py-2.5">
-            <dt className="text-slate-500">Order ID</dt>
-            <dd className="font-mono text-xs text-slate-400">{order.id}</dd>
-          </div>
-        </dl>
+      <div className="row" style={{ gap: 14 }}>
+        <h1 className="h1">Order</h1>
+        <OrderStatusBadge status={order.status} />
+        <span className="subtle mono" style={{ fontSize: 12.5 }}>{order.id.slice(0, 8)}…</span>
+      </div>
+
+      <Card className="card-pad" style={{ paddingTop: 6, paddingBottom: 6 }}>
+        <div className="defrow">
+          <span className="k">Ward Unit</span>
+          <Link to={`/ward-units/${order.wardUnitId}`} className="link-cell">{order.wardUnit?.name ?? order.wardUnitId}</Link>
+        </div>
+        <div className="defrow">
+          <span className="k">Created</span>
+          <span className="v">{formatDateTime(order.createdAt)}</span>
+        </div>
+        <div className="defrow">
+          <span className="k">Order ID</span>
+          <span className="mono" style={{ fontSize: 12.5, color: 'var(--faint)' }}>{order.id}</span>
+        </div>
       </Card>
 
-      <Card className="overflow-hidden">
-        <table className="w-full text-sm">
+      <Card>
+        <table className="tbl">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left">
-              <th className="px-5 py-3 font-medium text-slate-600">Medication</th>
-              <th className="px-5 py-3 font-medium text-slate-600 text-right">Quantity</th>
+            <tr>
+              <th className="no-sort">Medication</th>
+              <th className="no-sort num">Quantity</th>
             </tr>
           </thead>
           <tbody>
             {order.lines.map((line: { medicationId: string; quantity: number; medication?: { innName: string } | null }) => (
-              <tr key={line.medicationId} className="border-b border-slate-100 last:border-0">
-                <td className="px-5 py-3 text-slate-800">{line.medication?.innName ?? line.medicationId}</td>
-                <td className="px-5 py-3 text-right font-medium tabular-nums text-slate-700">{line.quantity}</td>
+              <tr key={line.medicationId}>
+                <td>{line.medication?.innName ?? line.medicationId}</td>
+                <td className="num">{line.quantity}</td>
               </tr>
             ))}
           </tbody>

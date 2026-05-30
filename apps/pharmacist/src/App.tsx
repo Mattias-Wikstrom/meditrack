@@ -30,7 +30,7 @@ export function App() {
   const urqlClient = useMemo(() => (token ? createUrqlClient(token, logout) : null), [token, logout]);
 
   if (!token || !urqlClient) {
-    return <LoginPage role="Pharmacist" appName="Pharmacy" onLogin={login} />;
+    return <LoginPage role="Pharmacist" appName="Pharmacy" appRole="pharmacist" onLogin={login} />;
   }
 
   return (
@@ -39,6 +39,7 @@ export function App() {
       <AppShell
         appName="Pharmacy"
         actorName={actorId!}
+        role="pharmacist"
         nav={<PharmacistNav />}
         onHome={() => navigate('/')}
         onProfile={() => navigate('/me')}

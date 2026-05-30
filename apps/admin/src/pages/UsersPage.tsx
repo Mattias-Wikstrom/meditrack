@@ -1,4 +1,3 @@
-// Used for /users (admin)
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
@@ -18,7 +17,6 @@ const ACTORS_QUERY = /* GraphQL */ `
 `;
 
 const ROLES = ['Nurse', 'Pharmacist', 'Admin'] as const;
-const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
 type SortKey = 'id' | 'role' | 'wardUnit';
 type SortDir = 'asc' | 'desc';
@@ -41,8 +39,8 @@ export function UsersPage() {
     else { setSortKey(key); setSortDir('asc'); }
   }
 
-  if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (fetching) return <Spinner />;
+  if (error) return <p className="error-text">Error: {error.message}</p>;
 
   type Actor = { id: string; role: string; wardUnitId?: string | null; wardUnit?: { name: string } | null };
   type WardUnit = { id: string; name: string };
@@ -50,30 +48,19 @@ export function UsersPage() {
   const wardUnits: WardUnit[] = data?.wardUnits ?? [];
   const filtered = roleFilter ? actors.filter(a => a.role === roleFilter) : actors;
   const sorted = [...filtered].sort((a, b) => {
-    let av: string;
-    let bv: string;
+    let av: string, bv: string;
     if (sortKey === 'id') { av = a.id; bv = b.id; }
     else if (sortKey === 'role') { av = a.role; bv = b.role; }
     else { av = a.wardUnit?.name ?? a.wardUnitId ?? ''; bv = b.wardUnit?.name ?? b.wardUnitId ?? ''; }
-    const cmp = av.localeCompare(bv);
-    return sortDir === 'asc' ? cmp : -cmp;
+    return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
   });
-
-  const th = (label: string, key: SortKey) => (
-    <th
-      className="text-left py-3 px-4 font-medium text-slate-600 cursor-pointer select-none whitespace-nowrap hover:text-slate-900"
-      onClick={() => toggleSort(key)}
-    >
-      {label}<SortIcon active={sortKey === key} dir={sortDir} />
-    </th>
-  );
 
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const wardUnitId = fd.get('wardUnitId') as string | null;
     try {
-      const actor = await createApiClient(token!).post<{ id: string }>('/actors', {
+      await createApiClient(token!).post<{ id: string }>('/actors', {
         id: fd.get('id') as string,
         role: fd.get('role') as string,
         wardUnitId: wardUnitId || undefined,
@@ -81,98 +68,97 @@ export function UsersPage() {
       });
       setShowCreate(false);
       setCreateError(null);
-      navigate(`/users/${actor.id}`);
+      refetch({ requestPolicy: 'network-only' });
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : 'Failed to create user');
     }
   }
 
-  return (
-    <div>
-      {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => { setShowCreate(false); setCreateError(null); }} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-4">New User</h2>
-            <form onSubmit={handleCreate} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Username</label>
-                <input name="id" required placeholder="e.g. nurse.anna" className={inputCls} />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Role</label>
-                <select name="role" value={selectedRole} onChange={e => setSelectedRole(e.target.value)} className={inputCls}>
-                  {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
-              </div>
-              {selectedRole === 'Nurse' && (
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Ward Unit</label>
-                  <select name="wardUnitId" required className={inputCls}>
-                    <option value="">— Select ward unit —</option>
-                    {wardUnits.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-                  </select>
-                </div>
-              )}
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Password</label>
-                <input name="password" type="password" required className={inputCls} />
-              </div>
-              {createError && <p role="alert" className="text-xs text-red-600">{createError}</p>}
-              <div className="flex gap-2 justify-end pt-1">
-                <Button type="button" variant="ghost" onClick={() => { setShowCreate(false); setCreateError(null); }}>Cancel</Button>
-                <Button type="submit">Create</Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+  const th = (label: string, key: SortKey) => (
+    <th onClick={() => toggleSort(key)}>
+      {label}<SortIcon active={sortKey === key} dir={sortDir} />
+    </th>
+  );
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">
-          Users
-          <span className="ml-2 text-sm font-normal text-slate-400">{sorted.length}</span>
-        </h1>
-        <div className="flex gap-3">
+  return (
+    <div className="stack">
+      <div className="h-row">
+        <h1 className="h1">Users</h1>
+        <div className="row" style={{ gap: 10 }}>
           <select
             value={roleFilter}
             onChange={e => setRoleFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+            className="select"
+            style={{ width: 'auto', minWidth: 140 }}
           >
             <option value="">All roles</option>
-            <option value="Nurse">Nurse</option>
-            <option value="Pharmacist">Pharmacist</option>
-            <option value="Admin">Admin</option>
+            {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
-          <Button onClick={() => { setShowCreate(true); setCreateError(null); setSelectedRole('Nurse'); }}>+ New User</Button>
+          <Button onClick={() => setShowCreate(true)}>+ Add User</Button>
         </div>
       </div>
 
-      <Card className="overflow-hidden">
-        <table className="w-full text-sm">
+      <Card>
+        <table className="tbl">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50">
-              {th('Username', 'id')}
+            <tr>
+              {th('User ID', 'id')}
               {th('Role', 'role')}
               {th('Ward Unit', 'wardUnit')}
             </tr>
           </thead>
           <tbody>
             {sorted.map(actor => (
-              <tr key={actor.id} onClick={() => navigate(`/users/${actor.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
-                <td className="py-3 px-4 font-medium text-slate-800">{actor.id}</td>
-                <td className="py-3 px-4"><RoleBadge role={actor.role} /></td>
-                <td className="py-3 px-4 text-slate-600">{actor.wardUnit?.name ?? actor.wardUnitId ?? <span className="text-slate-300">—</span>}</td>
+              <tr key={actor.id} className="clickable" onClick={() => navigate(`/users/${actor.id}`)}>
+                <td><span className="medname">{actor.id}</span></td>
+                <td><RoleBadge role={actor.role} /></td>
+                <td>{actor.wardUnit?.name ?? <span style={{ color: 'var(--faint)' }}>—</span>}</td>
               </tr>
             ))}
             {sorted.length === 0 && (
-              <tr>
-                <td colSpan={3} className="py-12 text-center text-slate-400">No users found.</td>
-              </tr>
+              <tr><td colSpan={3}><div className="empty">No users found.</div></td></tr>
             )}
           </tbody>
         </table>
       </Card>
+
+      {showCreate && (
+        <div className="scrim" onMouseDown={() => setShowCreate(false)}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()}>
+            <h3>Add User</h3>
+            <form onSubmit={handleCreate}>
+              <div className="field">
+                <label className="label">User ID</label>
+                <input name="id" required className="input" placeholder="e.g. nurse-john" />
+              </div>
+              <div className="field">
+                <label className="label">Role</label>
+                <select name="role" className="select" value={selectedRole} onChange={e => setSelectedRole(e.target.value)}>
+                  {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              {selectedRole === 'Nurse' && (
+                <div className="field">
+                  <label className="label">Ward Unit</label>
+                  <select name="wardUnitId" className="select">
+                    <option value="">None</option>
+                    {wardUnits.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                  </select>
+                </div>
+              )}
+              <div className="field">
+                <label className="label">Password</label>
+                <input name="password" type="password" required className="input" autoComplete="new-password" />
+              </div>
+              {createError && <p role="alert" className="error-text" style={{ marginBottom: 12 }}>{createError}</p>}
+              <div className="modal-actions">
+                <Button type="button" variant="ghost" onClick={() => setShowCreate(false)}>Cancel</Button>
+                <Button type="submit">Add User</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

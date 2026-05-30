@@ -1,9 +1,8 @@
-// Used for /orders (admin)
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'urql';
 import { useRefetchOn } from '@meditrack/client';
-import { Card, OrderStatusBadge, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
+import { OrderStatusBadge, Spinner, SortIcon, LineList, STATUS_RANK, formatDate } from '@meditrack/ui';
 import { graphql } from '../gql';
 
 const ORDERS_QUERY = graphql(`
@@ -30,12 +29,10 @@ type OrderRow = {
 function sortOrders(orders: OrderRow[], key: SortKey, dir: SortDir): OrderRow[] {
   return [...orders].sort((a, b) => {
     let cmp = 0;
-    switch (key) {
-      case 'wardUnit':  cmp = (a.wardUnit?.name ?? a.wardUnitId).localeCompare(b.wardUnit?.name ?? b.wardUnitId); break;
-      case 'lines':     cmp = a.lines.length - b.lines.length; break;
-      case 'createdAt': cmp = a.createdAt.localeCompare(b.createdAt); break;
-      case 'status':    cmp = (STATUS_RANK[a.status] ?? 0) - (STATUS_RANK[b.status] ?? 0); break;
-    }
+    if (key === 'wardUnit')  cmp = (a.wardUnit?.name ?? a.wardUnitId).localeCompare(b.wardUnit?.name ?? b.wardUnitId);
+    if (key === 'lines')     cmp = a.lines.length - b.lines.length;
+    if (key === 'createdAt') cmp = a.createdAt.localeCompare(b.createdAt);
+    if (key === 'status')    cmp = (STATUS_RANK[a.status] ?? 0) - (STATUS_RANK[b.status] ?? 0);
     return dir === 'asc' ? cmp : -cmp;
   });
 }
@@ -54,33 +51,28 @@ export function OrdersPage() {
     else { setSortKey(key); setSortDir('asc'); }
   }
 
-  if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (fetching && !data) return <Spinner />;
+  if (error) return <p className="error-text">Error: {error.message}</p>;
 
-  const all = data?.orders ?? [];
-  const filtered = statusFilter ? all.filter(o => o.status === statusFilter) : all;
+  const all: OrderRow[] = data?.orders ?? [];
+  const filtered = statusFilter ? all.filter((o: OrderRow) => o.status === statusFilter) : all;
   const sorted = sortOrders(filtered, sortKey, sortDir);
 
   const th = (label: string, key: SortKey) => (
-    <th
-      className="text-left py-3 px-4 font-medium text-slate-600 cursor-pointer select-none whitespace-nowrap hover:text-slate-900"
-      onClick={() => toggleSort(key)}
-    >
+    <th onClick={() => toggleSort(key)}>
       {label}<SortIcon active={sortKey === key} dir={sortDir} />
     </th>
   );
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">
-          Orders
-          <span className="ml-2 text-sm font-normal text-slate-400">{sorted.length}</span>
-        </h1>
+    <div className="stack">
+      <div className="h-row">
+        <h1 className="h1">Orders <span className="count" style={{ color: 'var(--faint)', fontWeight: 500, fontSize: 20 }}>{sorted.length}</span></h1>
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+          className="select"
+          style={{ width: 'auto', minWidth: 160 }}
         >
           <option value="">All statuses</option>
           <option value="Draft">Draft</option>
@@ -90,41 +82,41 @@ export function OrdersPage() {
         </select>
       </div>
 
-      <Card className="overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="card">
+        <table className="tbl">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50">
+            <tr>
               {th('Created', 'createdAt')}
               {th('Status', 'status')}
               {th('Ward Unit', 'wardUnit')}
               {th('Medications', 'lines')}
-              <th className="text-left py-3 px-4 font-medium text-slate-600">Order ID</th>
+              <th className="no-sort">Order ID</th>
             </tr>
           </thead>
           <tbody>
             {sorted.map(order => (
-              <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
-                <td className="py-3 px-4 text-slate-500 whitespace-nowrap">{formatDate(order.createdAt)}</td>
-                <td className="py-3 px-4"><OrderStatusBadge status={order.status} /></td>
-                <td className="py-3 px-4">
-                  <Link to={`/ward-units/${order.wardUnitId}`} onClick={e => e.stopPropagation()} className="text-accent hover:underline">
+              <tr key={order.id} className="clickable" onClick={() => navigate(`/orders/${order.id}`)}>
+                <td style={{ whiteSpace: 'nowrap' }}>{formatDate(order.createdAt)}</td>
+                <td><OrderStatusBadge status={order.status} /></td>
+                <td>
+                  <Link to={`/ward-units/${order.wardUnitId}`} className="link-cell" onClick={e => e.stopPropagation()}>
                     {order.wardUnit?.name ?? order.wardUnitId}
                   </Link>
                 </td>
-                <td className="py-3 px-4"><LineList lines={order.lines} limit={3} /></td>
-                <td className="py-3 px-4 text-slate-400 font-mono text-xs">{order.id}</td>
+                <td><LineList lines={order.lines} limit={3} /></td>
+                <td><span className="mono minicode">{order.id.slice(0, 12)}…</span></td>
               </tr>
             ))}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-slate-400">
-                  {statusFilter ? `No ${statusFilter.toLowerCase()} orders.` : 'No orders found.'}
+                <td colSpan={5}>
+                  <div className="empty">{statusFilter ? `No ${statusFilter.toLowerCase()} orders.` : 'No orders found.'}</div>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-      </Card>
+      </div>
     </div>
   );
 }

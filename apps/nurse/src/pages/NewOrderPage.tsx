@@ -1,8 +1,7 @@
-// Used for /orders/new (nurse)
 import { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClient } from 'urql';
-import { MedicationSearch, Button, Card, PageHeader } from '@meditrack/ui';
+import { MedicationSearch, Button, Card } from '@meditrack/ui';
 import type { MedicationOption } from '@meditrack/ui';
 import { useOrdersApi } from '../api/orders';
 import { graphql } from '../gql';
@@ -28,8 +27,6 @@ export function NewOrderPage() {
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Stable ref so async callbacks always see the current draft id
   const draftIdRef = useRef<string | null>(null);
 
   const fetcher = useCallback(async (query: string): Promise<MedicationOption[]> => {
@@ -37,10 +34,6 @@ export function NewOrderPage() {
     return result.data?.medications ?? [];
   }, [urql]);
 
-  /**
-   * Persist the current lines to the server.
-   * First call creates the draft; subsequent calls update its lines.
-   */
   async function persist(nextLines: Line[]) {
     setSaving(true);
     setError(null);
@@ -60,20 +53,20 @@ export function NewOrderPage() {
   }
 
   function addLine(med: MedicationOption) {
-    if (lines.some((l) => l.medicationId === med.id)) return;
+    if (lines.some(l => l.medicationId === med.id)) return;
     const next = [...lines, { medicationId: med.id, innName: med.innName, strength: med.strength, quantity: 1 }];
     setLines(next);
     void persist(next);
   }
 
   function updateQty(medicationId: string, qty: number) {
-    const next = lines.map((l) => l.medicationId === medicationId ? { ...l, quantity: Math.max(1, qty) } : l);
+    const next = lines.map(l => l.medicationId === medicationId ? { ...l, quantity: Math.max(1, qty) } : l);
     setLines(next);
     if (draftIdRef.current !== null) void persist(next);
   }
 
   function removeLine(medicationId: string) {
-    const next = lines.filter((l) => l.medicationId !== medicationId);
+    const next = lines.filter(l => l.medicationId !== medicationId);
     setLines(next);
     if (draftIdRef.current !== null) void persist(next);
   }
@@ -94,45 +87,55 @@ export function NewOrderPage() {
   const busy = saving || sending;
 
   return (
-    <div className="max-w-xl">
-      <PageHeader
-        onBack={() => navigate('/orders')}
-        className="mb-6"
-        actions={saving ? <span className="text-xs text-slate-400">Saving…</span> : undefined}
-      >
-        <h1 className="text-xl font-semibold text-slate-800">New Order</h1>
-      </PageHeader>
+    <div className="stack" style={{ maxWidth: 760 }}>
+      <button className="backlink" onClick={() => navigate('/orders')}>← Orders</button>
+      <div>
+        <h1 className="h1" style={{ marginBottom: 4 }}>New Order</h1>
+        {saving && <span className="subtle">Saving…</span>}
+      </div>
 
       {lines.length > 0 && (
-        <Card className="mb-6 divide-y divide-slate-100">
-          {lines.map((line) => (
-            <div key={line.medicationId} className="flex items-center gap-3 px-4 py-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 truncate">{line.innName}</p>
-                <p className="text-xs text-slate-400">{line.strength}</p>
+        <Card className="card-pad" style={{ paddingTop: 6, paddingBottom: 6 }}>
+          {lines.map(line => (
+            <div key={line.medicationId} className="line">
+              <div>
+                <div className="lname">{line.innName}</div>
+                <div className="lmeta">{line.strength}</div>
               </div>
-              <div className="flex items-center gap-2">
-                <button onClick={() => updateQty(line.medicationId, line.quantity - 1)} className="w-7 h-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center justify-center text-sm">−</button>
-                <span className="w-8 text-center text-sm font-medium text-slate-700">{line.quantity}</span>
-                <button onClick={() => updateQty(line.medicationId, line.quantity + 1)} className="w-7 h-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center justify-center text-sm">+</button>
+              <div className="row">
+                <div className="stepper">
+                  <button onClick={() => updateQty(line.medicationId, line.quantity - 1)}>–</button>
+                  <span className="v">{line.quantity}</span>
+                  <button onClick={() => updateQty(line.medicationId, line.quantity + 1)}>+</button>
+                </div>
+                <button className="iconbtn" onClick={() => removeLine(line.medicationId)} aria-label="Remove">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 6l12 12"/><path d="M18 6L6 18"/>
+                  </svg>
+                </button>
               </div>
-              <button onClick={() => removeLine(line.medicationId)} className="text-slate-300 hover:text-red-400 transition-colors ml-1 text-lg leading-none">×</button>
             </div>
           ))}
         </Card>
       )}
 
-      <div className="mb-10">
+      <div>
         <MedicationSearch label="Medication to add" onSelect={addLine} fetcher={fetcher} />
-        {lines.length > 0 && (
-          <p className="mt-2 text-xs text-slate-400">Add additional medications by typing their names above.</p>
-        )}
+        <div className="hint">
+          {lines.length === 0
+            ? 'Search by generic (INN) name to add the first medication.'
+            : 'Add more medications by searching above.'}
+        </div>
       </div>
 
-      {error && <p role="alert" className="text-red-600 text-sm mb-4">{error}</p>}
+      {error && <p role="alert" className="error-text">{error}</p>}
 
-      <Button onClick={handleSend} disabled={busy || lines.length === 0} className="w-full">
-        {sending ? 'Sending…' : 'Send Order'}
+      <Button
+        className="btn-block"
+        onClick={handleSend}
+        disabled={busy || lines.length === 0}
+      >
+        {sending ? 'Sending…' : `Send Order${lines.length > 0 ? ` · ${lines.length} item${lines.length > 1 ? 's' : ''}` : ''}`}
       </Button>
     </div>
   );

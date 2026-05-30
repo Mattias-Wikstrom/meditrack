@@ -1,7 +1,4 @@
-// Used on the Overview ('/') tab in the Admin and Pharmacist apps
-// These have in common that they show an overview for orders as well as medicines
 import { Link } from 'react-router-dom';
-import { Card } from './Card';
 
 export interface OverviewProduct {
   id: string;
@@ -20,106 +17,106 @@ export interface OverviewOrder {
 export interface OrderAndStockOverviewProps {
   products: OverviewProduct[];
   orders: OverviewOrder[];
-  /** If provided, low-stock items become links to this href */
   getProductHref?: (productId: string) => string;
-  /** href for the "Total Medications" stat card */
   inventoryHref?: string;
-  /** href for the "Low Stock Alerts" stat card (inventory sorted so low-stock items appear first) */
   lowStockHref?: string;
-  /** href for the "Total Orders" stat card */
   ordersHref?: string;
 }
 
 const ORDER_STATUSES = ['Draft', 'Sent', 'Confirmed', 'Delivered'] as const;
-
 const ORDER_STATUS_LABELS: Record<string, string> = {
-  Draft:     'Draft Orders',
-  Sent:      'Submitted Orders',
-  Confirmed: 'Confirmed Orders',
-  Delivered: 'Delivered Orders',
+  Draft: 'Draft', Sent: 'Submitted', Confirmed: 'Confirmed', Delivered: 'Delivered',
 };
-
-function StatCard({ title, value, subtitle, danger = false, href }: {
-  title: string; value: number; subtitle: string; danger?: boolean; href?: string;
-}) {
-  const card = (
-    <Card className={`p-3 ${danger ? 'border-red-300' : ''}${href ? ' hover:bg-slate-50 transition-colors' : ''}`}>
-      <div className="flex items-baseline justify-between">
-        <span className={`text-2xl font-bold tabular-nums ${danger ? 'text-red-600' : 'text-slate-900'}`}>{value}</span>
-        {danger && <span aria-hidden="true" className="text-red-400 text-sm">⚠</span>}
-      </div>
-      <p className="mt-0.5 text-sm font-medium text-slate-700">{title}</p>
-      <p className="text-xs text-slate-400">{subtitle}</p>
-    </Card>
-  );
-  return href ? <Link to={href} className="block">{card}</Link> : card;
-}
+const STATUS_CLS: Record<string, string> = {
+  Draft: 'draft', Sent: 'sent', Confirmed: 'confirmed', Delivered: 'delivered',
+};
 
 export function OrderAndStockOverview({ products, orders, getProductHref, inventoryHref, lowStockHref, ordersHref }: OrderAndStockOverviewProps) {
   const lowStock = products.filter(p => p.isBelowThreshold);
-  const pendingOrders = orders.filter(o => o.status !== 'Delivered').length;
+  const active = orders.filter(o => o.status !== 'Delivered').length;
   const byStatus = (s: string) => orders.filter(o => o.status === s).length;
 
+  const tileContent = (value: number, label: string, note: string, alert = false) => (
+    <div className={`tile${alert && value > 0 ? ' alert' : ''}`}>
+      {alert && value > 0 && (
+        <span className="tcorner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 9v4"/><path d="M12 17h.01"/>
+            <path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
+          </svg>
+        </span>
+      )}
+      <div className="tval">{value}</div>
+      <div className="tlabel">{label}</div>
+      <div className="tnote">{note}</div>
+    </div>
+  );
+
   return (
-    <div className="space-y-3">
-      <div className="grid gap-3 grid-cols-4">
-        <StatCard title="Total Medications" value={products.length} subtitle="In drug registry" href={inventoryHref} />
-        <StatCard title="Low Stock Alerts" value={lowStock.length} subtitle="Below minimum threshold" danger={lowStock.length > 0} href={lowStockHref} />
-        <StatCard title="Total Orders" value={orders.length} subtitle="All time orders" href={ordersHref} />
-        <StatCard title="Pending Orders" value={pendingOrders} subtitle="Awaiting completion" />
+    <div className="stack">
+      <div className="tiles">
+        {inventoryHref
+          ? <Link to={inventoryHref} style={{ textDecoration: 'none' }}>{tileContent(products.length, 'Total Medications', 'In drug registry')}</Link>
+          : tileContent(products.length, 'Total Medications', 'In drug registry')}
+        {lowStockHref
+          ? <Link to={lowStockHref} style={{ textDecoration: 'none' }}>{tileContent(lowStock.length, 'Low Stock Alerts', 'Below minimum threshold', true)}</Link>
+          : tileContent(lowStock.length, 'Low Stock Alerts', 'Below minimum threshold', true)}
+        {ordersHref
+          ? <Link to={ordersHref} style={{ textDecoration: 'none' }}>{tileContent(orders.length, 'Total Orders', 'All time orders')}</Link>
+          : tileContent(orders.length, 'Total Orders', 'All time orders')}
+        {tileContent(active, 'Pending Orders', 'Awaiting completion')}
       </div>
 
-      <div className="grid gap-3 grid-cols-2">
-        <Card className={`p-3 ${lowStock.length > 0 ? 'border-red-300' : ''}`}>
-          <h3 className={`text-sm font-semibold mb-0.5 ${lowStock.length > 0 ? 'text-red-600' : 'text-slate-800'}`}>
-            <span aria-hidden="true">⚠ </span>Low Stock Alerts
-          </h3>
-          <p className="text-xs text-slate-500 mb-2">
-            {lowStock.length} medication{lowStock.length === 1 ? '' : 's'} below minimum threshold
-          </p>
-          <div className="space-y-1.5">
-            {lowStock.length === 0 && <p className="text-sm text-slate-400">No low stock medications.</p>}
-            {lowStock.map(product => {
+      <div className="grid-2">
+        <div className={`alertcard${lowStock.length > 0 ? '' : ''}`}>
+          <div className="alert-hd">
+            <div className="t">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 9v4"/><path d="M12 17h.01"/>
+                <path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
+              </svg>
+              Low Stock Alerts
+            </div>
+            <div className="s">{lowStock.length} medication{lowStock.length !== 1 ? 's' : ''} below minimum threshold</div>
+          </div>
+          {lowStock.length === 0 ? (
+            <div className="empty" style={{ paddingTop: 20, paddingBottom: 24 }}>All stock levels are adequate.</div>
+          ) : (
+            lowStock.map(product => {
               const inner = (
                 <>
                   <div>
-                    <div className="text-sm font-medium text-slate-900">{product.productName}</div>
-                    <div className="text-xs text-slate-500">{product.medication?.innName ?? '—'} · {product.medication?.atcCode ?? '—'} · {product.medication?.strength ?? '—'}</div>
+                    <div className="ln">{product.productName}</div>
+                    <div className="lm">{product.medication?.innName ?? '—'} · {product.medication?.atcCode ?? '—'}</div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-medium tabular-nums">
-                    <span className="rounded-full bg-red-600 text-white px-2 py-0.5">{product.stockLevel}</span>
-                    <span className="text-slate-400">→</span>
-                    <span className="rounded-full border border-slate-300 text-slate-600 px-2 py-0.5">{product.stockThreshold}</span>
+                  <div className="chip">
+                    <span className="now">{product.stockLevel}</span>
+                    <span className="arrow">→</span>
+                    <span className="min">{product.stockThreshold} min</span>
                   </div>
                 </>
               );
-
-              const className = 'flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2 hover:bg-red-100 transition-colors';
-
               return getProductHref ? (
-                <Link key={product.id} to={getProductHref(product.id)} className={className}>
-                  {inner}
-                </Link>
+                <Link key={product.id} to={getProductHref(product.id)} className="lowrow">{inner}</Link>
               ) : (
-                <div key={product.id} className={className}>
-                  {inner}
-                </div>
+                <div key={product.id} className="lowrow">{inner}</div>
               );
-            })}
-          </div>
-        </Card>
+            })
+          )}
+        </div>
 
-        <Card className="p-3">
-          <h3 className="text-sm font-semibold text-slate-800 mb-2">Quick Stats</h3>
-          <dl className="space-y-1.5">
-            {ORDER_STATUSES.map(status => (
-              <div key={status} className="flex items-center justify-between text-sm border-b border-slate-100 pb-1.5 last:border-0 last:pb-0">
-                <dt className="text-slate-500">{ORDER_STATUS_LABELS[status]}</dt>
-                <dd className="font-semibold tabular-nums text-slate-900">{byStatus(status)}</dd>
-              </div>
-            ))}
-          </dl>
-        </Card>
+        <div className="card card-pad">
+          <h2 className="h2" style={{ marginBottom: 14 }}>Quick Stats</h2>
+          {ORDER_STATUSES.map(status => (
+            <div key={status} className="qstat">
+              <span className="k">{ORDER_STATUS_LABELS[status]}</span>
+              <span className="row" style={{ gap: 8 }}>
+                <span className="v">{byStatus(status)}</span>
+                <span className={`badge ${STATUS_CLS[status]}`}><span className="pdot" /></span>
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
