@@ -31,26 +31,26 @@ function RestockDialog({ productName, currentStock, onConfirm, onCancel, submitt
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30" onClick={onCancel} />
-      <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-        <h2 className="text-base font-semibold text-slate-800 mb-1">Restock</h2>
-        <p className="text-sm text-slate-500 mb-5">
-          {productName} · currently <span className="font-medium text-slate-700">{currentStock}</span> in stock
+      <div className="relative bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] p-6 w-full max-w-sm mx-4">
+        <h2 className="text-base font-semibold text-[var(--ink)] mb-1">Restock</h2>
+        <p className="text-sm text-[var(--muted)] mb-5">
+          {productName} · currently <span className="font-medium text-[var(--text)]">{currentStock}</span> in stock
         </p>
 
-        <label className="block text-xs font-medium text-slate-600 mb-1">Units to add</label>
+        <label className="block text-xs font-medium text-[var(--text)] mb-1">Units to add</label>
         <input
           type="number"
           min={1}
           value={quantity}
           onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent mb-1"
+          className="w-full rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent mb-1"
           autoFocus
         />
-        <p className="text-xs text-slate-400 mb-5">
+        <p className="text-xs text-[var(--faint)] mb-5">
           New total: {currentStock + quantity}
         </p>
 
-        {error && <p role="alert" className="text-xs text-red-600 mb-3">{error}</p>}
+        {error && <p role="alert" className="text-xs text-[var(--danger)] mb-3">{error}</p>}
 
         <div className="flex gap-3 justify-end">
           <Button variant="ghost" onClick={onCancel} disabled={submitting}>Cancel</Button>
@@ -108,7 +108,7 @@ export function InventoryPage() {
   }
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const products = data?.medicinalProducts ?? [];
   const lowStockCount = products.filter(p => p.isBelowThreshold).length;
@@ -126,7 +126,7 @@ export function InventoryPage() {
 
   const th = (label: string, key: SortKey, align: 'left' | 'right' = 'left') => (
     <th
-      className={`px-4 py-3 font-medium text-slate-600 cursor-pointer select-none hover:text-slate-900 whitespace-nowrap ${align === 'right' ? 'text-right' : ''}`}
+      className={`px-4 py-3 font-medium text-[var(--text)] cursor-pointer select-none hover:text-[var(--ink)] whitespace-nowrap ${align === 'right' ? 'text-right' : ''}`}
       onClick={() => handleSort(key)}
     >
       {label}<SortIcon active={sortKey === key} dir={sortDir} />
@@ -147,10 +147,10 @@ export function InventoryPage() {
       )}
 
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">
+        <h1 className="text-xl font-semibold text-[var(--ink)]">
           Inventory
           {lowStockCount > 0 && (
-            <span className="ml-3 text-sm font-normal text-red-600">
+            <span className="ml-3 text-sm font-normal text-[var(--danger)]">
               ⚠ {lowStockCount} below threshold
             </span>
           )}
@@ -159,43 +159,43 @@ export function InventoryPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search medication or product…"
-          className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+          className="w-64 rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
         />
       </div>
 
       <Card className="overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left">
+            <tr className="border-b border-[var(--border)] bg-[var(--bg-tint)] text-left">
               {th('Medication', 'medication')}
-              <th className="px-4 py-3 font-medium text-slate-600">ATC Code</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Form</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Strength</th>
+              <th className="px-4 py-3 font-medium text-[var(--text)]">ATC Code</th>
+              <th className="px-4 py-3 font-medium text-[var(--text)]">Form</th>
+              <th className="px-4 py-3 font-medium text-[var(--text)]">Strength</th>
               {th('Product', 'product')}
               {th('Stock', 'stock', 'right')}
-              <th className="px-4 py-3 font-medium text-slate-600 text-right">Min</th>
+              <th className="px-4 py-3 font-medium text-[var(--text)] text-right">Min</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody>
             {sorted.map(p => (
-              <tr key={p.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-slate-800">
+              <tr key={p.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-2)]">
+                <td className="px-4 py-3 font-medium text-[var(--ink)]">
                   {p.medication
                     ? <Link to={`/medications/${p.medication.id}`} className="text-accent hover:underline">{p.medication.innName}</Link>
                     : '—'}
                 </td>
-                <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.atcCode ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-600">{p.medication?.form ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-500 font-mono text-xs">{p.medication?.strength ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-600">
+                <td className="px-4 py-3 text-[var(--muted)] font-mono text-xs">{p.medication?.atcCode ?? '—'}</td>
+                <td className="px-4 py-3 text-[var(--text)]">{p.medication?.form ?? '—'}</td>
+                <td className="px-4 py-3 text-[var(--muted)] font-mono text-xs">{p.medication?.strength ?? '—'}</td>
+                <td className="px-4 py-3 text-[var(--text)]">
                   <Link to={`/inventory/${p.id}`} className="text-accent hover:underline">{p.productName}</Link>
                 </td>
-                <td className={`px-4 py-3 text-right font-medium tabular-nums ${p.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
+                <td className={`px-4 py-3 text-right font-medium tabular-nums ${p.isBelowThreshold ? 'text-[var(--danger)]' : 'text-[var(--ink)]'}`}>
                   {p.stockLevel}
                   {p.isBelowThreshold && <span className="ml-1 text-xs">⚠</span>}
                 </td>
-                <td className="px-4 py-3 text-right text-slate-400 tabular-nums">{p.stockThreshold}</td>
+                <td className="px-4 py-3 text-right text-[var(--faint)] tabular-nums">{p.stockThreshold}</td>
                 <td className="px-4 py-3 text-right">
                   <Button
                     size="sm"
@@ -212,7 +212,7 @@ export function InventoryPage() {
             ))}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-slate-400">
+                <td colSpan={8} className="px-4 py-12 text-center text-[var(--faint)]">
                   {q ? 'No results.' : 'No products in inventory.'}
                 </td>
               </tr>

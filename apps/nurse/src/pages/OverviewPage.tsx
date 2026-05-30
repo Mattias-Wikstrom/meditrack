@@ -26,10 +26,10 @@ const STATUS_LABELS: Record<string, string> = {
 function StatCard({ label, value, muted = false }: { label: string; value: number; muted?: boolean }) {
   return (
     <Card className="p-4">
-      <span className={`text-2xl font-bold tabular-nums ${muted ? 'text-slate-400' : 'text-slate-900'}`}>
+      <span className={`text-2xl font-bold tabular-nums ${muted ? 'text-[var(--faint)]' : 'text-[var(--ink)]'}`}>
         {value}
       </span>
-      <p className="mt-0.5 text-sm font-medium text-slate-600">{label}</p>
+      <p className="mt-0.5 text-sm font-medium text-[var(--text)]">{label}</p>
     </Card>
   );
 }
@@ -46,9 +46,9 @@ export function OverviewPage() {
 
   useRefetchOn('Order', () => refetch({ requestPolicy: 'network-only' }));
 
-  if (!wardUnitId) return <p className="text-red-600 text-sm">Error: Nurse account is not assigned to a ward unit.</p>;
+  if (!wardUnitId) return <p className="text-[var(--danger)] text-sm">Error: Nurse account is not assigned to a ward unit.</p>;
   if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const orders = data?.wardUnit?.orders ?? [];
   const byStatus = (s: string) => orders.filter(o => o.status === s).length;
@@ -69,13 +69,13 @@ export function OverviewPage() {
 
       <Card className="p-4">
         <dl className="space-y-1.5">
-          <div className="flex items-center justify-between text-sm border-b border-slate-100 pb-1.5">
-            <dt className="text-slate-500">Active orders</dt>
-            <dd className="font-semibold tabular-nums text-slate-900">{active}</dd>
+          <div className="flex items-center justify-between text-sm border-b border-[var(--border)] pb-1.5">
+            <dt className="text-[var(--muted)]">Active orders</dt>
+            <dd className="font-semibold tabular-nums text-[var(--ink)]">{active}</dd>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <dt className="text-slate-500">Total orders</dt>
-            <dd className="font-semibold tabular-nums text-slate-900">{orders.length}</dd>
+            <dt className="text-[var(--muted)]">Total orders</dt>
+            <dd className="font-semibold tabular-nums text-[var(--ink)]">{orders.length}</dd>
           </div>
         </dl>
       </Card>

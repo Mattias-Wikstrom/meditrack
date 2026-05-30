@@ -5,13 +5,13 @@ import { useQuery } from 'urql';
 import { PageHeader, OrderStatusBadge, Button, Card, Spinner, InventoryProductDetail, InfoRow, RoleBadge, formatDate } from '@meditrack/ui';
 import { useAuth, createApiClient, useRefetchOn } from '@meditrack/client';
 
-const dialogInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
+const dialogInputCls = 'w-full rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
 // ── shared helpers ────────────────────────────────────────────────────────────
 
 function NotFound({ kind, to }: { kind: string; to: string }) {
   return (
-    <p className="text-sm text-slate-500">
+    <p className="text-sm text-[var(--muted)]">
       No {kind} found.{' '}
       <a className="text-accent hover:underline" href={to}>Back to list</a>.
     </p>
@@ -43,7 +43,7 @@ export function UserDetailsPage() {
   useRefetchOn(['Actor', 'WardUnit'], () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const actor = data?.actors.find((a: { id: string }) => a.id === userId);
   if (!actor) return <NotFound kind="user" to="/users" />;
@@ -97,29 +97,29 @@ export function UserDetailsPage() {
           )}
         </>
       } />
-      <h1 className="text-xl font-semibold text-slate-800 mb-6">{actor.id}</h1>
+      <h1 className="text-xl font-semibold text-[var(--ink)] mb-6">{actor.id}</h1>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
         <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-2">Account</h2>
+          <h2 className="text-base font-semibold text-[var(--text)] mb-2">Account</h2>
           <InfoRow label="Role"><RoleBadge role={actor.role} /></InfoRow>
           <InfoRow label="Ward Unit">
             {actor.wardUnit
               ? <Link to={`/ward-units/${actor.wardUnitId}`} className="text-accent hover:underline">{actor.wardUnit.name}</Link>
-              : <span className="text-slate-300">—</span>}
+              : <span className="text-[var(--faint)]">—</span>}
           </InfoRow>
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-3">Recent Activity</h2>
+          <h2 className="text-base font-semibold text-[var(--text)] mb-3">Recent Activity</h2>
           {recentActivity.length === 0
-            ? <p className="text-sm text-slate-400">No recorded activity.</p>
+            ? <p className="text-sm text-[var(--faint)]">No recorded activity.</p>
             : (
               <div className="space-y-2">
                 {recentActivity.map((e: { action: string; entityId: string; occurredAt: string }, i: number) => (
-                  <div key={i} className="flex justify-between text-sm border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                    <span className="text-slate-600">{e.action}</span>
-                    <span className="text-slate-400 tabular-nums">{formatDate(e.occurredAt)}</span>
+                  <div key={i} className="flex justify-between text-sm border-b border-[var(--border)] pb-2 last:border-0 last:pb-0">
+                    <span className="text-[var(--text)]">{e.action}</span>
+                    <span className="text-[var(--faint)] tabular-nums">{formatDate(e.occurredAt)}</span>
                   </div>
                 ))}
               </div>
@@ -131,25 +131,25 @@ export function UserDetailsPage() {
       {modal === 'edit' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-4">Edit User</h2>
+          <div className="relative bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-[var(--ink)] mb-4">Edit User</h2>
             <form onSubmit={handleUpdate} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Role</label>
+                <label className="block text-xs font-medium text-[var(--text)] mb-1">Role</label>
                 <select name="role" value={editRole} onChange={e => setEditRole(e.target.value)} className={dialogInputCls}>
                   {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
               {editRole === 'Nurse' && (
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Ward Unit</label>
+                  <label className="block text-xs font-medium text-[var(--text)] mb-1">Ward Unit</label>
                   <select name="wardUnitId" defaultValue={actor.wardUnitId ?? ''} className={dialogInputCls}>
                     <option value="">— None —</option>
                     {wardUnits.map((u: WardUnit) => <option key={u.id} value={u.id}>{u.name}</option>)}
                   </select>
                 </div>
               )}
-              {modalError && <p role="alert" className="text-xs text-red-600">{modalError}</p>}
+              {modalError && <p role="alert" className="text-xs text-[var(--danger)]">{modalError}</p>}
               <div className="flex gap-2 justify-end pt-1">
                 <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
                 <Button type="submit">Save</Button>
@@ -162,12 +162,12 @@ export function UserDetailsPage() {
       {modal === 'confirmDelete' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-2">Delete User</h2>
-            <p className="text-sm text-slate-600 mb-4">
+          <div className="relative bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-[var(--ink)] mb-2">Delete User</h2>
+            <p className="text-sm text-[var(--text)] mb-4">
               Delete <strong>{actor.id}</strong>? This cannot be undone.
             </p>
-            {modalError && <p role="alert" className="text-xs text-red-600 mb-3">{modalError}</p>}
+            {modalError && <p role="alert" className="text-xs text-[var(--danger)] mb-3">{modalError}</p>}
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDelete}>Delete</Button>
@@ -208,7 +208,7 @@ export function WardUnitDetailsPage() {
   useRefetchOn(['WardUnit', 'Actor', 'Order'], () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const unit = data?.wardUnit;
   if (!unit) return <NotFound kind="ward unit" to="/ward-units" />;
@@ -252,19 +252,19 @@ export function WardUnitDetailsPage() {
           <Button variant="danger" size="sm" onClick={() => { setModalError(null); setModal('confirmDelete'); }}>Delete</Button>
         </>
       } />
-      <h1 className="text-xl font-semibold text-slate-800 mb-1">{unit.name}</h1>
-      <p className="text-xs text-slate-400 font-mono mb-6">{unit.id}</p>
+      <h1 className="text-xl font-semibold text-[var(--ink)] mb-1">{unit.name}</h1>
+      <p className="text-xs text-[var(--faint)] font-mono mb-6">{unit.id}</p>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-3 mb-4">
         <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-3">
+          <h2 className="text-base font-semibold text-[var(--text)] mb-3">
             Nurses
-            <span className="ml-2 text-sm font-normal text-slate-400">{nurses.length}</span>
+            <span className="ml-2 text-sm font-normal text-[var(--faint)]">{nurses.length}</span>
           </h2>
           {nurses.length === 0
-            ? <p className="text-sm text-slate-400">No nurses assigned.</p>
+            ? <p className="text-sm text-[var(--faint)]">No nurses assigned.</p>
             : nurses.map((n: { id: string }) => (
-                <Link key={n.id} to={`/users/${n.id}`} className="block py-1.5 border-b border-slate-100 last:border-0 text-sm text-accent hover:underline">
+                <Link key={n.id} to={`/users/${n.id}`} className="block py-1.5 border-b border-[var(--border)] last:border-0 text-sm text-accent hover:underline">
                   {n.id}
                 </Link>
               ))
@@ -272,27 +272,27 @@ export function WardUnitDetailsPage() {
         </Card>
 
         <Card className="p-5 col-span-2">
-          <h2 className="text-base font-semibold text-slate-700 mb-3">
+          <h2 className="text-base font-semibold text-[var(--text)] mb-3">
             Orders
-            <span className="ml-2 text-sm font-normal text-slate-400">{orders.length}</span>
+            <span className="ml-2 text-sm font-normal text-[var(--faint)]">{orders.length}</span>
           </h2>
           {orders.length === 0
-            ? <p className="text-sm text-slate-400">No orders yet.</p>
+            ? <p className="text-sm text-[var(--faint)]">No orders yet.</p>
             : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-left">
-                    <th className="pb-2 font-medium text-slate-500">Created</th>
-                    <th className="pb-2 font-medium text-slate-500">Status</th>
-                    <th className="pb-2 font-medium text-slate-500">Medications</th>
+                  <tr className="border-b border-[var(--border)] text-left">
+                    <th className="pb-2 font-medium text-[var(--muted)]">Created</th>
+                    <th className="pb-2 font-medium text-[var(--muted)]">Status</th>
+                    <th className="pb-2 font-medium text-[var(--muted)]">Medications</th>
                   </tr>
                 </thead>
                 <tbody>
                   {orders.map((o: { id: string; status: string; createdAt: string; lines: { medicationId: string; medication?: { innName: string } | null; quantity: number }[] }) => (
-                    <tr key={o.id} onClick={() => navigate(`/orders/${o.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
-                      <td className="py-2 pr-4 text-slate-500 whitespace-nowrap">{formatDate(o.createdAt)}</td>
+                    <tr key={o.id} onClick={() => navigate(`/orders/${o.id}`)} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-2)] cursor-pointer">
+                      <td className="py-2 pr-4 text-[var(--muted)] whitespace-nowrap">{formatDate(o.createdAt)}</td>
                       <td className="py-2 pr-4"><OrderStatusBadge status={o.status} /></td>
-                      <td className="py-2 text-slate-600">
+                      <td className="py-2 text-[var(--text)]">
                         {o.lines.map(l => l.medication?.innName ?? l.medicationId).join(', ')}
                       </td>
                     </tr>
@@ -307,14 +307,14 @@ export function WardUnitDetailsPage() {
       {modal === 'edit' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-4">Edit Ward Unit</h2>
+          <div className="relative bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-[var(--ink)] mb-4">Edit Ward Unit</h2>
             <form onSubmit={handleUpdate} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Name</label>
+                <label className="block text-xs font-medium text-[var(--text)] mb-1">Name</label>
                 <input name="name" defaultValue={unit.name} required className={dialogInputCls} />
               </div>
-              {modalError && <p role="alert" className="text-xs text-red-600">{modalError}</p>}
+              {modalError && <p role="alert" className="text-xs text-[var(--danger)]">{modalError}</p>}
               <div className="flex gap-2 justify-end pt-1">
                 <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
                 <Button type="submit">Save</Button>
@@ -327,12 +327,12 @@ export function WardUnitDetailsPage() {
       {modal === 'confirmDelete' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-2">Delete Ward Unit</h2>
-            <p className="text-sm text-slate-600 mb-4">
+          <div className="relative bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-[var(--ink)] mb-2">Delete Ward Unit</h2>
+            <p className="text-sm text-[var(--text)] mb-4">
               Delete <strong>{unit.name}</strong>? This cannot be undone. All assigned nurses must be reassigned first.
             </p>
-            {modalError && <p role="alert" className="text-xs text-red-600 mb-3">{modalError}</p>}
+            {modalError && <p role="alert" className="text-xs text-[var(--danger)] mb-3">{modalError}</p>}
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDelete}>Delete</Button>
@@ -355,7 +355,7 @@ const PRODUCT_DETAIL_QUERY = `
   }
 `;
 
-const productInputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
+const productInputCls = 'w-full rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
 export function MedicationDetailsPage() {
   const navigate = useNavigate();
@@ -371,7 +371,7 @@ export function MedicationDetailsPage() {
   useRefetchOn('MedicinalProduct', () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const product = data?.medicinalProduct;
   if (!product) return <NotFound kind="medication product" to="/inventory" />;
@@ -418,18 +418,18 @@ export function MedicationDetailsPage() {
       {modal === 'edit' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-4">Edit Product</h2>
+          <div className="relative bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-[var(--ink)] mb-4">Edit Product</h2>
             <form onSubmit={handleUpdate} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Product Name</label>
+                <label className="block text-xs font-medium text-[var(--text)] mb-1">Product Name</label>
                 <input name="productName" defaultValue={product.productName} required className={productInputCls} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Minimum Threshold</label>
+                <label className="block text-xs font-medium text-[var(--text)] mb-1">Minimum Threshold</label>
                 <input name="stockThreshold" type="number" min={0} defaultValue={product.stockThreshold} required className={productInputCls} />
               </div>
-              {modalError && <p role="alert" className="text-xs text-red-600">{modalError}</p>}
+              {modalError && <p role="alert" className="text-xs text-[var(--danger)]">{modalError}</p>}
               <div className="flex gap-2 justify-end pt-1">
                 <Button type="button" variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
                 <Button type="submit">Save</Button>
@@ -442,12 +442,12 @@ export function MedicationDetailsPage() {
       {modal === 'confirmDelete' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30" onClick={() => setModal(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-2">Delete Product</h2>
-            <p className="text-sm text-slate-600 mb-4">
+          <div className="relative bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-[var(--ink)] mb-2">Delete Product</h2>
+            <p className="text-sm text-[var(--text)] mb-4">
               Delete <strong>{product.productName}</strong>? This cannot be undone.
             </p>
-            {modalError && <p role="alert" className="text-xs text-red-600 mb-3">{modalError}</p>}
+            {modalError && <p role="alert" className="text-xs text-[var(--danger)] mb-3">{modalError}</p>}
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" onClick={() => setModal(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDelete}>Delete</Button>

@@ -36,22 +36,22 @@ function ConfirmView({ order, onConfirmed }: {
     <Card className="mb-6 overflow-hidden">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-200 bg-slate-50 text-left">
-            <th className="py-3 px-5 font-medium text-slate-600">Medication</th>
-            <th className="py-3 px-5 font-medium text-slate-600 text-right">Quantity</th>
+          <tr className="border-b border-[var(--border)] bg-[var(--bg-tint)] text-left">
+            <th className="py-3 px-5 font-medium text-[var(--text)]">Medication</th>
+            <th className="py-3 px-5 font-medium text-[var(--text)] text-right">Quantity</th>
           </tr>
         </thead>
         <tbody>
           {order.lines.map(line => (
-            <tr key={line.medicationId} className="border-b border-slate-100 last:border-0">
-              <td className="py-3 px-5 text-slate-800">{line.medication?.innName ?? line.medicationId}</td>
-              <td className="py-3 px-5 text-right font-medium tabular-nums text-slate-700">{line.quantity}</td>
+            <tr key={line.medicationId} className="border-b border-[var(--border)] last:border-0">
+              <td className="py-3 px-5 text-[var(--ink)]">{line.medication?.innName ?? line.medicationId}</td>
+              <td className="py-3 px-5 text-right font-medium tabular-nums text-[var(--text)]">{line.quantity}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      {error && <p role="alert" className="px-5 pb-4 text-xs text-red-600">{error}</p>}
-      <div className="px-5 py-4 border-t border-slate-100">
+      {error && <p role="alert" className="px-5 pb-4 text-xs text-[var(--danger)]">{error}</p>}
+      <div className="px-5 py-4 border-t border-[var(--border)]">
         <Button onClick={handleConfirm} disabled={submitting} className="w-full">
           {submitting ? 'Confirming…' : 'Confirm Order'}
         </Button>
@@ -132,22 +132,22 @@ function LineDeliverySection({
   const multiRow = splits.length > 1;
 
   return (
-    <div className="px-5 py-4 border-b border-slate-100 last:border-0">
+    <div className="px-5 py-4 border-b border-[var(--border)] last:border-0">
       {/* Line header */}
       <div className="flex items-baseline justify-between mb-3">
-        <p className="text-sm font-medium text-slate-800">
+        <p className="text-sm font-medium text-[var(--ink)]">
           {line.medication?.innName ?? line.medicationId}
-          <span className="ml-2 text-slate-400 font-normal">× {line.quantity} ordered</span>
+          <span className="ml-2 text-[var(--faint)] font-normal">× {line.quantity} ordered</span>
         </p>
-        <span className={`text-xs font-medium tabular-nums ${covered ? 'text-green-600' : overAllocated ? 'text-red-600' : 'text-slate-400'}`}>
+        <span className={`text-xs font-medium tabular-nums ${covered ? 'text-[var(--ok)]' : overAllocated ? 'text-[var(--danger)]' : 'text-[var(--faint)]'}`}>
           {totalAllocated} / {line.quantity}{covered ? ' ✓' : overAllocated ? ' ✕' : ''}
         </span>
       </div>
 
       {/* Column headers — stable width, always rendered */}
       <div className="flex gap-2 mb-1.5">
-        <p className="flex-1 text-xs text-slate-500">Product</p>
-        <p className="w-20 text-xs text-slate-500">Qty</p>
+        <p className="flex-1 text-xs text-[var(--muted)]">Product</p>
+        <p className="w-20 text-xs text-[var(--muted)]">Qty</p>
         <div className="w-6" /> {/* spacer keeps headers aligned with rows */}
       </div>
 
@@ -158,7 +158,7 @@ function LineDeliverySection({
             <select
               value={split.medicinalProductId}
               onChange={(e) => updateSplit(i, { medicinalProductId: e.target.value })}
-              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+              className="flex-1 rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
             >
               <option value="">Select product…</option>
               {products.map((p) => (
@@ -173,12 +173,12 @@ function LineDeliverySection({
               max={line.quantity}
               value={split.quantity}
               onChange={(e) => updateSplit(i, { quantity: Math.max(1, parseInt(e.target.value) || 1) })}
-              className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+              className="w-20 rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
             />
             {multiRow ? (
               <button
                 onClick={() => removeSplit(i)}
-                className="w-6 text-slate-300 hover:text-red-400 transition-colors text-sm"
+                className="w-6 text-[var(--faint)] hover:text-[var(--danger)] transition-colors text-sm"
                 title="Remove"
               >
                 ✕
@@ -191,7 +191,7 @@ function LineDeliverySection({
       </div>
 
       {hasDuplicates && (
-        <p className="mt-2 text-xs text-red-600">Each product can only be selected once per order line.</p>
+        <p className="mt-2 text-xs text-[var(--danger)]">Each product can only be selected once per order line.</p>
       )}
 
       {/* Split button — only when there is remaining quantity to allocate */}
@@ -285,14 +285,14 @@ export function OrderDetailPage() {
   }
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error || !order) return <p className="text-red-600 text-sm">Order not found.</p>;
+  if (error || !order) return <p className="text-[var(--danger)] text-sm">Order not found.</p>;
 
   const shortId = order.id.slice(0, 8);
 
   return (
     <div className="max-w-xl">
       <PageHeader onBack={() => navigate('/orders')} className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">Order <span className="font-mono">{shortId}…</span></h1>
+        <h1 className="text-xl font-semibold text-[var(--ink)]">Order <span className="font-mono">{shortId}…</span></h1>
         <OrderStatusBadge status={order.status} />
       </PageHeader>
 
@@ -302,16 +302,16 @@ export function OrderDetailPage() {
         <Card className="overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                <th className="py-3 px-5 font-medium text-slate-600">Medication</th>
-                <th className="py-3 px-5 font-medium text-slate-600 text-right">Quantity</th>
+              <tr className="border-b border-[var(--border)] bg-[var(--bg-tint)] text-left">
+                <th className="py-3 px-5 font-medium text-[var(--text)]">Medication</th>
+                <th className="py-3 px-5 font-medium text-[var(--text)] text-right">Quantity</th>
               </tr>
             </thead>
             <tbody>
               {order.lines.map(line => (
-                <tr key={line.medicationId} className="border-b border-slate-100 last:border-0">
-                  <td className="py-3 px-5 text-slate-800">{line.medication?.innName ?? line.medicationId}</td>
-                  <td className="py-3 px-5 text-right font-medium tabular-nums text-slate-700">{line.quantity}</td>
+                <tr key={line.medicationId} className="border-b border-[var(--border)] last:border-0">
+                  <td className="py-3 px-5 text-[var(--ink)]">{line.medication?.innName ?? line.medicationId}</td>
+                  <td className="py-3 px-5 text-right font-medium tabular-nums text-[var(--text)]">{line.quantity}</td>
                 </tr>
               ))}
             </tbody>
@@ -331,7 +331,7 @@ export function OrderDetailPage() {
             ))}
           </Card>
 
-          {submitError && <p role="alert" className="text-red-600 text-sm mb-4">{submitError}</p>}
+          {submitError && <p role="alert" className="text-[var(--danger)] text-sm mb-4">{submitError}</p>}
 
           <Button onClick={handleDeliver} disabled={submitting || !canDeliver} className="w-full">
             {submitting ? 'Delivering…' : 'Deliver Order'}

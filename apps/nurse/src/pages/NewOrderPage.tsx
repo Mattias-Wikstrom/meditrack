@@ -98,25 +98,25 @@ export function NewOrderPage() {
       <PageHeader
         onBack={() => navigate('/orders')}
         className="mb-6"
-        actions={saving ? <span className="text-xs text-slate-400">Saving…</span> : undefined}
+        actions={saving ? <span className="text-xs text-[var(--faint)]">Saving…</span> : undefined}
       >
-        <h1 className="text-xl font-semibold text-slate-800">New Order</h1>
+        <h1 className="text-xl font-semibold text-[var(--ink)]">New Order</h1>
       </PageHeader>
 
       {lines.length > 0 && (
-        <Card className="mb-6 divide-y divide-slate-100">
+        <Card className="mb-6 divide-y divide-[var(--border)]">
           {lines.map((line) => (
             <div key={line.medicationId} className="flex items-center gap-3 px-4 py-3">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 truncate">{line.innName}</p>
-                <p className="text-xs text-slate-400">{line.strength}</p>
+                <p className="text-sm font-medium text-[var(--ink)] truncate">{line.innName}</p>
+                <p className="text-xs text-[var(--faint)]">{line.strength}</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => updateQty(line.medicationId, line.quantity - 1)} className="w-7 h-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center justify-center text-sm">−</button>
-                <span className="w-8 text-center text-sm font-medium text-slate-700">{line.quantity}</span>
-                <button onClick={() => updateQty(line.medicationId, line.quantity + 1)} className="w-7 h-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center justify-center text-sm">+</button>
+                <button onClick={() => updateQty(line.medicationId, line.quantity - 1)} className="w-7 h-7 rounded-md border border-[var(--border)] text-[var(--muted)] hover:bg-[var(--surface-2)] flex items-center justify-center text-sm">−</button>
+                <span className="w-8 text-center text-sm font-medium text-[var(--text)]">{line.quantity}</span>
+                <button onClick={() => updateQty(line.medicationId, line.quantity + 1)} className="w-7 h-7 rounded-md border border-[var(--border)] text-[var(--muted)] hover:bg-[var(--surface-2)] flex items-center justify-center text-sm">+</button>
               </div>
-              <button onClick={() => removeLine(line.medicationId)} className="text-slate-300 hover:text-red-400 transition-colors ml-1 text-lg leading-none">×</button>
+              <button onClick={() => removeLine(line.medicationId)} className="text-[var(--faint)] hover:text-[var(--danger)] transition-colors ml-1 text-lg leading-none">×</button>
             </div>
           ))}
         </Card>
@@ -125,11 +125,11 @@ export function NewOrderPage() {
       <div className="mb-10">
         <MedicationSearch label="Medication to add" onSelect={addLine} fetcher={fetcher} />
         {lines.length > 0 && (
-          <p className="mt-2 text-xs text-slate-400">Add additional medications by typing their names above.</p>
+          <p className="mt-2 text-xs text-[var(--faint)]">Add additional medications by typing their names above.</p>
         )}
       </div>
 
-      {error && <p role="alert" className="text-red-600 text-sm mb-4">{error}</p>}
+      {error && <p role="alert" className="text-[var(--danger)] text-sm mb-4">{error}</p>}
 
       <Button onClick={handleSend} disabled={busy || lines.length === 0} className="w-full">
         {sending ? 'Sending…' : 'Send Order'}

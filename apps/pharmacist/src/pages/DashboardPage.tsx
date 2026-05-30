@@ -27,7 +27,7 @@ const ORDERS_QUERY = graphql(`
 function CountOrderStatusBadge({ n }: { n: number }) {
   if (n === 0) return null;
   return (
-    <span className="ml-2 text-xs font-medium bg-accent-light text-accent px-2 py-0.5 rounded-full">
+    <span className="ml-2 text-xs font-medium bg-[var(--accent-soft)] text-[var(--accent-ink)] px-2 py-0.5 rounded-full">
       {n}
     </span>
   );
@@ -50,7 +50,7 @@ export function DashboardPage() {
   }
 
   if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const sent = data?.sent ?? [];
   const confirmed = data?.confirmed ?? [];
@@ -59,25 +59,25 @@ export function DashboardPage() {
   return (
     <div className="space-y-8">
       <section>
-        <h2 className="text-base font-semibold text-slate-700 mb-3">
+        <h2 className="text-base font-semibold text-[var(--text)] mb-3">
           Pending Confirmation <CountOrderStatusBadge n={sent.length} />
         </h2>
         <Card className="overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                <th className="py-3 px-4 font-medium text-slate-600 whitespace-nowrap">Created</th>
-                <th className="py-3 px-4 font-medium text-slate-600">Ward Unit</th>
-                <th className="py-3 px-4 font-medium text-slate-600">Medications</th>
-                <th className="py-3 px-4 font-medium text-slate-600">Status</th>
+              <tr className="border-b border-[var(--border)] bg-[var(--bg-tint)] text-left">
+                <th className="py-3 px-4 font-medium text-[var(--text)] whitespace-nowrap">Created</th>
+                <th className="py-3 px-4 font-medium text-[var(--text)]">Ward Unit</th>
+                <th className="py-3 px-4 font-medium text-[var(--text)]">Medications</th>
+                <th className="py-3 px-4 font-medium text-[var(--text)]">Status</th>
                 <th className="py-3 px-4" />
               </tr>
             </thead>
             <tbody>
               {sent.map(order => (
-                <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
-                  <td className="py-3 px-4 text-slate-500 whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
-                  <td className="py-3 px-4 text-slate-600 font-mono text-xs align-top">{order.wardUnitId}</td>
+                <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-2)] cursor-pointer">
+                  <td className="py-3 px-4 text-[var(--muted)] whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
+                  <td className="py-3 px-4 text-[var(--text)] font-mono text-xs align-top">{order.wardUnitId}</td>
                   <td className="py-3 px-4 align-top"><LineList lines={order.lines} /></td>
                   <td className="py-3 px-4 align-top"><OrderStatusBadge status={order.status} /></td>
                   <td className="py-3 px-4 text-right align-top">
@@ -87,7 +87,7 @@ export function DashboardPage() {
               ))}
               {sent.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-10 text-center text-slate-400">No orders awaiting confirmation.</td>
+                  <td colSpan={5} className="py-10 text-center text-[var(--faint)]">No orders awaiting confirmation.</td>
                 </tr>
               )}
             </tbody>
@@ -96,25 +96,25 @@ export function DashboardPage() {
       </section>
 
       <section>
-        <h2 className="text-base font-semibold text-slate-700 mb-3">
+        <h2 className="text-base font-semibold text-[var(--text)] mb-3">
           Ready to Deliver <CountOrderStatusBadge n={confirmed.length} />
         </h2>
         <Card className="overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                <th className="py-3 px-4 font-medium text-slate-600 whitespace-nowrap">Created</th>
-                <th className="py-3 px-4 font-medium text-slate-600">Ward Unit</th>
-                <th className="py-3 px-4 font-medium text-slate-600">Medications</th>
-                <th className="py-3 px-4 font-medium text-slate-600">Status</th>
+              <tr className="border-b border-[var(--border)] bg-[var(--bg-tint)] text-left">
+                <th className="py-3 px-4 font-medium text-[var(--text)] whitespace-nowrap">Created</th>
+                <th className="py-3 px-4 font-medium text-[var(--text)]">Ward Unit</th>
+                <th className="py-3 px-4 font-medium text-[var(--text)]">Medications</th>
+                <th className="py-3 px-4 font-medium text-[var(--text)]">Status</th>
                 <th className="py-3 px-4" />
               </tr>
             </thead>
             <tbody>
               {confirmed.map(order => (
-                <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
-                  <td className="py-3 px-4 text-slate-500 whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
-                  <td className="py-3 px-4 text-slate-600 font-mono text-xs align-top">{order.wardUnitId}</td>
+                <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-2)] cursor-pointer">
+                  <td className="py-3 px-4 text-[var(--muted)] whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
+                  <td className="py-3 px-4 text-[var(--text)] font-mono text-xs align-top">{order.wardUnitId}</td>
                   <td className="py-3 px-4 align-top"><LineList lines={order.lines} /></td>
                   <td className="py-3 px-4 align-top"><OrderStatusBadge status={order.status} /></td>
                   <td className="py-3 px-4 text-right align-top">
@@ -124,7 +124,7 @@ export function DashboardPage() {
               ))}
               {confirmed.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-10 text-center text-slate-400">No orders ready for delivery.</td>
+                  <td colSpan={5} className="py-10 text-center text-[var(--faint)]">No orders ready for delivery.</td>
                 </tr>
               )}
             </tbody>
@@ -134,7 +134,7 @@ export function DashboardPage() {
 
       {delivered.length > 0 && (
         <details className="group">
-          <summary className="cursor-pointer select-none text-sm text-slate-400 hover:text-slate-600 transition-colors list-none flex items-center gap-1">
+          <summary className="cursor-pointer select-none text-sm text-[var(--faint)] hover:text-[var(--text)] transition-colors list-none flex items-center gap-1">
             <span className="group-open:rotate-90 transition-transform inline-block">›</span>
             Delivered ({delivered.length})
           </summary>
@@ -142,18 +142,18 @@ export function DashboardPage() {
             <Card className="overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                    <th className="py-3 px-4 font-medium text-slate-600 whitespace-nowrap">Created</th>
-                    <th className="py-3 px-4 font-medium text-slate-600">Ward Unit</th>
-                    <th className="py-3 px-4 font-medium text-slate-600">Medications</th>
-                    <th className="py-3 px-4 font-medium text-slate-600">Status</th>
+                  <tr className="border-b border-[var(--border)] bg-[var(--bg-tint)] text-left">
+                    <th className="py-3 px-4 font-medium text-[var(--text)] whitespace-nowrap">Created</th>
+                    <th className="py-3 px-4 font-medium text-[var(--text)]">Ward Unit</th>
+                    <th className="py-3 px-4 font-medium text-[var(--text)]">Medications</th>
+                    <th className="py-3 px-4 font-medium text-[var(--text)]">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {delivered.map(order => (
-                    <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
-                      <td className="py-3 px-4 text-slate-500 whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
-                      <td className="py-3 px-4 text-slate-600 font-mono text-xs align-top">{order.wardUnitId}</td>
+                    <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-2)] cursor-pointer">
+                      <td className="py-3 px-4 text-[var(--muted)] whitespace-nowrap align-top">{formatDate(order.createdAt)}</td>
+                      <td className="py-3 px-4 text-[var(--text)] font-mono text-xs align-top">{order.wardUnitId}</td>
                       <td className="py-3 px-4 align-top"><LineList lines={order.lines} /></td>
                       <td className="py-3 px-4 align-top"><OrderStatusBadge status={order.status} /></td>
                     </tr>

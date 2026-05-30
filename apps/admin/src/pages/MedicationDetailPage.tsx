@@ -32,20 +32,20 @@ type ModalState =
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-[var(--text)] mb-1">{label}</label>
       {children}
     </div>
   );
 }
 
-const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
+const inputCls = 'w-full rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
 function DialogShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-        <h2 className="text-base font-semibold text-slate-800 mb-4">{title}</h2>
+      <div className="relative bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] p-6 w-full max-w-sm mx-4">
+        <h2 className="text-base font-semibold text-[var(--ink)] mb-4">{title}</h2>
         {children}
       </div>
     </div>
@@ -65,11 +65,11 @@ export function MedicationDetailPage() {
   });
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const medication = data?.medication;
   if (!medication) return (
-    <p className="text-sm text-slate-500">
+    <p className="text-sm text-[var(--muted)]">
       Medication not found.{' '}
       <a className="text-accent hover:underline" href="/inventory">Back to inventory</a>.
     </p>
@@ -159,13 +159,13 @@ export function MedicationDetailPage() {
       } />
 
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">{medication.innName}</h1>
-        <p className="text-xs text-slate-400 font-mono mt-0.5">{medication.atcCode}</p>
+        <h1 className="text-xl font-semibold text-[var(--ink)]">{medication.innName}</h1>
+        <p className="text-xs text-[var(--faint)] font-mono mt-0.5">{medication.atcCode}</p>
       </div>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 mb-6">
         <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-2">Details</h2>
+          <h2 className="text-base font-semibold text-[var(--text)] mb-2">Details</h2>
           <InfoRow label="INN Name">{medication.innName}</InfoRow>
           <InfoRow label="ATC Code"><span className="font-mono text-xs">{medication.atcCode}</span></InfoRow>
           <InfoRow label="Form">{medication.form}</InfoRow>
@@ -174,42 +174,42 @@ export function MedicationDetailPage() {
 
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-slate-700">
-              Products <span className="ml-1 text-sm font-normal text-slate-400">{products.length}</span>
+            <h2 className="text-base font-semibold text-[var(--text)]">
+              Products <span className="ml-1 text-sm font-normal text-[var(--faint)]">{products.length}</span>
             </h2>
             <Button size="sm" onClick={() => { setFormError(null); setModal({ type: 'addProduct' }); }}>
               + Add Product
             </Button>
           </div>
           {products.length === 0 ? (
-            <p className="text-sm text-slate-400">No products registered.</p>
+            <p className="text-sm text-[var(--faint)]">No products registered.</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-left">
-                  <th className="pb-2 font-medium text-slate-500">Product</th>
-                  <th className="pb-2 font-medium text-slate-500 text-right">Stock</th>
-                  <th className="pb-2 font-medium text-slate-500 text-right">Min</th>
+                <tr className="border-b border-[var(--border)] text-left">
+                  <th className="pb-2 font-medium text-[var(--muted)]">Product</th>
+                  <th className="pb-2 font-medium text-[var(--muted)] text-right">Stock</th>
+                  <th className="pb-2 font-medium text-[var(--muted)] text-right">Min</th>
                   <th className="pb-2" />
                 </tr>
               </thead>
               <tbody>
                 {products.map(p => (
-                  <tr key={p.id} className="border-b border-slate-100 last:border-0">
+                  <tr key={p.id} className="border-b border-[var(--border)] last:border-0">
                     <td className="py-2 pr-2">
                       <Link to={`/inventory/${p.id}`} className="text-accent hover:underline">{p.productName}</Link>
                     </td>
-                    <td className={`py-2 pr-2 text-right tabular-nums font-medium ${p.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
+                    <td className={`py-2 pr-2 text-right tabular-nums font-medium ${p.isBelowThreshold ? 'text-[var(--danger)]' : 'text-[var(--ink)]'}`}>
                       {p.stockLevel}{p.isBelowThreshold && <span className="ml-1 text-xs">⚠</span>}
                     </td>
-                    <td className="py-2 pr-2 text-right text-slate-400 tabular-nums">{p.stockThreshold}</td>
+                    <td className="py-2 pr-2 text-right text-[var(--faint)] tabular-nums">{p.stockThreshold}</td>
                     <td className="py-2 text-right">
                       <button
-                        className="text-xs text-slate-400 hover:text-accent mr-2 transition-colors"
+                        className="text-xs text-[var(--faint)] hover:text-accent mr-2 transition-colors"
                         onClick={() => { setFormError(null); setModal({ type: 'editProduct', product: p }); }}
                       >Edit</button>
                       <button
-                        className="text-xs text-slate-400 hover:text-red-500 transition-colors"
+                        className="text-xs text-[var(--faint)] hover:text-[var(--danger)] transition-colors"
                         onClick={() => { setFormError(null); setModal({ type: 'confirmDeleteProduct', product: p }); }}
                       >Delete</button>
                     </td>
@@ -240,7 +240,7 @@ export function MedicationDetailPage() {
             <Field label="Strength">
               <input name="strength" defaultValue={medication.strength} required className={inputCls} />
             </Field>
-            {formError && <p role="alert" className="text-xs text-red-600">{formError}</p>}
+            {formError && <p role="alert" className="text-xs text-[var(--danger)]">{formError}</p>}
             <div className="flex gap-2 justify-end pt-1">
               <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
               <Button type="submit">Save</Button>
@@ -251,10 +251,10 @@ export function MedicationDetailPage() {
 
       {modal?.type === 'confirmDeleteMedication' && (
         <DialogShell title="Delete Medication" onClose={closeModal}>
-          <p className="text-sm text-slate-600 mb-4">
+          <p className="text-sm text-[var(--text)] mb-4">
             Delete <strong>{medication.innName}</strong>? This cannot be undone. All products must be removed first.
           </p>
-          {formError && <p role="alert" className="text-xs text-red-600 mb-3">{formError}</p>}
+          {formError && <p role="alert" className="text-xs text-[var(--danger)] mb-3">{formError}</p>}
           <div className="flex gap-2 justify-end">
             <Button variant="ghost" onClick={closeModal}>Cancel</Button>
             <Button variant="danger" onClick={handleDeleteMedication}>Delete</Button>
@@ -274,7 +274,7 @@ export function MedicationDetailPage() {
             <Field label="Minimum Threshold">
               <input name="stockThreshold" type="number" min={0} defaultValue={50} required className={inputCls} />
             </Field>
-            {formError && <p role="alert" className="text-xs text-red-600">{formError}</p>}
+            {formError && <p role="alert" className="text-xs text-[var(--danger)]">{formError}</p>}
             <div className="flex gap-2 justify-end pt-1">
               <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
               <Button type="submit">Add Product</Button>
@@ -292,7 +292,7 @@ export function MedicationDetailPage() {
             <Field label="Minimum Threshold">
               <input name="stockThreshold" type="number" min={0} defaultValue={modal.product.stockThreshold} required className={inputCls} />
             </Field>
-            {formError && <p role="alert" className="text-xs text-red-600">{formError}</p>}
+            {formError && <p role="alert" className="text-xs text-[var(--danger)]">{formError}</p>}
             <div className="flex gap-2 justify-end pt-1">
               <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
               <Button type="submit">Save</Button>
@@ -303,10 +303,10 @@ export function MedicationDetailPage() {
 
       {modal?.type === 'confirmDeleteProduct' && (
         <DialogShell title="Delete Product" onClose={closeModal}>
-          <p className="text-sm text-slate-600 mb-4">
+          <p className="text-sm text-[var(--text)] mb-4">
             Delete <strong>{modal.product.productName}</strong>? This cannot be undone.
           </p>
-          {formError && <p role="alert" className="text-xs text-red-600 mb-3">{formError}</p>}
+          {formError && <p role="alert" className="text-xs text-[var(--danger)] mb-3">{formError}</p>}
           <div className="flex gap-2 justify-end">
             <Button variant="ghost" onClick={closeModal}>Cancel</Button>
             <Button variant="danger" onClick={() => handleDeleteProduct(modal.product.id)}>Delete</Button>

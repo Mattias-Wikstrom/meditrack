@@ -118,7 +118,7 @@ export function NurseOrderDetailPage() {
   }
 
   if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (!order) return <p className="text-red-600 text-sm p-4">Order not found.</p>;
+  if (!order) return <p className="text-[var(--danger)] text-sm p-4">Order not found.</p>;
 
   const busy = saving || sending;
 
@@ -127,51 +127,51 @@ export function NurseOrderDetailPage() {
       <PageHeader
         onBack={() => navigate('/orders')}
         className="mb-2"
-        actions={saving ? <span className="text-xs text-slate-400">Saving…</span> : undefined}
+        actions={saving ? <span className="text-xs text-[var(--faint)]">Saving…</span> : undefined}
       >
-        <h1 className="text-xl font-semibold text-slate-800">Order</h1>
+        <h1 className="text-xl font-semibold text-[var(--ink)]">Order</h1>
         <OrderStatusBadge status={order.status} />
       </PageHeader>
 
-      <p className="text-xs text-slate-400 mb-6">{order.wardUnit?.name ?? order.wardUnitId} · {formatDateTime(order.createdAt)}</p>
+      <p className="text-xs text-[var(--faint)] mb-6">{order.wardUnit?.name ?? order.wardUnitId} · {formatDateTime(order.createdAt)}</p>
 
       {lines.length > 0 ? (
-        <Card className="mb-6 divide-y divide-slate-100">
+        <Card className="mb-6 divide-y divide-[var(--border)]">
           {lines.map(line => (
             <div key={line.medicationId} className="flex items-center gap-3 px-4 py-3">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 truncate">{line.innName}</p>
-                <p className="text-xs text-slate-400">{line.strength}</p>
+                <p className="text-sm font-medium text-[var(--ink)] truncate">{line.innName}</p>
+                <p className="text-xs text-[var(--faint)]">{line.strength}</p>
               </div>
               {isDraft ? (
                 <>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => updateQty(line.medicationId, line.quantity - 1)} className="w-7 h-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center justify-center text-sm">−</button>
-                    <span className="w-8 text-center text-sm font-medium text-slate-700">{line.quantity}</span>
-                    <button onClick={() => updateQty(line.medicationId, line.quantity + 1)} className="w-7 h-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center justify-center text-sm">+</button>
+                    <button onClick={() => updateQty(line.medicationId, line.quantity - 1)} className="w-7 h-7 rounded-md border border-[var(--border)] text-[var(--muted)] hover:bg-[var(--surface-2)] flex items-center justify-center text-sm">−</button>
+                    <span className="w-8 text-center text-sm font-medium text-[var(--text)]">{line.quantity}</span>
+                    <button onClick={() => updateQty(line.medicationId, line.quantity + 1)} className="w-7 h-7 rounded-md border border-[var(--border)] text-[var(--muted)] hover:bg-[var(--surface-2)] flex items-center justify-center text-sm">+</button>
                   </div>
-                  <button onClick={() => removeLine(line.medicationId)} className="text-slate-300 hover:text-red-400 transition-colors ml-1 text-lg leading-none">×</button>
+                  <button onClick={() => removeLine(line.medicationId)} className="text-[var(--faint)] hover:text-[var(--danger)] transition-colors ml-1 text-lg leading-none">×</button>
                 </>
               ) : (
-                <span className="text-sm text-slate-600 shrink-0">× {line.quantity}</span>
+                <span className="text-sm text-[var(--text)] shrink-0">× {line.quantity}</span>
               )}
             </div>
           ))}
         </Card>
       ) : (
-        <p className="text-slate-400 text-sm mb-6 text-center py-8">No medications added yet.</p>
+        <p className="text-[var(--faint)] text-sm mb-6 text-center py-8">No medications added yet.</p>
       )}
 
       {isDraft && (
         <div className="mb-10">
           <MedicationSearch label="Medication to add" onSelect={addLine} fetcher={fetcher} />
           {lines.length > 0 && (
-            <p className="mt-2 text-xs text-slate-400">Add additional medications by typing their names above.</p>
+            <p className="mt-2 text-xs text-[var(--faint)]">Add additional medications by typing their names above.</p>
           )}
         </div>
       )}
 
-      {error && <p role="alert" className="text-red-600 text-sm mb-4">{error}</p>}
+      {error && <p role="alert" className="text-[var(--danger)] text-sm mb-4">{error}</p>}
 
       {isDraft && (
         <Button onClick={handleSend} disabled={busy || lines.length === 0} className="w-full">
@@ -179,7 +179,7 @@ export function NurseOrderDetailPage() {
         </Button>
       )}
 
-      <p className="mt-10 text-xs text-slate-300">
+      <p className="mt-10 text-xs text-[var(--faint)]">
         Order id: <span className="font-mono">{order.id}</span>
       </p>
     </div>

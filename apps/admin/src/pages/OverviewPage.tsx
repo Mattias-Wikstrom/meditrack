@@ -17,7 +17,7 @@ export function OverviewPage() {
   const [{ data, fetching, error }] = useQuery({ query: OVERVIEW_QUERY });
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const products = data?.medicinalProducts ?? [];
 

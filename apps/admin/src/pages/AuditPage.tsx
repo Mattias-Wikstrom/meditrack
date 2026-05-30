@@ -17,32 +17,36 @@ const AUDIT_QUERY = graphql(`
   }
 `);
 
+const _created  = 'bg-[var(--st-deliv-bg)] text-[var(--st-deliv-fg)]';
+const _updated  = 'bg-[var(--st-sent-bg)]  text-[var(--st-sent-fg)]';
+const _deleted  = 'bg-[var(--danger-bg)]   text-[var(--danger-fg)]';
+
 const ACTION_STYLES: Record<string, string> = {
-  DraftOrderCreated:  'bg-slate-100 text-slate-600',
-  OrderSent:          'bg-blue-100 text-blue-700',
-  OrderConfirmed:     'bg-amber-100 text-amber-700',
-  OrderDelivered:     'bg-green-100 text-green-700',
-  ActorLoggedIn:      'bg-teal-100 text-teal-700',
-  ActorLoginFailed:   'bg-red-100 text-red-700',
-  PasswordChanged:    'bg-purple-100 text-purple-700',
-  ProductRestocked:   'bg-indigo-100 text-indigo-700',
-  ActorCreated:       'bg-teal-100 text-teal-700',
-  ActorUpdated:       'bg-blue-100 text-blue-700',
-  ActorDeleted:       'bg-red-100 text-red-700',
-  WardUnitCreated:          'bg-teal-100 text-teal-700',
-  WardUnitUpdated:          'bg-blue-100 text-blue-700',
-  WardUnitDeleted:          'bg-red-100 text-red-700',
-  MedicationCreated:        'bg-teal-100 text-teal-700',
-  MedicationUpdated:        'bg-blue-100 text-blue-700',
-  MedicationDeleted:        'bg-red-100 text-red-700',
-  MedicinalProductCreated:  'bg-teal-100 text-teal-700',
-  MedicinalProductUpdated:  'bg-blue-100 text-blue-700',
-  MedicinalProductDeleted:  'bg-red-100 text-red-700',
+  DraftOrderCreated:  'bg-[var(--st-draft-bg)] text-[var(--st-draft-fg)]',
+  OrderSent:          'bg-[var(--st-sent-bg)]  text-[var(--st-sent-fg)]',
+  OrderConfirmed:     'bg-[var(--st-conf-bg)]  text-[var(--st-conf-fg)]',
+  OrderDelivered:     'bg-[var(--st-deliv-bg)] text-[var(--st-deliv-fg)]',
+  ActorLoggedIn:      _created,
+  ActorLoginFailed:   _deleted,
+  PasswordChanged:    'bg-[var(--accent-soft)] text-[var(--accent-ink)]',
+  ProductRestocked:   _updated,
+  ActorCreated:       _created,
+  ActorUpdated:       _updated,
+  ActorDeleted:       _deleted,
+  WardUnitCreated:          _created,
+  WardUnitUpdated:          _updated,
+  WardUnitDeleted:          _deleted,
+  MedicationCreated:        _created,
+  MedicationUpdated:        _updated,
+  MedicationDeleted:        _deleted,
+  MedicinalProductCreated:  _created,
+  MedicinalProductUpdated:  _updated,
+  MedicinalProductDeleted:  _deleted,
 };
 
 function ActionBadge({ action }: { action: string }) {
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ACTION_STYLES[action] ?? 'bg-gray-100 text-gray-600'}`}>
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ACTION_STYLES[action] ?? 'bg-[var(--bg-tint)] text-[var(--muted)]'}`}>
       {action}
     </span>
   );
@@ -85,7 +89,7 @@ export function AuditPage() {
   useRefetchOn(['Order', 'Actor', 'WardUnit', 'Medication', 'MedicinalProduct'], () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching && !data) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const entries = data?.auditLog ?? [];
 
@@ -100,21 +104,21 @@ export function AuditPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">
+        <h1 className="text-xl font-semibold text-[var(--ink)]">
           Audit Log
-          <span className="ml-2 text-sm font-normal text-slate-400">{filtered.length}</span>
+          <span className="ml-2 text-sm font-normal text-[var(--faint)]">{filtered.length}</span>
         </h1>
         <div className="flex gap-3">
           <input
             value={actorFilter}
             onChange={e => setActorFilter(e.target.value)}
             placeholder="Filter by user…"
-            className="w-44 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+            className="w-44 rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
           />
           <select
             value={actionFilter}
             onChange={e => setActionFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+            className="rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
           >
             <option value="">All actions</option>
             {allActions.map(a => <option key={a} value={a}>{a}</option>)}
@@ -125,21 +129,21 @@ export function AuditPage() {
       <Card className="overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left">
-              <th className="px-4 py-3 font-medium text-slate-600 whitespace-nowrap">Timestamp</th>
-              <th className="px-4 py-3 font-medium text-slate-600">User</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Action</th>
-              <th className="px-4 py-3 font-medium text-slate-600">Entity ID</th>
+            <tr className="border-b border-[var(--border)] bg-[var(--bg-tint)] text-left">
+              <th className="px-4 py-3 font-medium text-[var(--text)] whitespace-nowrap">Timestamp</th>
+              <th className="px-4 py-3 font-medium text-[var(--text)]">User</th>
+              <th className="px-4 py-3 font-medium text-[var(--text)]">Action</th>
+              <th className="px-4 py-3 font-medium text-[var(--text)]">Entity ID</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((e, i) => {
               const detailsRoute = toEntityDetailsRoute(e.action, e.entityId);
               return (
-              <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap tabular-nums">{formatDateTimePrecise(e.occurredAt)}</td>
+              <tr key={i} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-2)]">
+                <td className="px-4 py-3 text-[var(--muted)] whitespace-nowrap tabular-nums">{formatDateTimePrecise(e.occurredAt)}</td>
                 <td className="px-4 py-3 font-medium">
-                  <Link to={`/users/${e.actorId}`} className="text-slate-800 hover:text-accent hover:underline">{e.actorId}</Link>
+                  <Link to={`/users/${e.actorId}`} className="text-[var(--ink)] hover:text-accent hover:underline">{e.actorId}</Link>
                 </td>
                 <td className="px-4 py-3"><ActionBadge action={e.action} /></td>
                 <td className="px-4 py-3 font-mono text-xs">
@@ -148,7 +152,7 @@ export function AuditPage() {
                       {e.entityId}
                     </Link>
                   ) : (
-                    <span className="text-slate-400">{e.entityId}</span>
+                    <span className="text-[var(--faint)]">{e.entityId}</span>
                   )}
                 </td>
               </tr>
@@ -156,7 +160,7 @@ export function AuditPage() {
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-12 text-center text-slate-400">No audit events found.</td>
+                <td colSpan={4} className="px-4 py-12 text-center text-[var(--faint)]">No audit events found.</td>
               </tr>
             )}
           </tbody>

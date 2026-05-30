@@ -15,7 +15,7 @@ const WARD_UNITS_QUERY = graphql(`
   }
 `);
 
-const inputCls = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
+const inputCls = 'w-full rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent';
 
 function slugify(name: string): string {
   return name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
@@ -32,7 +32,7 @@ export function WardUnitsPage() {
   useRefetchOn('WardUnit', () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const units = data?.wardUnits ?? [];
 
@@ -68,15 +68,15 @@ export function WardUnitsPage() {
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30" onClick={() => setShowCreate(false)} />
-          <div className="relative bg-white rounded-xl shadow-xl border border-slate-200 p-6 w-full max-w-sm mx-4">
-            <h2 className="text-base font-semibold text-slate-800 mb-4">New Ward Unit</h2>
+          <div className="relative bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] p-6 w-full max-w-sm mx-4">
+            <h2 className="text-base font-semibold text-[var(--ink)] mb-4">New Ward Unit</h2>
             <form onSubmit={handleCreate} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Name</label>
+                <label className="block text-xs font-medium text-[var(--text)] mb-1">Name</label>
                 <input name="name" required placeholder="e.g. Ward 4B" onChange={handleNameChange} className={inputCls} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">ID</label>
+                <label className="block text-xs font-medium text-[var(--text)] mb-1">ID</label>
                 <input
                   name="id"
                   required
@@ -85,7 +85,7 @@ export function WardUnitsPage() {
                   className={inputCls}
                 />
               </div>
-              {createError && <p role="alert" className="text-xs text-red-600">{createError}</p>}
+              {createError && <p role="alert" className="text-xs text-[var(--danger)]">{createError}</p>}
               <div className="flex gap-2 justify-end pt-1">
                 <Button type="button" variant="ghost" onClick={() => setShowCreate(false)}>Cancel</Button>
                 <Button type="submit">Create</Button>
@@ -96,9 +96,9 @@ export function WardUnitsPage() {
       )}
 
       <div className="flex items-center justify-between mb-6 min-h-[38px]">
-        <h1 className="text-xl font-semibold text-slate-800">
+        <h1 className="text-xl font-semibold text-[var(--ink)]">
           Ward Units
-          <span className="ml-2 text-sm font-normal text-slate-400">{units.length}</span>
+          <span className="ml-2 text-sm font-normal text-[var(--faint)]">{units.length}</span>
         </h1>
         <Button onClick={openCreate}>+ New Ward Unit</Button>
       </div>
@@ -106,21 +106,21 @@ export function WardUnitsPage() {
       <Card className="overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left">
-              <th className="px-4 py-3 font-medium text-slate-600">Name</th>
-              <th className="px-4 py-3 font-medium text-slate-600">ID</th>
+            <tr className="border-b border-[var(--border)] bg-[var(--bg-tint)] text-left">
+              <th className="px-4 py-3 font-medium text-[var(--text)]">Name</th>
+              <th className="px-4 py-3 font-medium text-[var(--text)]">ID</th>
             </tr>
           </thead>
           <tbody>
             {units.map(unit => (
-              <tr key={unit.id} onClick={() => navigate(`/ward-units/${unit.id}`)} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 cursor-pointer">
-                <td className="px-4 py-3 font-medium text-slate-800">{unit.name}</td>
-                <td className="px-4 py-3 text-slate-400 font-mono text-xs">{unit.id}</td>
+              <tr key={unit.id} onClick={() => navigate(`/ward-units/${unit.id}`)} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-2)] cursor-pointer">
+                <td className="px-4 py-3 font-medium text-[var(--ink)]">{unit.name}</td>
+                <td className="px-4 py-3 text-[var(--faint)] font-mono text-xs">{unit.id}</td>
               </tr>
             ))}
             {units.length === 0 && (
               <tr>
-                <td colSpan={2} className="px-4 py-12 text-center text-slate-400">No ward units found.</td>
+                <td colSpan={2} className="px-4 py-12 text-center text-[var(--faint)]">No ward units found.</td>
               </tr>
             )}
           </tbody>

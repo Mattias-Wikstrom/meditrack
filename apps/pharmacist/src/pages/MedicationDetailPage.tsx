@@ -25,11 +25,11 @@ export function MedicationDetailPage() {
   });
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const medication = data?.medication;
   if (!medication) return (
-    <p className="text-sm text-slate-500">
+    <p className="text-sm text-[var(--muted)]">
       Medication not found.{' '}
       <a className="text-accent hover:underline" href="/inventory">Back to inventory</a>.
     </p>

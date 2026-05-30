@@ -28,11 +28,11 @@ export function AdminOrderDetailPage() {
   useRefetchOn('Order', () => refetch({ requestPolicy: 'network-only' }));
 
   if (fetching) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (error) return <p className="text-red-600 text-sm">Error: {error.message}</p>;
+  if (error) return <p className="text-[var(--danger)] text-sm">Error: {error.message}</p>;
 
   const order = data?.order;
   if (!order) return (
-    <p className="text-sm text-slate-500">
+    <p className="text-sm text-[var(--muted)]">
       Order not found.{' '}
       <a className="text-accent hover:underline" href="/orders">Back to list</a>.
     </p>
@@ -41,7 +41,7 @@ export function AdminOrderDetailPage() {
   return (
     <div className="max-w-xl">
       <PageHeader onBack={() => navigate('/orders')} className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">
+        <h1 className="text-xl font-semibold text-[var(--ink)]">
           Order <span className="font-mono text-base">{order.id.slice(0, 8)}…</span>
         </h1>
         <OrderStatusBadge status={order.status} />
@@ -49,21 +49,21 @@ export function AdminOrderDetailPage() {
 
       <Card className="p-5 mb-4">
         <dl className="text-sm space-y-0">
-          <div className="flex justify-between items-baseline py-2.5 border-b border-slate-100">
-            <dt className="text-slate-500">Ward Unit</dt>
+          <div className="flex justify-between items-baseline py-2.5 border-b border-[var(--border)]">
+            <dt className="text-[var(--muted)]">Ward Unit</dt>
             <dd>
               <Link to={`/ward-units/${order.wardUnitId}`} className="text-accent hover:underline">
                 {order.wardUnit?.name ?? order.wardUnitId}
               </Link>
             </dd>
           </div>
-          <div className="flex justify-between items-baseline py-2.5 border-b border-slate-100">
-            <dt className="text-slate-500">Created</dt>
-            <dd className="text-slate-700">{formatDateTime(order.createdAt)}</dd>
+          <div className="flex justify-between items-baseline py-2.5 border-b border-[var(--border)]">
+            <dt className="text-[var(--muted)]">Created</dt>
+            <dd className="text-[var(--text)]">{formatDateTime(order.createdAt)}</dd>
           </div>
           <div className="flex justify-between items-baseline py-2.5">
-            <dt className="text-slate-500">Order ID</dt>
-            <dd className="font-mono text-xs text-slate-400">{order.id}</dd>
+            <dt className="text-[var(--muted)]">Order ID</dt>
+            <dd className="font-mono text-xs text-[var(--faint)]">{order.id}</dd>
           </div>
         </dl>
       </Card>
@@ -71,16 +71,16 @@ export function AdminOrderDetailPage() {
       <Card className="overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left">
-              <th className="px-5 py-3 font-medium text-slate-600">Medication</th>
-              <th className="px-5 py-3 font-medium text-slate-600 text-right">Quantity</th>
+            <tr className="border-b border-[var(--border)] bg-[var(--bg-tint)] text-left">
+              <th className="px-5 py-3 font-medium text-[var(--text)]">Medication</th>
+              <th className="px-5 py-3 font-medium text-[var(--text)] text-right">Quantity</th>
             </tr>
           </thead>
           <tbody>
             {order.lines.map((line: { medicationId: string; quantity: number; medication?: { innName: string } | null }) => (
-              <tr key={line.medicationId} className="border-b border-slate-100 last:border-0">
-                <td className="px-5 py-3 text-slate-800">{line.medication?.innName ?? line.medicationId}</td>
-                <td className="px-5 py-3 text-right font-medium tabular-nums text-slate-700">{line.quantity}</td>
+              <tr key={line.medicationId} className="border-b border-[var(--border)] last:border-0">
+                <td className="px-5 py-3 text-[var(--ink)]">{line.medication?.innName ?? line.medicationId}</td>
+                <td className="px-5 py-3 text-right font-medium tabular-nums text-[var(--text)]">{line.quantity}</td>
               </tr>
             ))}
           </tbody>

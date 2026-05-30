@@ -28,10 +28,10 @@ export function StockAlerts() {
   return (
     <div className="mb-6 space-y-2">
       {alerts.map(alert => (
-        <div key={alert.id} className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 flex items-center justify-between">
+        <div key={alert.id} className="rounded-lg border border-red-200 bg-[var(--danger-bg)] px-3 py-2 text-sm text-[var(--danger-fg)] flex items-center justify-between">
           <span>{alert.message}</span>
           <button
-            className="ml-3 text-red-500 hover:text-red-700"
+            className="ml-3 text-[var(--danger)] hover:text-[var(--danger-fg)]"
             onClick={() => setAlerts(current => current.filter(a => a.id !== alert.id))}
             aria-label="Dismiss alert"
           >
