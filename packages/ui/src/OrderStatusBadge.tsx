@@ -1,9 +1,9 @@
 // Used to display order status
 const styles: Record<string, string> = {
-  Draft:     'bg-slate-100 text-slate-600',
-  Sent:      'bg-blue-100 text-blue-700',
-  Confirmed: 'bg-amber-100 text-amber-700',
-  Delivered: 'bg-green-100 text-green-700',
+  Draft:     'bg-[var(--st-draft-bg)] text-[var(--st-draft-fg)]',
+  Sent:      'bg-[var(--st-sent-bg)]  text-[var(--st-sent-fg)]',
+  Confirmed: 'bg-[var(--st-conf-bg)]  text-[var(--st-conf-fg)]',
+  Delivered: 'bg-[var(--st-deliv-bg)] text-[var(--st-deliv-fg)]',
 };
 
 interface OrderStatusBadgeProps {
@@ -12,7 +12,7 @@ interface OrderStatusBadgeProps {
 
 export function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] ?? 'bg-slate-100 text-slate-600'}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] ?? styles['Draft']}`}>
       {status}
     </span>
   );

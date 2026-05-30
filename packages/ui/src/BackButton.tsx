@@ -9,7 +9,7 @@ export function BackButton({ label = 'Back', className = '', ...props }: BackBut
   return (
     <button
       type="button"
-      className={`text-slate-400 hover:text-slate-600 transition-colors text-sm ${className}`.trim()}
+      className={`text-[var(--muted)] hover:text-[var(--text)] transition-colors text-sm ${className}`.trim()}
       {...props}
     >
       ← {label}

@@ -23,7 +23,7 @@ export function TabNav({ items }: TabNavProps) {
             `px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
               isActive
                 ? 'border-accent text-accent'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                : 'border-transparent text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--border-strong)]'
             }`
           }
         >

@@ -43,13 +43,13 @@ function StatCard({ title, value, subtitle, danger = false, href }: {
   title: string; value: number; subtitle: string; danger?: boolean; href?: string;
 }) {
   const card = (
-    <Card className={`p-3 ${danger ? 'border-red-300' : ''}${href ? ' hover:bg-slate-50 transition-colors' : ''}`}>
+    <Card className={`p-3 ${danger ? 'border-red-300' : ''}${href ? ' hover:bg-[var(--surface-2)] transition-colors' : ''}`}>
       <div className="flex items-baseline justify-between">
-        <span className={`text-2xl font-bold tabular-nums ${danger ? 'text-red-600' : 'text-slate-900'}`}>{value}</span>
-        {danger && <span aria-hidden="true" className="text-red-400 text-sm">⚠</span>}
+        <span className={`text-2xl font-bold tabular-nums ${danger ? 'text-[var(--danger)]' : 'text-[var(--ink)]'}`}>{value}</span>
+        {danger && <span aria-hidden="true" className="text-[var(--danger)] text-sm">⚠</span>}
       </div>
-      <p className="mt-0.5 text-sm font-medium text-slate-700">{title}</p>
-      <p className="text-xs text-slate-400">{subtitle}</p>
+      <p className="mt-0.5 text-sm font-medium text-[var(--text)]">{title}</p>
+      <p className="text-xs text-[var(--faint)]">{subtitle}</p>
     </Card>
   );
   return href ? <Link to={href} className="block">{card}</Link> : card;
@@ -71,30 +71,30 @@ export function OrderAndStockOverview({ products, orders, getProductHref, invent
 
       <div className="grid gap-3 grid-cols-2">
         <Card className={`p-3 ${lowStock.length > 0 ? 'border-red-300' : ''}`}>
-          <h3 className={`text-sm font-semibold mb-0.5 ${lowStock.length > 0 ? 'text-red-600' : 'text-slate-800'}`}>
+          <h3 className={`text-sm font-semibold mb-0.5 ${lowStock.length > 0 ? 'text-[var(--danger)]' : 'text-[var(--ink)]'}`}>
             <span aria-hidden="true">⚠ </span>Low Stock Alerts
           </h3>
-          <p className="text-xs text-slate-500 mb-2">
+          <p className="text-xs text-[var(--muted)] mb-2">
             {lowStock.length} medication{lowStock.length === 1 ? '' : 's'} below minimum threshold
           </p>
           <div className="space-y-1.5">
-            {lowStock.length === 0 && <p className="text-sm text-slate-400">No low stock medications.</p>}
+            {lowStock.length === 0 && <p className="text-sm text-[var(--faint)]">No low stock medications.</p>}
             {lowStock.map(product => {
               const inner = (
                 <>
                   <div>
-                    <div className="text-sm font-medium text-slate-900">{product.productName}</div>
-                    <div className="text-xs text-slate-500">{product.medication?.innName ?? '—'} · {product.medication?.atcCode ?? '—'} · {product.medication?.strength ?? '—'}</div>
+                    <div className="text-sm font-medium text-[var(--ink)]">{product.productName}</div>
+                    <div className="text-xs text-[var(--muted)]">{product.medication?.innName ?? '—'} · {product.medication?.atcCode ?? '—'} · {product.medication?.strength ?? '—'}</div>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-medium tabular-nums">
-                    <span className="rounded-full bg-red-600 text-white px-2 py-0.5">{product.stockLevel}</span>
-                    <span className="text-slate-400">→</span>
-                    <span className="rounded-full border border-slate-300 text-slate-600 px-2 py-0.5">{product.stockThreshold}</span>
+                    <span className="rounded-full bg-[var(--danger)] text-white px-2 py-0.5">{product.stockLevel}</span>
+                    <span className="text-[var(--faint)]">→</span>
+                    <span className="rounded-full border border-[var(--border-2)] text-[var(--muted)] px-2 py-0.5">{product.stockThreshold}</span>
                   </div>
                 </>
               );
 
-              const className = 'flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2 hover:bg-red-100 transition-colors';
+              const className = 'flex items-center justify-between rounded-lg border border-red-200 bg-[var(--danger-bg)] px-3 py-2 hover:bg-red-100 transition-colors';
 
               return getProductHref ? (
                 <Link key={product.id} to={getProductHref(product.id)} className={className}>
@@ -110,12 +110,12 @@ export function OrderAndStockOverview({ products, orders, getProductHref, invent
         </Card>
 
         <Card className="p-3">
-          <h3 className="text-sm font-semibold text-slate-800 mb-2">Quick Stats</h3>
+          <h3 className="text-sm font-semibold text-[var(--ink)] mb-2">Quick Stats</h3>
           <dl className="space-y-1.5">
             {ORDER_STATUSES.map(status => (
-              <div key={status} className="flex items-center justify-between text-sm border-b border-slate-100 pb-1.5 last:border-0 last:pb-0">
-                <dt className="text-slate-500">{ORDER_STATUS_LABELS[status]}</dt>
-                <dd className="font-semibold tabular-nums text-slate-900">{byStatus(status)}</dd>
+              <div key={status} className="flex items-center justify-between text-sm border-b border-[var(--border)] pb-1.5 last:border-0 last:pb-0">
+                <dt className="text-[var(--muted)]">{ORDER_STATUS_LABELS[status]}</dt>
+                <dd className="font-semibold tabular-nums text-[var(--ink)]">{byStatus(status)}</dd>
               </div>
             ))}
           </dl>

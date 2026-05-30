@@ -53,23 +53,23 @@ export function LoginPage({ role, appName, onLogin }: LoginPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
+    <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center font-sans">
       <div className="w-full max-w-sm px-4">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-slate-800">MediTrack</h1>
-          <p className="text-slate-500 text-sm mt-1">{appName ?? role} sign in</p>
+          <h1 className="text-2xl font-semibold text-[var(--ink)]">MediTrack</h1>
+          <p className="text-[var(--muted)] text-sm mt-1">{appName ?? role} sign in</p>
         </div>
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4"
+          className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-6 shadow-sm space-y-4"
         >
           <div>
-            <label htmlFor="login-user" className="block text-sm font-medium text-slate-700 mb-1">User</label>
+            <label htmlFor="login-user" className="block text-sm font-medium text-[var(--text)] mb-1">User</label>
             <select
               id="login-user"
               value={actorId}
               onChange={(e) => setActorId(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+              className="w-full rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
               required
             >
               {actors.map((a) => (
@@ -78,18 +78,18 @@ export function LoginPage({ role, appName, onLogin }: LoginPageProps) {
             </select>
           </div>
           <div>
-            <label htmlFor="login-password" className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <label htmlFor="login-password" className="block text-sm font-medium text-[var(--text)] mb-1">Password</label>
             <input
               id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+              className="w-full rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
               required
               autoComplete="current-password"
             />
           </div>
-          {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
+          {error && <p role="alert" className="text-[var(--danger)] text-sm">{error}</p>}
           <Button type="submit" disabled={submitting || !actorId} className="w-full">
             {submitting ? 'Signing in…' : 'Sign in'}
           </Button>

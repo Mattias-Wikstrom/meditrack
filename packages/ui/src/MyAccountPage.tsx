@@ -56,62 +56,62 @@ export function MyAccountPage({ token, actorId, role, wardUnitName, onSuccess, o
       {onCancel && (
         <BackButton onClick={onCancel} className="mb-4 inline-block" />
       )}
-      <h1 className="text-xl font-semibold text-slate-800 mb-6">My Account</h1>
+      <h1 className="text-xl font-semibold text-[var(--ink)] mb-6">My Account</h1>
       <Card className="p-6">
         <div className="mb-6 space-y-1">
-          <p className="text-sm text-slate-500">
-            Signed in as <span className="font-medium text-slate-700">{actorId}</span>
+          <p className="text-sm text-[var(--muted)]">
+            Signed in as <span className="font-medium text-[var(--text)]">{actorId}</span>
           </p>
-          <p className="text-sm text-slate-500">
-            Role: <span className="font-medium text-slate-700">{role}</span>
+          <p className="text-sm text-[var(--muted)]">
+            Role: <span className="font-medium text-[var(--text)]">{role}</span>
           </p>
           {wardUnitName && (
-            <p className="text-sm text-slate-500">
-              Ward unit: <span className="font-medium text-slate-700">{wardUnitName}</span>
+            <p className="text-sm text-[var(--muted)]">
+              Ward unit: <span className="font-medium text-[var(--text)]">{wardUnitName}</span>
             </p>
           )}
         </div>
         {success ? (
-          <p role="status" className="text-green-600 text-sm">Password changed successfully.</p>
+          <p role="status" className="text-[var(--ok)] text-sm">Password changed successfully.</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="account-current-password" className="block text-sm font-medium text-slate-700 mb-1">Current password</label>
+              <label htmlFor="account-current-password" className="block text-sm font-medium text-[var(--text)] mb-1">Current password</label>
               <input
                 id="account-current-password"
                 type="password"
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                className="w-full rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
                 required
                 autoComplete="current-password"
               />
             </div>
             <div>
-              <label htmlFor="account-new-password" className="block text-sm font-medium text-slate-700 mb-1">New password</label>
+              <label htmlFor="account-new-password" className="block text-sm font-medium text-[var(--text)] mb-1">New password</label>
               <input
                 id="account-new-password"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                className="w-full rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
                 required
                 autoComplete="new-password"
               />
             </div>
             <div>
-              <label htmlFor="account-confirm-password" className="block text-sm font-medium text-slate-700 mb-1">Confirm new password</label>
+              <label htmlFor="account-confirm-password" className="block text-sm font-medium text-[var(--text)] mb-1">Confirm new password</label>
               <input
                 id="account-confirm-password"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                className="w-full rounded-lg border border-[var(--border-2)] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
                 required
                 autoComplete="new-password"
               />
             </div>
-            {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
+            {error && <p role="alert" className="text-[var(--danger)] text-sm">{error}</p>}
             <Button type="submit" disabled={submitting} className="w-full">
               {submitting ? 'Saving…' : 'Change password'}
             </Button>

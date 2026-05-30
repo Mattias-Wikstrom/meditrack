@@ -15,9 +15,9 @@ export function RoleBadge({ role }: { role: string }) {
 
 export function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex justify-between items-start py-2.5 border-b border-slate-100 last:border-0 text-sm">
-      <span className="text-slate-500 shrink-0 mr-4">{label}</span>
-      <span className="text-slate-800 text-right">{children}</span>
+    <div className="flex justify-between items-start py-2.5 border-b border-[var(--border)] last:border-0 text-sm">
+      <span className="text-[var(--muted)] shrink-0 mr-4">{label}</span>
+      <span className="text-[var(--ink)] text-right">{children}</span>
     </div>
   );
 }
@@ -53,18 +53,18 @@ export function LineList({ lines, limit }: { lines: OrderLineSummary[]; limit?: 
     <div className="space-y-0.5">
       {shown.map(l => (
         <div key={l.medicationId} className="flex items-baseline gap-1.5">
-          <span className="text-slate-700">{l.medication?.innName ?? l.medicationId}</span>
-          <span className="text-slate-400 text-xs">×{l.quantity}</span>
+          <span className="text-[var(--text)]">{l.medication?.innName ?? l.medicationId}</span>
+          <span className="text-[var(--faint)] text-xs">×{l.quantity}</span>
         </div>
       ))}
-      {extra > 0 && <div className="text-slate-400 text-xs">+{extra} more</div>}
+      {extra > 0 && <div className="text-[var(--faint)] text-xs">+{extra} more</div>}
     </div>
   );
 }
 
 export function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   return (
-    <span className={`ml-1 text-xs ${active ? 'text-slate-700' : 'invisible'}`}>
+    <span className={`ml-1 text-xs ${active ? 'text-[var(--text)]' : 'invisible'}`}>
       {dir === 'asc' ? '↑' : '↓'}
     </span>
   );

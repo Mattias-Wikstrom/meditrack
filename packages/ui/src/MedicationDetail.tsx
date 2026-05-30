@@ -33,12 +33,12 @@ export function MedicationDetail({ medication, products, onBack, getProductHref 
   return (
     <div>
       <PageHeader onBack={onBack} />
-      <h1 className="text-xl font-semibold text-slate-800 mb-1">{medication.innName}</h1>
-      <p className="text-xs text-slate-400 font-mono mb-6">{medication.atcCode}</p>
+      <h1 className="text-xl font-semibold text-[var(--ink)] mb-1">{medication.innName}</h1>
+      <p className="text-xs text-[var(--faint)] font-mono mb-6">{medication.atcCode}</p>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 mb-4">
         <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-2">Medication</h2>
+          <h2 className="text-base font-semibold text-[var(--text)] mb-2">Medication</h2>
           <InfoRow label="INN Name">{medication.innName}</InfoRow>
           <InfoRow label="ATC Code">
             <span className="font-mono text-xs">{medication.atcCode}</span>
@@ -50,24 +50,24 @@ export function MedicationDetail({ medication, products, onBack, getProductHref 
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-base font-semibold text-slate-700 mb-2">
+          <h2 className="text-base font-semibold text-[var(--text)] mb-2">
             Products
-            <span className="ml-2 text-sm font-normal text-slate-400">{products.length}</span>
+            <span className="ml-2 text-sm font-normal text-[var(--faint)]">{products.length}</span>
           </h2>
           {products.length === 0 ? (
-            <p className="text-sm text-slate-400">No products registered.</p>
+            <p className="text-sm text-[var(--faint)]">No products registered.</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-left">
-                  <th className="pb-2 font-medium text-slate-500">Product</th>
-                  <th className="pb-2 font-medium text-slate-500 text-right">Stock</th>
-                  <th className="pb-2 font-medium text-slate-500 text-right">Min</th>
+                <tr className="border-b border-[var(--border)] text-left">
+                  <th className="pb-2 font-medium text-[var(--muted)]">Product</th>
+                  <th className="pb-2 font-medium text-[var(--muted)] text-right">Stock</th>
+                  <th className="pb-2 font-medium text-[var(--muted)] text-right">Min</th>
                 </tr>
               </thead>
               <tbody>
                 {products.map(p => (
-                  <tr key={p.id} className="border-b border-slate-100 last:border-0">
+                  <tr key={p.id} className="border-b border-[var(--border)] last:border-0">
                     <td className="py-2 pr-4">
                       {getProductHref ? (
                         <Link to={getProductHref(p.id)} className="text-accent hover:underline">
@@ -77,11 +77,11 @@ export function MedicationDetail({ medication, products, onBack, getProductHref 
                         p.productName
                       )}
                     </td>
-                    <td className={`py-2 pr-4 text-right font-medium tabular-nums ${p.isBelowThreshold ? 'text-red-600' : 'text-slate-800'}`}>
+                    <td className={`py-2 pr-4 text-right font-medium tabular-nums ${p.isBelowThreshold ? 'text-[var(--danger)]' : 'text-[var(--ink)]'}`}>
                       {p.stockLevel}
                       {p.isBelowThreshold && <span className="ml-1 text-xs">⚠</span>}
                     </td>
-                    <td className="py-2 text-right text-slate-400 tabular-nums">{p.stockThreshold}</td>
+                    <td className="py-2 text-right text-[var(--faint)] tabular-nums">{p.stockThreshold}</td>
                   </tr>
                 ))}
               </tbody>
